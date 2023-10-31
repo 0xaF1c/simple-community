@@ -1,0 +1,33 @@
+{
+  "name": "v1",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "./node_modules/.bin/ts-node-dev ./src/index.ts",
+    "start": "./node_modules/.bin/ts-node ./dist/index.js",
+    "build": "./node_modules/.bin/tsc ./src/index.ts"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "reflect-metadata": "^0.1.13",
+    "sql.js": "^1.8.0",
+    "typeorm": "^0.3.17"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/express-jwt": "^7.4.2",
+    "@types/multer": "^1.4.7",
+    "@types/node": "^18.15.10",
+    "express-jwt": "^8.4.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.2"
+  }
+}
