@@ -80,14 +80,17 @@ export function startup() {
   const api_port = process.env.API_PORT ?? 3000
   const app = express()
 
+  const str = 'this server is running is http://localhost:${api_port}'
   
   app.listen(api_port, () => {
-    console.log(`\n\n\n\n\n\n`)
-    console.log(`█████████████████████████████████████████████████████████`)
-    console.log(`██                                                     ██`)
-    console.log(`██   this server is running is http://localhost:${api_port}   ██`)
-    console.log(`██                                                     ██`)
-    console.log(`█████████████████████████████████████████████████████████`)
+    const topBorder = str.replace(/./g, '█')
+    const space = str.replace(/./g, ' ')
+    console.clear()
+    console.log(`  ${topBorder}████`)
+    console.log(`███ ${space} ███`)
+    console.log(`███ ${str} ███`)
+    console.log(`███ ${space} ███`)
+    console.log(`  ${topBorder}████`)
     console.log(``)
   })
   return chainedObject(app)
