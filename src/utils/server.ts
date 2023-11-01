@@ -1,14 +1,21 @@
-import express, { Application, RequestHandler } from "express"
+import express, { Application, ErrorRequestHandler, RequestHandler } from "express"
 import path from "path"
 import { ControllerOptions } from "src/types"
+import { FgGreen, Reset } from "./color"
 
 type ICallback = (app: Application) => void
 interface IChainedObject {
   useController: (controller: ControllerOptions) => IChainedObject
   useControllers: (controllers: Array<ControllerOptions>) => IChainedObject
-  use: (...handlers: Array<RequestHandler>) => IChainedObject
+  use: (...handlers: Array<RequestHandler | ErrorRequestHandler>) => IChainedObject
   onReady: (fn: ICallback) => IChainedObject
 }
+
+const api_path = process.env.API_ROOT ?? '/api'
+
+let state = false
+let timer : NodeJS.Timeout | undefined = undefined
+let cb = (() => {}) as any
 
 function formatUrl(url: string) {
   return url.replace(/\\/g, '/')
@@ -16,21 +23,20 @@ function formatUrl(url: string) {
 
 function useController(controller: ControllerOptions, app: Application) {
   const modulePath = controller.path
+  
   controller.handlers.forEach(route => {
-    const url = formatUrl(path.join(modulePath, route.path))
+    const url = formatUrl(path.join(api_path, modulePath, route.path))
 
     try {
       app[route.method](url, route.handler)
-      console.info(`${url}: loaded`)
+      console.info(`[${FgGreen}Loaded${Reset}] ${url}`)
     } catch(e) {
       console.error(`${url}: ${e.msg}`)
     }
   })
 }
 
-let state = false
-let timer : NodeJS.Timeout | undefined = undefined
-let cb = (() => {}) as any
+
 function chainedObject(app: Application): IChainedObject {
   if (timer != undefined) {
     clearTimeout(timer!)
@@ -38,12 +44,10 @@ function chainedObject(app: Application): IChainedObject {
   timer = setTimeout(() => {
     state = true
     if (state) {
-      console.log('wdnmd');
-      
       hooks(app)
       cb(app)
     }
-  }, 5000)
+  }, 500)
   return {
     useController(controller) {
       useController(controller, app)
@@ -66,7 +70,6 @@ function chainedObject(app: Application): IChainedObject {
 }
 
 function hooks(app: Application) {
-  const api_path = process.env.API_ROOT ?? '/api'
   const filePath = process.env.DESCRIPTION_FILE ?? '../public/index.html'
   app.get(api_path, (_, res) => {
     res.sendFile(path.join(__dirname, filePath))
@@ -79,7 +82,13 @@ export function startup() {
 
   
   app.listen(api_port, () => {
-    console.log(`this server is running is http://localhost:${api_port}`)
+    console.log(`\n\n\n\n\n\n`)
+    console.log(`█████████████████████████████████████████████████████████`)
+    console.log(`██                                                     ██`)
+    console.log(`██   this server is running is http://localhost:${api_port}   ██`)
+    console.log(`██                                                     ██`)
+    console.log(`█████████████████████████████████████████████████████████`)
+    console.log(``)
   })
   return chainedObject(app)
 }
