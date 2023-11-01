@@ -1,10 +1,10 @@
 import { RequestHandler } from "express"
 
-export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head'
+export type RequestMethod = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head'
 
 export interface RouterHandler {
   path: string,
-  method: Method,
+  method: RequestMethod,
   handler: RequestHandler
 }
 export interface ControllerOptions {
