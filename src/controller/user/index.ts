@@ -1,7 +1,7 @@
 import { ControllerOptions } from 'src/types'
-import { loginWithAccount, status } from './user.service';
+import { loginWithAccount, register, status } from './user.service';
 import { useValidateInterceptor } from '../../middleware/validateInterceptor';
-import { LoginParams } from './validate';
+import { LoginParams, RegisterParams } from './validate';
 
 export const userController: ControllerOptions = {
   path: '/user',
@@ -19,12 +19,19 @@ export const userController: ControllerOptions = {
       ]
     },
     '/register': {
-      method: 'get',
-      handlers: [(_, res) => {
-        res.json({
-          msg: 'register success'
-        })
-      }]
+      method: 'post',
+      handlers: [
+        useValidateInterceptor(RegisterParams, 'post'),
+        (req, res) => {
+          register(req.body)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
     },
     '/status': {
       method: 'get',

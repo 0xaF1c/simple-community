@@ -15,6 +15,28 @@ export class LoginParams {
   password: string
 }
 
-export class register {
+export class RegisterParams {
+  @IsEmail()
+  @IsString()
+  email: string
 
+  @Length(3, 30)
+  @IsOptional()
+  @IsString()
+  account: string
+
+  @IsString()
+  @IsStrongPassword()
+  password: string
+
+  @IsString()
+  @IsOptional()
+  description: string
+
+  @IsString()
+  @IsOptional()
+  name: string
+
+  backgroundUrl: string
+  avatarUrl: string
 }

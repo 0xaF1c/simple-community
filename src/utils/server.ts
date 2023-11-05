@@ -72,6 +72,11 @@ function chainedObject(app: Application): IChainedObject {
 
 function hooks(app: Application) {
   const filePath = process.env.DESCRIPTION_FILE ?? '../public/index.html'
+  // const frontendPath = process.env.WEB_CLIENT_PATH ?? '/frontend/dist'
+
+  // app.get('/', (_, res) => {
+  //   res.sendFile(path.join(__dirname, '../../', frontendPath)+'/index.html')
+  // })
   app.get(api_path, (_, res) => {
     res.sendFile(path.join(__dirname, filePath))
   })

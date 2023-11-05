@@ -4,8 +4,85 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    * {
+      font-size: 2.5rem;
+    }
+    .test {
+      font-size: 1rem;
+      width: 800px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      background: #fefefe;
+      box-shadow: 3px 3px 10px 1px #444;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .test .mid {
+      height: 65%;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .test .mid .title,
+    .test .mid .title a,
+    .test .mid .title span {
+      font-size: 1rem;
+    }
+    .test .mid img {
+      border-radius: 100000px;
+      box-shadow: 3px 3px 10px 1px #cccccc;
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+    }
+    .test .top {
+      height: 45%;
+    }
+    .test .top img {
+      object-fit: cover;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  HelloWorld
+  <input type="text" placeholder="这里填token">
+  <button>点我测试</button>
+  <div class="test">
+    <div class="top">
+      <img src="/public/background/default.jpg" sizes="cover" height="10%" width="100%" alt="">
+
+    </div>
+    <div class="mid">
+      <img src="/public/avatar/default.jpg" alt="">
+      <div class="title">
+        <span class="name">aaa</span>@<a href="#" class="account">aasdasda</a>
+        <br>
+        <span class="email">asdasdasd</span>
+      </div>
+      <div class="description"></div>
+    </div>
+  </div>
+  <script>
+    const xhr = new XMLHttpRequest()
+
+    document.querySelector('button').addEventListener('click', () => {
+      xhr.open('get', '/api/user/status')
+      xhr.setRequestHeader('Authorization', document.querySelector('input').value)
+      xhr.addEventListener('load', (res) => {
+        const { data } = JSON.parse(res.currentTarget.responseText)
+        document.querySelector('.mid img').src = data.avatarUrl
+        document.querySelector('.top img').src = data.backgroundUrl
+        document.querySelector('span.name').innerHTML = data.name
+        document.querySelector('a.account').innerHTML = data.account
+        document.querySelector('span.email').innerHTML = data.email
+        console.log(res.currentTarget.responseText)
+      })
+      xhr.send()
+    })
+  </script>
 </body>
 </html>

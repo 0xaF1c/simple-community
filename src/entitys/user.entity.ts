@@ -1,27 +1,29 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity()
 export class UserEntity {
-  constructor() {}
 
   @PrimaryGeneratedColumn()
   id: number
 
   @Column({
     length: 20,
-    type: 'varchar'
+    type: 'varchar',
+    unique: true
   })
   name: string
 
   @Column({
     length: 20,
-    type: 'varchar'
+    type: 'varchar',
+    unique: true
   })
   account: string
 
   @Column({
     length: 30,
-    type: 'varchar'
+    type: 'varchar',
+    unique: true
   })
   email: string
 
@@ -45,4 +47,43 @@ export class UserEntity {
     type: 'varchar'
   })
   backgroundUrl: string
+
+  @CreateDateColumn()
+  createTime: Date
+
+  @UpdateDateColumn()
+  updateTime: Date
+}
+
+export class UserDTO {
+  id: number
+
+  name: string
+
+  account: string
+
+  email: string
+
+  description: string
+
+  avatarUrl: string
+
+  backgroundUrl: string
+
+  createTime: Date
+
+  updateTime: Date
+  constructor (user?: UserEntity | null) {
+    if (user != null) {
+      this.id = user.id
+      this.name = user.name
+      this.account = user.account
+      this.email = user.email
+      this.description = user.description
+      this.avatarUrl = user.avatarUrl
+      this.backgroundUrl = user.backgroundUrl
+      this.createTime = user.createTime
+      this.updateTime = user.updateTime  
+    }
+  }
 }
