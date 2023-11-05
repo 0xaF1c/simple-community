@@ -24,18 +24,19 @@ function formatUrl(url: string) {
 function useController(controller: ControllerOptions, app: Application) {
   const modulePath = controller.path
   
-  controller.handlers.forEach(route => {
-    const url = formatUrl(path.join(api_path, modulePath, route.path))
-
+  Object.keys(controller.handler).forEach((key) => {
+    const route = controller.handler[key]
+    const url = formatUrl(path.join(api_path, modulePath, key))
+    
     try {
-      app[route.method](url, route.handler)
+      app[route.method](url, route.handlers)
       console.info(`[${FgGreen}Loaded${Reset}] ${url}`)
     } catch(e) {
       console.error(`${url}: ${e.msg}`)
     }
+    
   })
 }
-
 
 function chainedObject(app: Application): IChainedObject {
   if (timer != undefined) {
@@ -80,12 +81,13 @@ export function startup() {
   const api_port = process.env.API_PORT ?? 3000
   const app = express()
 
-  const str = 'this server is running is http://localhost:${api_port}'
+  const str = `this server is running is http://localhost:${api_port}`
   
   app.listen(api_port, () => {
     const topBorder = str.replace(/./g, '█')
     const space = str.replace(/./g, ' ')
-    console.clear()
+
+    console.log('')
     console.log(`  ${topBorder}████`)
     console.log(`███ ${space} ███`)
     console.log(`███ ${str} ███`)
