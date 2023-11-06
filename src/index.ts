@@ -8,7 +8,7 @@ import { userController } from "./controller/user"
 import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgYellow, Reset } from "./utils/color"
 
-console.clear()
+// console.clear()
 
 config()
 
@@ -25,10 +25,9 @@ startup()
         '/favicon.ico',
         '/',
         '/public',
-        '/api/user/register',
-        '/api/user/verify',
-        '/api/user/loginWithAccount',
-        '/api/user/loginWithEmail',
+        '/api/user/profile',
+        new RegExp('/api/user/login/\S*'),
+        new RegExp('/api/user/register/\S*'),
         new RegExp('/public/\S*'),
         new RegExp('/frontend/dist/\S*')
       ]

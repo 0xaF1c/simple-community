@@ -24,4 +24,3 @@ export interface ErrorDTO {
   status: number
   error: IError
 }
-

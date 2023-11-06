@@ -1,7 +1,7 @@
 import { ControllerOptions } from 'src/types'
-import { loginWithAccount, register, status } from './user.service';
+import { loginWithAccount, loginWithEmailCode, profile, register, sendEmailCode, status } from './user.service';
 import { useValidateInterceptor } from '../../middleware/validateInterceptor';
-import { LoginParams, RegisterParams } from './validate';
+import { GetLoginEmailCodeParams, LoginParams, LoginWithEmailCodeParams, RegisterParams } from './validate';
 
 export const userController: ControllerOptions = {
   path: '/user',
@@ -9,12 +9,14 @@ export const userController: ControllerOptions = {
     '/profile': {
       method: 'get',
       handlers: [
-        (req: any, res) => {
-          console.log(req.auth);
-
-          res.json({
-            name: 'xiaoming'
-          })
+        (req, res) => {
+          profile(req.query.id)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
         }
       ]
     },
@@ -48,7 +50,37 @@ export const userController: ControllerOptions = {
         }
       ]
     },
-    '/loginWithAccount': {
+    '/login/email/send': {
+      method: 'get',
+      handlers: [
+        useValidateInterceptor(GetLoginEmailCodeParams, 'get'),
+        (req, res) => {
+          sendEmailCode(req.query as any)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/login/email': {
+      method: 'post',
+      handlers: [
+        useValidateInterceptor(LoginWithEmailCodeParams, 'post'),
+        (req, res) => {
+          loginWithEmailCode(req.body)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/login': {
       method: 'post',
       handlers: [
         useValidateInterceptor(LoginParams, 'post'),

@@ -1,7 +1,7 @@
 import express, { Application, ErrorRequestHandler, RequestHandler } from "express"
 import path from "path"
 import { ControllerOptions } from "src/types"
-import { FgGreen, Reset } from "./color"
+import { FgBlue, Reset } from "./color"
 
 type ICallback = (app: Application) => void
 interface IChainedObject {
@@ -30,7 +30,7 @@ function useController(controller: ControllerOptions, app: Application) {
     
     try {
       app[route.method](url, route.handlers)
-      console.info(`[${FgGreen}Loaded${Reset}] ${url}`)
+      console.info(`[${FgBlue}Loaded${Reset}] ${url}`)
     } catch(e) {
       console.error(`${url}: ${e.msg}`)
     }
@@ -72,11 +72,7 @@ function chainedObject(app: Application): IChainedObject {
 
 function hooks(app: Application) {
   const filePath = process.env.DESCRIPTION_FILE ?? '../public/index.html'
-  // const frontendPath = process.env.WEB_CLIENT_PATH ?? '/frontend/dist'
 
-  // app.get('/', (_, res) => {
-  //   res.sendFile(path.join(__dirname, '../../', frontendPath)+'/index.html')
-  // })
   app.get(api_path, (_, res) => {
     res.sendFile(path.join(__dirname, filePath))
   })
@@ -86,7 +82,7 @@ export function startup() {
   const api_port = process.env.API_PORT ?? 3000
   const app = express()
 
-  const str = `this server is running is http://localhost:${api_port}`
+  const str = `this server is running is http://localhost:${api_port}${api_path}`
   
   app.listen(api_port, () => {
     const topBorder = str.replace(/./g, '█')

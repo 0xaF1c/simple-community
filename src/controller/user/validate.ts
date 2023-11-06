@@ -30,6 +30,9 @@ export class RegisterParams {
   password: string
 
   @IsString()
+  code: string
+
+  @IsString()
   @IsOptional()
   description: string
 
@@ -39,4 +42,17 @@ export class RegisterParams {
 
   backgroundUrl: string
   avatarUrl: string
+}
+
+export class GetLoginEmailCodeParams {
+  @IsEmail()
+  email: string
+}
+
+export class LoginWithEmailCodeParams {
+  @IsEmail()
+  email: string
+
+  @IsString()
+  code: string
 }
