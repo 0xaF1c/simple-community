@@ -1,0 +1,166 @@
+import { rename, rm } from "fs"
+import { StatusCodes } from "http-status-codes"
+import path from "path"
+import sharp from "sharp"
+import { ImageEntity } from "../../entitys/image.entity"
+import { ErrorDTO, HttpDTO } from "src/types"
+import { FgCyan, FgYellow, Reset } from "../../utils/color"
+import { useAppDataSource } from "../../utils/database"
+import { formatUrl } from "../../utils/formatUrl"
+import { config } from "dotenv"
+import { randomUUID } from "crypto"
+
+const { dataSource } = useAppDataSource()
+const imageRepository = dataSource.getRepository(ImageEntity)
+export async function formatImage(path: string, name: string) {
+  let result: string | null = null
+  try {
+    const img = sharp(path)
+    const metadata = await img.metadata()
+    const format = metadata.format ?? 'png'
+    const filename = `${name}.${format}`
+    const url = `/storage/uploads/image/${filename}`
+    result = url
+
+    img.toFormat(format, {
+      quality: 100
+    })
+      .toFile(`${path}.${format}`, (err, _info) => {
+        if (err) {
+          result = null
+          return null
+        } else {
+          console.info(`[${FgYellow}uploaded${Reset}] ${url}`)
+          return result
+        }
+      })
+
+  } catch (err) {
+    result = null
+  }
+  setTimeout(() => {
+    rm(path, () => {
+      console.info(`[${FgYellow}image${Reset}] cache clean`)
+    })
+  }, 1500)
+  return result
+}
+
+export function uploadImage(path: string, uploader: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    saveImage(path, uploader)
+      .then((url: any) => {        
+        resolve({
+          status: StatusCodes.OK,
+          data: { url }
+        })
+      })
+      .catch((err) => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: err.name,
+            message: err.message
+          }
+        })
+      })
+
+  })
+}
+export function uploadMultipleImage(files: any[], uploader: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    handleMultiple(files, uploader)
+      .then((result) => resolve({
+        status: StatusCodes.OK,
+        data: {
+          urls: result
+        }
+      }))
+      .catch((err) => reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: err.name,
+          message: err.message
+        }
+      }))
+  })
+}
+
+function saveImage(_path: string, uploader: string): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    const image = new ImageEntity()
+    image.url = _path
+    image.uploader = uploader
+    imageRepository.save(image)
+      .then((saveImage) => {
+        resolve(`${formatUrl(path.join(process.env.API_ROOT ?? '/api', '/image/i/'))}${saveImage.id}`)
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  })
+}
+
+function handleMultiple(files: any[], uploader: string) {
+  return new Promise((resolve, _reject) => {
+    const result: any = []
+    files.forEach(async img => {
+      const _path = await formatImage(img.path, img.filename)
+
+      if (_path === null) throw 'unkown error';
+
+      const url = await saveImage(_path as string, uploader)
+
+      result.push(url)
+      if (result.length === files.length) {
+        resolve(result)
+      }
+    })
+  })
+}
+
+export function getImage(id: string): Promise<string | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    imageRepository.findOne({
+      where: { id }
+    })
+      .then((img) => {
+        resolve(img?.url ?? '')
+      })
+      .catch((err) => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: err.name,
+            message: err.message
+          }
+        })
+      })
+  })
+}
+
+export function resetPath() {
+  config()
+  imageRepository.find({})
+    .then(images => {
+      images.forEach(img => {
+        const ext = path.extname(img.url)
+        const oringinalPath = path.join(process.env.UPLOADS_PATH ?? '' , '/image', path.basename(img.url))
+        const newBasename = randomUUID().replace(/\-/g, '')+ext
+        const newPath = path.join(process.env.UPLOADS_PATH ?? '' , '/image', newBasename)
+        
+        rename(oringinalPath, newPath, (err) => {
+          if (err) throw err
+          img.url = `/storage/uploads/image/${newBasename}`
+          imageRepository.save(img)
+            .then((newImg) => {
+              console.log(`[${FgCyan}ResetURL${Reset}] old: ${img.url} new: ${newImg.url}`)
+            })
+            .catch((err) => {
+              throw err
+            })
+        })
+      })
+    })
+    .catch(console.log)
+}

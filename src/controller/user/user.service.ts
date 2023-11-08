@@ -3,7 +3,7 @@ import { UserDTO, UserEntity } from "../../entitys/user.entity"
 import { useAppDataSource } from "../../utils/database"
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
-import { GetLoginEmailCodeParams, LoginWithEmailCodeParams, RegisterParams } from "./validate"
+import { GetLoginEmailCodeParams, LoginWithEmailCodeParams, RegisterParams, UpdatePasswordParams, UpdateProfileParams } from "./validate"
 import { random } from "lodash"
 import { useMailer } from "../../utils/email"
 
@@ -34,7 +34,8 @@ function verify(code: string, email: string) {
 }
 
 export function createToken(payload: any) {
-  return jwt.sign(payload, process.env.JWT_SECRET ?? '14d')
+
+  return 'Bearer ' + jwt.sign(payload, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '14d' })
 }
 
 export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
@@ -46,8 +47,8 @@ export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
           if (!user.account) user.account = `community_user_${count + 1}`
           if (!user.name) user.name = `community_user_${count + 1}`
           user.avatarUrl = '/public/avatar/default.jpg'
-          user.backgroundUrl = '/public/background/avatar.jpg'
-  
+          user.backgroundUrl = '/public/background/default.jpg'
+
           userRepository.save(user)
             .then((saveResult) => {
               resolve({
@@ -230,7 +231,7 @@ export function sendEmailCode(params: GetLoginEmailCodeParams): Promise<HttpDTO 
 export function loginWithEmailCode(params: LoginWithEmailCodeParams): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     if (verify(params.code, params.email)) {
-      userRepository.findOne({ where: { email: params.email }})
+      userRepository.findOne({ where: { email: params.email } })
         .then((user) => {
           if (user === null) {
             reject({
@@ -266,5 +267,92 @@ export function loginWithEmailCode(params: LoginWithEmailCodeParams): Promise<Ht
         }
       })
     }
+  })
+}
+export function updateProfile(profile: UpdateProfileParams, id: number): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    const updateObj: Record<string, any> = {}
+    if (profile.name) updateObj.name = profile.name
+    if (profile.account) updateObj.account = profile.account
+    if (profile.email) updateObj.email = profile.email
+    if (profile.description) updateObj.description = profile.description
+    if (profile.avatarUrl) updateObj.avatarUrl = profile.avatarUrl
+    if (profile.backgroundUrl) updateObj.backgroundUrl = profile.backgroundUrl
+
+    userRepository.update({
+      id,
+    }, updateObj)
+      .then(result => {
+        resolve({
+          status: StatusCodes.OK,
+          data: result
+        })
+      })
+      .catch(err => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: err.name,
+            message: err.message
+          }
+        })
+      })
+  })
+}
+export function updatePassword(option: UpdatePasswordParams, id: number): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    const { oldPassword, newPassword } = option
+    userRepository.findOne({
+      where: { id }
+    })
+      .then((user) => {
+        if (user === null) {
+          reject({
+            status: StatusCodes.NOT_FOUND,
+            error: {
+              name: 'UserNotFound',
+              message: 'unkown token'
+            }
+          })
+        }
+        if (user?.password === oldPassword) {
+          userRepository.update({
+            id: user.id
+          }, {
+            password: newPassword
+          })
+          .then(result => {
+            resolve({
+              status: StatusCodes.OK,
+              data: result
+            })
+          })
+          .catch((err) => {
+            reject({
+              status: StatusCodes.INTERNAL_SERVER_ERROR,
+              error: {
+                name: err.name,
+                message: err.message
+              }
+            })
+          })
+        } else {
+          reject({
+            status: StatusCodes.OK,
+            data: {
+              msg: 'old password is not correct'
+            }
+          })
+        }
+      })
+      .catch(() => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: 'InternalServerError',
+            message: 'Internal Server Error'
+          }
+        })
+      })
   })
 }

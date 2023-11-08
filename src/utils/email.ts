@@ -6,7 +6,6 @@ export function useMailer() {
 
   if (transporter === null) {
     config()
-    console.log(process.env.SMTP_HOST);
     
     transporter = createTransport({
       service: process.env.MAILER_SERVICE,

@@ -1,7 +1,7 @@
 import { ControllerOptions } from 'src/types'
-import { loginWithAccount, loginWithEmailCode, profile, register, sendEmailCode, status } from './user.service';
+import { loginWithAccount, loginWithEmailCode, profile, register, sendEmailCode, status, updatePassword, updateProfile } from './user.service';
 import { useValidateInterceptor } from '../../middleware/validateInterceptor';
-import { GetLoginEmailCodeParams, LoginParams, LoginWithEmailCodeParams, RegisterParams } from './validate';
+import { GetLoginEmailCodeParams, LoginParams, LoginWithEmailCodeParams, RegisterParams, UpdatePasswordParams, UpdateProfileParams } from './validate';
 
 export const userController: ControllerOptions = {
   path: '/user',
@@ -86,6 +86,38 @@ export const userController: ControllerOptions = {
         useValidateInterceptor(LoginParams, 'post'),
         (req, res) => {
           loginWithAccount(req.body)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/profile/update': {
+      method: 'post',
+      handlers: [
+        useValidateInterceptor(UpdateProfileParams, 'post'),
+        (req, res) => {
+          // @ts-ignore
+          updateProfile(req.body, req.auth.id)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/password/update': {
+      method: 'post',
+      handlers: [
+        useValidateInterceptor(UpdatePasswordParams, 'post'),
+        (req, res) => {
+          // @ts-ignore
+          updatePassword(req.body, req.auth.id)
             .then((result) => {
               res.json(result)
             })

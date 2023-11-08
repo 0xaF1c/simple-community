@@ -7,6 +7,8 @@ import { startup } from "./utils/server"
 import { userController } from "./controller/user"
 import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgYellow, Reset } from "./utils/color"
+import { imageController } from "./controller/image"
+import { resetPath } from "./controller/image/image.service"
 
 // console.clear()
 
@@ -22,26 +24,32 @@ startup()
     .unless({
       path: [
         process.env.API_ROOT ?? '/api',
+        process.env.API_ROOT+'/' ?? '/api/',
         '/favicon.ico',
         '/',
         '/public',
         '/api/user/profile',
-        new RegExp('/api/user/login/\S*'),
-        new RegExp('/api/user/register/\S*'),
-        new RegExp('/public/\S*'),
-        new RegExp('/frontend/dist/\S*')
+        new RegExp('/api/image/i\S*'),
+        new RegExp('/api/user/login\S*'),
+        new RegExp('/api/user/register\S*'),
+        new RegExp('/public\S*'),
+        new RegExp('/storage/uploads\S*'),
+        new RegExp('/frontend/dist\S*')
       ]
     })
   )
   .use(errorHandler)
+  .use('/storage/uploads' as any, express.static(path.join(process.env.UPLOADS_PATH ?? '')))
   .use('/public' as any, express.static(path.join(__dirname, './public')))
   .use('/' as any, express.static(path.join(__dirname, '../', process.env.FRONTEND_DIR ?? 'frontend/dist')))
   .use(errorHandler)
   .use(successHander)
   .useController(userController)
+  .useController(imageController)
   .onReady(() => {
     // init()
     const token = jwt.sign({id: '1'}, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
 
     console.log(`[${FgYellow}temp_token${Reset}] Bearer ${token}`)
+    resetPath()
   })

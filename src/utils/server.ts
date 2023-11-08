@@ -2,6 +2,7 @@ import express, { Application, ErrorRequestHandler, RequestHandler } from "expre
 import path from "path"
 import { ControllerOptions } from "src/types"
 import { FgBlue, Reset } from "./color"
+import { formatUrl } from "./formatUrl"
 
 type ICallback = (app: Application) => void
 interface IChainedObject {
@@ -17,19 +18,18 @@ let state = false
 let timer : NodeJS.Timeout | undefined = undefined
 let cb = (() => {}) as any
 
-function formatUrl(url: string) {
-  return url.replace(/\\/g, '/')
-}
-
 function useController(controller: ControllerOptions, app: Application) {
   const modulePath = controller.path
   
   Object.keys(controller.handler).forEach((key) => {
     const route = controller.handler[key]
     const url = formatUrl(path.join(api_path, modulePath, key))
-    
     try {
-      app[route.method](url, route.handlers)
+      if (route.middleware != null) {
+        app.route(url)[route.method](route.middleware, route.handlers)
+      } else {
+        app[route.method](url, route.handlers)
+      }
       console.info(`[${FgBlue}Loaded${Reset}] ${url}`)
     } catch(e) {
       console.error(`${url}: ${e.msg}`)

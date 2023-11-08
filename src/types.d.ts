@@ -4,6 +4,7 @@ export type RequestMethod = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' 
 
 export interface RouterHandler {
   method: RequestMethod,
+  middleware?: RequestHandler
   handlers: Array<RequestHandler>
 }
 export interface ControllerOptions {

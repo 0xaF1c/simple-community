@@ -11,7 +11,7 @@ export class LoginParams {
   @IsEmail()
   email: string
 
-  @IsStrongPassword()
+  @IsStrongPassword({minSymbols: 0, minUppercase: 1, minNumbers: 0, minLength: 8})
   password: string
 }
 
@@ -26,7 +26,7 @@ export class RegisterParams {
   account: string
 
   @IsString()
-  @IsStrongPassword()
+  @IsStrongPassword({minSymbols: 0, minUppercase: 1, minNumbers: 0, minLength: 8})
   password: string
 
   @IsString()
@@ -55,4 +55,38 @@ export class LoginWithEmailCodeParams {
 
   @IsString()
   code: string
+}
+
+export class UpdateProfileParams {
+  @IsOptional()
+  @IsString()
+  @Length(3, 30)
+  name: string
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 30)
+  account: string
+
+  @IsEmail()
+  @IsOptional()
+  email: string
+
+  @IsString()
+  @IsOptional()
+  description: string
+
+  @IsOptional()
+  avatarUrl: string
+
+  @IsOptional()
+  backgroundUrl: string
+}
+
+export class UpdatePasswordParams {
+  @IsStrongPassword({minSymbols: 0, minUppercase: 1, minNumbers: 0, minLength: 8})
+  oldPassword: string
+
+  @IsStrongPassword({minSymbols: 0, minUppercase: 1, minNumbers: 0, minLength: 8})
+  newPassword: string
 }
