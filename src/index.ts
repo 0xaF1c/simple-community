@@ -8,7 +8,9 @@ import { userController } from "./controller/user"
 import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgYellow, Reset } from "./utils/color"
 import { imageController } from "./controller/image"
-import { resetPath } from "./controller/image/image.service"
+// import { resetPath } from "./controller/image/image.service"
+import { tweetController } from "./controller/tweet"
+import { tagController } from "./controller/tags"
 
 // console.clear()
 
@@ -46,10 +48,12 @@ startup()
   .use(successHander)
   .useController(userController)
   .useController(imageController)
+  .useController(tweetController)
+  .useController(tagController)
   .onReady(() => {
     // init()
     const token = jwt.sign({id: '1'}, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
 
     console.log(`[${FgYellow}temp_token${Reset}] Bearer ${token}`)
-    resetPath()
+    // resetPath()
   })

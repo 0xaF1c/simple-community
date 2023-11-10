@@ -73,7 +73,7 @@ export class UserDTO {
   createTime: Date
 
   updateTime: Date
-  constructor (user?: UserEntity | null) {
+  constructor (user?: UserEntity | null | Record<string, any>) {
     if (user != null) {
       this.id = user.id
       this.name = user.name

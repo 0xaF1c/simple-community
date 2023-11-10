@@ -1,12 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 
-@Entity('sc_tweet_image')
-export class TweetImagesEntity {
+@Entity('sc_tweet_tags')
+export class TweetTagsEntity {
   @PrimaryGeneratedColumn()
   id: string
 
   @Column()
-  url: string
+  tagId: string
 
   @Column('uuid')
   tweetId: string
@@ -16,9 +16,9 @@ export class TweetImagesEntity {
    * @param image image url
    * @param tweet tweet uuid
    */
-  constructor(option?: { url: string, tweetId: string }) {
+  constructor(option?: { tweetId: string, tagId: string }) {
     if (option !== null && option !== undefined) {
-      this.url = option.url
+      this.tagId = option.tagId
       this.tweetId = option.tweetId
     }
   }
