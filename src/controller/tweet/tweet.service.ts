@@ -171,9 +171,57 @@ export function getTweetDetail(tweetId: string, userId?: string): Promise<HttpDT
       })
   })
 }
-// export function getTweetByTag(): Promise<HttpDTO | ErrorDTO> {
-
-// }
-// export function getTweetByUser(): Promise<HttpDTO | ErrorDTO> {
-
-// }
+export function getTweetByTag(tagId: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    tweetTagRepository.find({
+      where: {
+        tagId: tagId
+      }
+    })
+    .then((result) => {
+      resolve({
+        status: StatusCodes.OK,
+        data: {
+          tag: tagId,
+          tweets: result.map(tweetTag => tweetTag.tweetId)
+        }
+      })
+    })
+    .catch((err) => {
+      reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: err.name,
+          message: err.message
+        }
+      })
+    })
+  })
+}
+export function getTweetByUser(id: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    tweetRepository.find({
+      where: {
+        publisher: id
+      }
+    })
+    .then((result) => {
+      resolve({
+        status: StatusCodes.OK,
+        data: {
+          userid: id,
+          tweets: result
+        }
+      })
+    })
+    .catch((err) => {
+      reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: err.name,
+          message: err.message
+        }
+      })
+    })
+  })
+}

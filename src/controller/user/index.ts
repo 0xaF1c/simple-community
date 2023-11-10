@@ -2,6 +2,7 @@ import { ControllerOptions } from 'src/types'
 import { loginWithAccount, loginWithEmailCode, profile, register, sendEmailCode, status, updatePassword, updateProfile } from './user.service';
 import { useValidateInterceptor } from '../../middleware/validateInterceptor';
 import { GetLoginEmailCodeParams, LoginParams, LoginWithEmailCodeParams, RegisterParams, UpdatePasswordParams, UpdateProfileParams } from './validate';
+import { getTweetByUser } from '../tweet/tweet.service';
 
 export const userController: ControllerOptions = {
   path: '/user',
@@ -118,6 +119,21 @@ export const userController: ControllerOptions = {
         (req, res) => {
           // @ts-ignore
           updatePassword(req.body, req.auth.id)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/tweets': {
+      method: 'get',
+      handlers: [
+        (req, res) => {
+          // @ts-ignore
+          getTweetByUser(req.auth.id)
             .then((result) => {
               res.json(result)
             })

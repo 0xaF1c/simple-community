@@ -31,6 +31,7 @@ startup()
         '/',
         '/public',
         '/api/user/profile',
+        '/api/tag/tweets',
         new RegExp('/api/image/i\S*'),
         new RegExp('/api/user/login\S*'),
         new RegExp('/api/user/register\S*'),
