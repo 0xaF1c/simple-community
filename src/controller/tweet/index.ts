@@ -1,7 +1,8 @@
-import { useValidateInterceptor } from "../../middleware/validateInterceptor";
-import { ControllerOptions } from "../../types";
-import { getTweetDetail, tweetLike, tweetPublish } from "./tweet.service";
-import { TweetLikeParams, TweetPublishParams } from "./validate";
+import { useValidateInterceptor } from "../../middleware/validateInterceptor"
+import { ControllerOptions } from "../../types"
+import { getTweetComments, sendTweetComment } from "../comment/comment.service"
+import { getTweetDetail, tweetLike, tweetPublish } from "./tweet.service"
+import { TweetCommentSendParams, TweetLikeParams, TweetPublishParams } from "./validate"
 
 export const tweetController: ControllerOptions = {
   path: 'tweet',
@@ -54,13 +55,41 @@ export const tweetController: ControllerOptions = {
         }
       ]
     },
+    '/comment/send': {
+      method: 'post',
+      handlers: [
+        useValidateInterceptor(TweetCommentSendParams, 'post'),
+        (req, res) => {
+          if (req.body.replyTo === undefined) req.body.replyTo = null
+          // @ts-ignore
+          sendTweetComment(req.body, req.auth.id)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/comments': {
+      method: 'get',
+      handlers: [
+        (req, res) => {
+          // @ts-ignore
+          getTweetComments(req.query.id)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
     '/delete': {
       method: 'get',
       handlers: []
     },
-    '/comment': {
-      method: 'get',
-      handlers: []
-    }
   }
 }

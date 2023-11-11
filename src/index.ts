@@ -11,6 +11,7 @@ import { imageController } from "./controller/image"
 // import { resetPath } from "./controller/image/image.service"
 import { tweetController } from "./controller/tweet"
 import { tagController } from "./controller/tags"
+import { commentController } from "./controller/comment"
 
 // console.clear()
 
@@ -51,6 +52,7 @@ startup()
   .useController(imageController)
   .useController(tweetController)
   .useController(tagController)
+  .useController(commentController)
   .onReady(() => {
     // init()
     const token = jwt.sign({id: '1'}, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })

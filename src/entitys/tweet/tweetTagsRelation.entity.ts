@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 
-@Entity('sc_tweet_tags')
+@Entity('sc_tweet_tags_relation')
 export class TweetTagsEntity {
   @PrimaryGeneratedColumn()
   id: string

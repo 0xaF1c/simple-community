@@ -1,14 +1,14 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('sc_tweet_likes')
-export class TweetLikesEntity {
-
-  @PrimaryGeneratedColumn('uuid')
+@Entity('sc_comment_likes_relation')
+export class commentLikesEntity {
+  
+  @PrimaryGeneratedColumn()
   id: string
 
   @Column()
   userId: string
 
   @Column()
-  tweetId: string
+  commentId: string
 }

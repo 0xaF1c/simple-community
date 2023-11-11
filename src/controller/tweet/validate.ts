@@ -25,3 +25,17 @@ export class TweetLikeParams {
   @IsUUID()
   tweetId: string
 }
+
+export class TweetCommentSendParams {
+  @IsString()
+  content: string
+
+  @IsUUID()
+  tweetId: string
+
+  @IsUUID()
+  @IsOptional()
+  replyTo: string | null
+
+  publisher: string
+}

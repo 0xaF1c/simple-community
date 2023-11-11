@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('sc_tweet_image')
+@Entity('sc_tweet_image_relation')
 export class TweetImagesEntity {
   @PrimaryGeneratedColumn()
   id: string

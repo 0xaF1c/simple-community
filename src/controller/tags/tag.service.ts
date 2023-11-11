@@ -1,6 +1,6 @@
 import { useAppDataSource } from "../../utils/database";
 import { CreateTagParams } from "./validate";
-import { TagEntity } from "../../entitys/tag.entity";
+import { TagEntity } from "../../entitys/tag/tag.entity";
 import { ErrorDTO, HttpDTO } from "src/types";
 import { StatusCodes } from "http-status-codes";
 

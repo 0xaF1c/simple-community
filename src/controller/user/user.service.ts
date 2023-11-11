@@ -1,5 +1,5 @@
 import { ErrorDTO, HttpDTO } from "src/types"
-import { UserDTO, UserEntity } from "../../entitys/user.entity"
+import { UserDTO, UserEntity } from "../../entitys/user/user.entity"
 import { useAppDataSource } from "../../utils/database"
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
