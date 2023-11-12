@@ -2,3 +2,5 @@ node_modules
 src/public/uploads
 frontend/dist
 .VSCodeCounter
+yarn-error.log
+yarn.lock
