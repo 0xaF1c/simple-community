@@ -152,9 +152,12 @@ export function getTweetDetail(tweetId: string, userId?: string): Promise<HttpDT
       .leftJoinAndSelect(TweetLikesEntity, 'like', 'like.tweetId = TweetEntity.id')
       .leftJoinAndSelect(UserEntity, 'user', 'user.id = like.userId')
       .leftJoinAndSelect(TweetImagesEntity, 'image', 'image.tweetId = TweetEntity.id')
+      .leftJoinAndSelect(UserEntity, 'pubUser', 'pubUser.id = TweetEntity.publisher')
       .where('TweetEntity.id = :id', { id: tweetId })
       .getRawMany()
       .then(result => {
+        console.log(result);
+        
         resolve({
           status: StatusCodes.OK,
           data: TweetDTO.fromFindResult(result, userId)
@@ -223,5 +226,68 @@ export function getTweetByUser(id: string): Promise<HttpDTO | ErrorDTO> {
         }
       })
     })
+  })
+}
+export function deleteTweet(tweetId: string, userId: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+
+    tweetRepository.delete({
+      id: tweetId,
+      publisher: userId
+    })
+    .then((result) => {
+      resolve({
+        status: StatusCodes.OK,
+        data: result
+      })
+    })
+    .catch((err) => {
+      reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: err.name,
+          message: err.message
+        }
+      })
+    })
+  })
+}
+
+export function recommendTweet(limit?: number, userId?: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    tweetRepository.createQueryBuilder()
+    .select()
+    .limit(limit ?? 10)
+    .getMany()
+    .then(result => {
+      Promise.all(result.map(t => getTweetDetail(t.id, userId)))
+      .then(values => {
+        resolve({
+          status: StatusCodes.OK,
+          data: {
+            recommendTweet: values.map((v:any) => v.data)
+          }
+        })
+      })
+      .catch((_) => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: 'INTERNAL_SERVER_ERROR',
+            message: 'unknown error'
+          }
+        })
+      })
+    })
+    .catch((err) => {
+      reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: err.name,
+          message: err.message
+        }
+      })
+    })
+    
   })
 }

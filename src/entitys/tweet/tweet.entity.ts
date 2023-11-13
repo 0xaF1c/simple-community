@@ -65,6 +65,16 @@ interface ITweetDetailFindResult {
   image_id: any
   image_url: any
   image_tweetId: any
+  pubUser_id: any
+  pubUser_name: any
+  pubUser_account: any
+  pubUser_email: any
+  pubUser_password: any
+  pubUser_description: any
+  pubUser_avatarUrl: any
+  pubUser_backgroundUrl: any
+  pubUser_createTime: any
+  pubUser_updateTime: any
 }
 interface ITweetCommentFindResult {
   TweetCommentEntity_id: any
@@ -119,7 +129,7 @@ export class TweetDTO {
 
   title: string
 
-  publisher: string
+  publisherId: string
 
   createTime: Date
 
@@ -129,17 +139,19 @@ export class TweetDTO {
   tags: Array<Record<string, any>>
   images: string[]
   likes: Array<Record<string, any>>
+  publisher: Record<string, any>
   constructor() {
     this.tags = []
     this.images = []
     this.likes = []
+    this.publisher = {}
   }
   static fromEntity(option: ITweetDTOConstructorOption) {
     const _this = new TweetDTO()
     _this.id = option.tweet.id
     _this.content = option.tweet.content
     _this.title = option.tweet.title
-    _this.publisher = option.tweet.publisher
+    _this.publisherId = option.tweet.publisher
     _this.createTime = option.tweet.createTime
     _this.updateTime = option.tweet.updateTime
     
@@ -161,8 +173,17 @@ export class TweetDTO {
       _this.title = result.TweetEntity_title
       _this.createTime = result.TweetEntity_createTime
       _this.updateTime = result.TweetEntity_updateTime
-      _this.publisher = result.TweetEntity_publisher
+      _this.publisherId = result.TweetEntity_publisher
       _this.id = result.TweetEntity_id
+      _this.publisher.name = result.pubUser_name
+      _this.publisher.account = result.pubUser_account
+      _this.publisher.email = result.pubUser_email
+      _this.publisher.password = result.pubUser_password
+      _this.publisher.description = result.pubUser_description
+      _this.publisher.avatarUrl = result.pubUser_avatarUrl
+      _this.publisher.backgroundUrl = result.pubUser_backgroundUrl
+      _this.publisher.createTime = result.pubUser_createTime
+      _this.publisher.updateTime = result.pubUser_updateTime
 
       _this.tags.push({
         title: result.tag_title,
@@ -191,8 +212,9 @@ export class TweetDTO {
     _this.likes = _this.likes.filter(user => user.id !== null)
     _this.likeCount = _this.likes.length
 
-    if (userId !== undefined) {
-      _this.liked = Boolean(_this.likes.filter(user => user.id === userId))
+
+    if (userId !== undefined || userId !== null) {
+      _this.liked = _this.likes.filter(user => Number(user.id) === Number(userId)).length > 0
     } else {
       _this.liked = false
     }

@@ -83,17 +83,17 @@ export function startup() {
   const app = express()
 
   const str = `this server is running is http://localhost:${api_port}${api_path}`
-  
+
   app.listen(api_port, () => {
     const topBorder = str.replace(/./g, '█')
     const space = str.replace(/./g, ' ')
 
     console.log('')
-    console.log(`  ${topBorder}████`)
+    console.log(`${topBorder}████████`)
     console.log(`███ ${space} ███`)
     console.log(`███ ${str} ███`)
     console.log(`███ ${space} ███`)
-    console.log(`  ${topBorder}████`)
+    console.log(`${topBorder}████████`)
     console.log(``)
   })
   return chainedObject(app)

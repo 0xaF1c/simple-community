@@ -161,3 +161,27 @@ export function commentLike(commentLikeParams: CommentLikeParams, id: string): P
     }
   })
 }
+
+export function deleteComment(commentId: string, userId: string): Promise<HttpDTO | ErrorDTO>  {
+  return new Promise((resolve, reject) => {
+    commentRepository.delete({
+      id: commentId,
+      publisher: userId
+    })
+    .then((result) => {
+      resolve({
+        status: StatusCodes.OK,
+        data: result
+      })
+    })
+    .catch((err) => {
+      reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: err.name,
+          message: err.message
+        }
+      })
+    })
+  })
+}
