@@ -1,9 +1,11 @@
-import { IsArray, IsBooleanString, IsOptional, IsString, IsUUID } from "class-validator"
+import { IsArray, IsBooleanString, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator"
 
 export class TweetPublishParams {
+  @IsNotEmpty()
   @IsString()
   content: string
 
+  @IsNotEmpty()
   @IsString()
   title: string
 

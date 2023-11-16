@@ -1,7 +1,7 @@
 import { useValidateInterceptor } from "../../middleware/validateInterceptor"
 import { ControllerOptions } from "../../types"
 import { getTweetComments, sendTweetComment } from "../comment/comment.service"
-import { deleteTweet, getTweetDetail, recommendTweet, tweetLike, tweetPublish } from "./tweet.service"
+import { deleteTweet, getTweetDetail, isLikeTweet, recommendTweet, tweetLike, tweetPublish } from "./tweet.service"
 import { TweetCommentSendParams, TweetLikeParams, TweetPublishParams } from "./validate"
 
 export const tweetController: ControllerOptions = {
@@ -108,6 +108,21 @@ export const tweetController: ControllerOptions = {
         (req, res) => {
           // @ts-ignore
           recommendTweet(req.query.limit, req.query.id ?? undefined)
+            .then((result) => {
+              res.json(result)
+            })
+            .catch((err) => {
+              res.json(err)
+            })
+        }
+      ]
+    },
+    '/isLike': {
+      method: 'get',
+      handlers: [
+        (req, res) => {
+          // @ts-ignore
+          isLikeTweet(req.query.id, req.auth.id)
             .then((result) => {
               res.json(result)
             })

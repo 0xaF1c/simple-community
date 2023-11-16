@@ -1,24 +1,14 @@
 import { createI18n } from 'vue-i18n'
 import zhCn from './lang/zh'
 import en from './lang/en'
+import { getLanguage } from '../utils/language'
 
 export default createI18n({
   legacy: false,
-  locale: localStorage.getItem('locale') || navigator.language || 'en-US',
+  locale: getLanguage(),
   messages: {
-    'zh-TW': zhCn,
     'zh-CN': zhCn,
     'en-US': en,
-    'en-EG': en,
-    'en-AU': en,
-    'en-GB': en,
-    'en-CA': en,
-    'en-NZ': en,
-    'en-IE': en,
-    'en-ZA': en,
-    'en-JM': en,
-    'en-BZ': en,
-    'en-TT': en,
     /**
       af,
       sq,

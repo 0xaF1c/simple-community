@@ -1,40 +1,22 @@
 <template>
   <n-card hoverable bordered>
     <template #default>
-      <n-carousel v-show="tweet.images.length > 0" show-arrow :show-dots="true" :loop="false" :centered-slides="true"
-        @update:current-index="onCarouselChange" dot-type="line" dot-placement="top" :style="{
-          height: `${carouselHeight}px`,
-          Transition: 'height .3s'
-        }">
-        <img class="carousel-img" v-for="(img, i) in tweet.images" ref="imgs" :src="img" :style="{
-          width: '100%',
-          objectFit: 'contain',
-        }" @load="onImgLoad(i)" />
-        <template #arrow="{ prev, next }">
-          <div class="n-carousel__arrow-group" v-if="tweet.images.length > 1">
-            <n-button secondary size="large" @click="prev" style=" background-color: #eeea;">
-              <n-icon :component="ArrowLeft24Filled"></n-icon>
-            </n-button>
-            <n-button secondary size="large" @click="next" style=" background-color: #eeea;">
-              <n-icon :component="ArrowRight24Filled"></n-icon>
-            </n-button>
-          </div>
-        </template>
-        <template #dots="{ total, currentIndex, to }">
-          <ul class="n-carousel__dots n-carousel__dots--line" v-if="tweet.images.length > 1">
-            <li v-for="index of total" :key="index" class="n-carousel__dot" :class="{ ['n-carousel__dot--active']: currentIndex === index - 1 }"
-              @click="to(index - 1)" style="list-style: none; box-shadow: #444 1px 1px 15px 0.1px;" />
-          </ul>
-        </template>
-      </n-carousel>
+      <n-image-group>
+        <n-space>
+          <n-el style="display: flex;justify-content: center;align-items: center;">
+            <n-image lazy width="150" height="150" object-fit="contain" v-for="(img) in tweet.images" :src="img"></n-image>
+          </n-el>
+        </n-space>
+      </n-image-group>
     </template>
     <template #header>
       <n-space align="center">
-        <n-avatar :src="tweet.publisher.avatarUrl" :size="50"
+        <n-avatar object-fit="cover" :src="tweet.publisher.avatarUrl" :size="50"
           style="display: flex; justify-content: center; align-items: center;" />
         <n-text>{{ tweet.publisher.name }}@{{ tweet.publisher.account }}</n-text>
       </n-space>
-      {{ tweet.content }}
+      <h2>{{ tweet.title }}</h2>
+      <n-el v-html="tweet.content"></n-el>
     </template>
     <template #header-extra>
       <n-button text size="large">
@@ -44,13 +26,30 @@
     </template>
 
     <template #footer>
-      <tag v-for="tag in tweet.tags" :tag="tag"></tag>
+      <n-el>
+        <tag v-for="tag in tweet.tags" :tag="tag"></tag>
+      </n-el>
+      <n-space style="margin-top: 10px;">
+        <n-button secondary @click="like">
+          <n-icon :size="20" v-show="!liked" :component="Heart24Regular"></n-icon>
+          <n-icon :size="20" v-show="liked" :component="Heart24Filled"></n-icon>
+          <n-el style="margin-left: 7px;">{{ tweet.likeCount }}</n-el>
+        </n-button>
+        <n-button secondary @click="commentShow = !commentShow">
+          <n-icon :size="20" v-show="!commentShow" :component="Comment24Regular"></n-icon>
+          <n-icon :size="20" v-show="commentShow" :component="Comment24Filled"></n-icon>
+          <n-el style="margin-left: 7px;">{{ commentData?.comments.length }}</n-el>
+        </n-button>
+      </n-space>
+      <n-el v-show="commentShow">
+        <my-comment v-for="c in commentData?.comments" :comment="c" :reply="reply[c.id] ?? []"></my-comment>
+      </n-el>
     </template>
   </n-card>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, reactive } from 'vue'
 import {
   NCard,
   NCarousel,
@@ -59,13 +58,23 @@ import {
   NSpace,
   NIcon,
   NButton,
+  NThing,
+  NEl,
+  NImageGroup,
+  NImage
 } from 'naive-ui'
 import {
   ArrowRight24Filled,
   ArrowLeft24Filled,
-  ChevronDoubleRight20Filled
+  ChevronDoubleRight20Filled,
+  Comment24Regular,
+  Comment24Filled,
+  Heart24Regular,
+  Heart24Filled
 } from '@vicons/fluent'
 import tag from '../tag/tag.vue'
+import myComment from '../comment/commentWarpper.vue'
+import { http } from '../../utils/http'
 export default defineComponent({
   components: {
     NCard,
@@ -75,7 +84,12 @@ export default defineComponent({
     NText,
     NIcon,
     NSpace,
-    NButton
+    NButton,
+    NThing,
+    NEl,
+    myComment,
+    NImageGroup,
+    NImage
   },
   props: {
     tweet: {
@@ -83,19 +97,75 @@ export default defineComponent({
       required: true
     }
   },
-  setup() {
+  setup(props) {
     const imgs = ref<HTMLImageElement[]>([])
+    const commentData = ref<Record<string, any>>()
     const carouselHeight = ref(300)
     const carouselIndex = ref(0)
+    const liked = ref(false)
+    const commentShow = ref(false)
+    const reply = reactive<Record<string, any>>({})
 
+    const getCommentData = async () => {
+      commentData.value = (await http.get('/api/tweet/comments', {
+        params: {
+          id: props.tweet.id
+        }
+      })).data
+
+      commentData.value?.comments.forEach((c: any) => {
+        if (c.replyTo !== null) {
+          if (reply[c.replyTo] === undefined) reply[c.replyTo] = []
+          reply[c.replyTo]?.push(c)
+        }
+      })
+    }
+    const like = () => {
+      liked.value = !liked.value
+      if (liked.value) {
+        props.tweet.likeCount++
+      } else {
+        props.tweet.likeCount--
+      }
+      http.get('/api/tweet/like', {
+        params: {
+          like: liked.value,
+          tweetId: props.tweet.id
+        }
+      })
+    }
+    const init = () => {
+      http.get('/api/tweet/isLike', {
+        params: {
+          id: props.tweet.id
+        }
+      })
+      .then(res => {
+        liked.value = res.data
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+    init()
+    getCommentData()
 
     return {
       imgs,
       carouselHeight,
       carouselIndex,
+      liked,
+      commentShow,
+      commentData,
+      reply,
+      like,
       ArrowRight24Filled,
       ArrowLeft24Filled,
-      ChevronDoubleRight20Filled
+      ChevronDoubleRight20Filled,
+      Comment24Regular,
+      Comment24Filled,
+      Heart24Regular,
+      Heart24Filled
     }
   },
   methods: {

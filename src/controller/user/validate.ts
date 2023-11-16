@@ -1,4 +1,4 @@
-import { IsString, Length, IsEmail, IsStrongPassword, IsOptional } from 'class-validator'
+import { IsString, Length, IsEmail, IsStrongPassword, IsOptional, IsBooleanString, IsNumberString } from 'class-validator'
 
 export class LoginParams {
 
@@ -89,4 +89,13 @@ export class UpdatePasswordParams {
 
   @IsStrongPassword({minSymbols: 0, minUppercase: 1, minNumbers: 0, minLength: 8})
   newPassword: string
+}
+
+export class FollowParams {
+  @IsOptional()
+  @IsBooleanString()
+  follow: string
+
+  @IsNumberString()
+  userId: string
 }

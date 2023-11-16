@@ -34,3 +34,29 @@ export function createTag(tag: CreateTagParams, id: string): Promise<HttpDTO | E
       })
   })
 }
+
+export function recommendTag(limit?: number): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {    
+    tagRepository.createQueryBuilder()
+      .select()
+      .orderBy("RAND()")
+      .limit(limit ?? 10)
+      .getMany()
+      .then((res) => {
+        resolve({
+          status: StatusCodes.OK,
+          data: res
+        })
+        
+      })
+      .catch((err) => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: err.name,
+            message: err.message
+          }
+        })
+      })
+  })
+}

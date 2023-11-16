@@ -14,8 +14,8 @@ import banner from './banner.vue'
 import { http } from '../../utils/http'
 import { Ref } from 'vue'
 async function setRecommendTweet(recommendTweet: Ref<any>) {
-  const data: any = await http.get('/api/tweet/recommend')
-  recommendTweet.value = data.recommendTweet
+  const res: any = await http.get('/api/tweet/recommend')
+  recommendTweet.value = res.data.recommendTweet
 }
 
 export default defineComponent({

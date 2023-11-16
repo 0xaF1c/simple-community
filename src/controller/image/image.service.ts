@@ -9,9 +9,11 @@ import { useAppDataSource } from "../../utils/database"
 import { formatUrl } from "../../utils/formatUrl"
 import { config } from "dotenv"
 import { randomUUID } from "crypto"
+import { TweetImagesEntity } from "../../entitys/tweet/tweetImagesRelation.entity"
 
 const { dataSource } = useAppDataSource()
 const imageRepository = dataSource.getRepository(ImageEntity)
+const TweetImageRelationRepository = dataSource.getRepository(TweetImagesEntity)
 export async function formatImage(path: string, name: string) {
   let result: string | null = null
   try {
@@ -94,6 +96,9 @@ function saveImage(_path: string, uploader: string): Promise<string | null> {
     imageRepository.save(image)
       .then((saveImage) => {
         resolve(`${formatUrl(path.join(process.env.API_ROOT ?? '/api', '/image/i/'))}${saveImage.id}`)
+        setTimeout(() => {
+          deleteNoRelationImage()
+        }, 10 * 60 * 1000)
       })
       .catch((err) => {
         reject(err)
@@ -163,4 +168,27 @@ export function resetPath() {
       })
     })
     .catch(console.log)
+}
+
+export async function deleteNoRelationImage() {
+  config()
+  const whitelist: string[] = []
+  ;(await TweetImageRelationRepository.find({})).forEach(img => {
+    
+    const uuid = path.basename(img.url)
+    
+    whitelist.push(uuid)
+  })
+  
+  ;(await imageRepository.find({})).forEach((img) => {
+    if (!whitelist.includes(img.id)) {
+      
+      const oringinalPath = path.join(process.env.UPLOADS_PATH ?? '' , '/image', path.basename(img.url))
+      rm(oringinalPath, () => {
+        imageRepository.remove(img)
+        console.log(`[${FgCyan}已清除无引用图片${Reset}] ${oringinalPath}`);
+      })
+    }
+  })
+  
 }

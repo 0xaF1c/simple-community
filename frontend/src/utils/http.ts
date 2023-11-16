@@ -7,18 +7,22 @@ function login(_token: string) {
   localStorage.setItem('token', _token)
   token.value = localStorage.getItem('token') ?? ''
 }
-
+function isLogin() {
+  return localStorage.getItem('token') === ''
+}
+export const headers = {
+  'Authorization': localStorage.getItem('token') ?? token.value
+}
 const http = axios.create({
-  headers: {
-    'Authorization': localStorage.getItem('token') ?? token.value
-  }
+  headers
 })
 
 http.interceptors.response.use((res) => {
-  return res.data.data
+  return res.data
 })
 
 export {
   http,
-  login
+  login,
+  isLogin
 }

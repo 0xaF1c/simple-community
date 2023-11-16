@@ -156,8 +156,6 @@ export function getTweetDetail(tweetId: string, userId?: string): Promise<HttpDT
       .where('TweetEntity.id = :id', { id: tweetId })
       .getRawMany()
       .then(result => {
-        console.log(result);
-        
         resolve({
           status: StatusCodes.OK,
           data: TweetDTO.fromFindResult(result, userId)
@@ -257,6 +255,7 @@ export function recommendTweet(limit?: number, userId?: string): Promise<HttpDTO
   return new Promise((resolve, reject) => {
     tweetRepository.createQueryBuilder()
     .select()
+    .orderBy("RAND()")
     .limit(limit ?? 10)
     .getMany()
     .then(result => {
@@ -289,5 +288,38 @@ export function recommendTweet(limit?: number, userId?: string): Promise<HttpDTO
       })
     })
     
+  })
+}
+
+export function isLikeTweet(tweetId: string, userId: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    tweetLikesRepository.findOne({
+      where: {
+        tweetId: tweetId,
+        userId: userId
+      }
+    })
+    .then((res) => {
+      if (res === null) {
+        resolve({
+          status: StatusCodes.OK,
+          data: false
+        })
+      } else {
+        resolve({
+          status: StatusCodes.OK,
+          data: true
+        })
+      }
+    })
+    .catch((_) => {
+      reject({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        error: {
+          name: 'INTERNAL_SERVER_ERROR',
+          message: 'unknown error'
+        }
+      })
+    })
   })
 }
