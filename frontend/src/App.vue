@@ -2,7 +2,7 @@
 // import HelloWorld from './components/HelloWorld.vue'
 // import { storeToRefs } from 'pinia'
 import { RouterView } from 'vue-router'
-import { NLayout, NScrollbar, NLayoutContent, NConfigProvider, GlobalThemeOverrides, NMessageProvider } from 'naive-ui'
+import { NLayout, NScrollbar, NLayoutContent, NConfigProvider, GlobalThemeOverrides, NMessageProvider, NLoadingBarProvider } from 'naive-ui'
 import myMenu from './views/menu/index.vue'
 import rightMenu from './views/menu/recommendTag.vue'
 import panel from './views/menu/panel.vue'
@@ -25,41 +25,43 @@ const { theme } = useToggleTheme()
 const _theme = ref(theme)
 const contentWidth = ref(800)
 const leftSiderWidth = ref(200)
-const rightSiderWidth = ref(230)
+const rightSiderWidth = ref(300)
 </script>
 
 <template>
   <n-config-provider :theme-overrides="themeOverrides" :theme="_theme">
-    <n-message-provider>
-      <auth-modal>
-        <n-layout embedded>
-          <n-layout :style="{
-            width: `${contentWidth+leftSiderWidth+rightSiderWidth}px`,
-            height: '100vh',
-            margin: '0 auto',
-            padding: '5px 0'
-          }" has-sider embedded>
-            <n-layout embedded :width="`${leftSiderWidth}px`">
-              <header>
-                <h1>我是Logo</h1>
-              </header>
-              <my-menu></my-menu>
-              <footer>
-                我是备案号
-              </footer>
-            </n-layout>
-            <n-layout-content embedded :style="{width: `${contentWidth}px`}" has-sider sider-placement="right">
-              <n-scrollbar style="max-height: 100vh;">
-                <router-view />
-              </n-scrollbar>
-            </n-layout-content>
-            <n-layout embedded :style="{width: `${rightSiderWidth}px`,height: 'auto'}">
-              <panel @update:theme="(t) => theme = t" style="margin-bottom: 7px;" />
-              <rightMenu />
+    <n-loading-bar-provider>
+      <n-message-provider>
+        <auth-modal>
+          <n-layout embedded>
+            <n-layout :style="{
+              width: `${contentWidth+leftSiderWidth+rightSiderWidth}px`,
+              height: '100vh',
+              margin: '0 auto',
+              padding: '5px 0'
+            }" has-sider embedded>
+              <n-layout embedded :width="`${leftSiderWidth}px`">
+                <header>
+                  <h1>我是Logo</h1>
+                </header>
+                <my-menu></my-menu>
+                <footer>
+                  我是备案号
+                </footer>
+              </n-layout>
+              <n-layout-content embedded :style="{width: `${contentWidth}px`}" has-sider sider-placement="right">
+                <n-scrollbar style="max-height: 100vh;">
+                  <router-view />
+                </n-scrollbar>
+              </n-layout-content>
+              <n-layout embedded :style="{width: `${rightSiderWidth}px`,height: 'auto'}">
+                <panel @update:theme="(t) => theme = t" style="margin-bottom: 7px;" />
+                <rightMenu />
+              </n-layout>
             </n-layout>
           </n-layout>
-        </n-layout>
-      </auth-modal>
-    </n-message-provider>
+        </auth-modal>
+      </n-message-provider>
+    </n-loading-bar-provider>
   </n-config-provider>
 </template>

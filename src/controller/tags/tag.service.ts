@@ -60,3 +60,26 @@ export function recommendTag(limit?: number): Promise<HttpDTO | ErrorDTO> {
       })
   })
 }
+export function getTagDetail(tagId: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {    
+    tagRepository.createQueryBuilder()
+      .select()
+      .where('TagEntity.id = :id', { id: tagId })
+      .getOne()
+      .then((res) => {
+        resolve({
+          status: StatusCodes.OK,
+          data: res
+        })
+      })
+      .catch((err) => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: err.name,
+            message: err.message
+          }
+        })
+      })
+  })
+}

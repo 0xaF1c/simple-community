@@ -175,6 +175,7 @@ export class TweetDTO {
       _this.updateTime = result.TweetEntity_updateTime
       _this.publisherId = result.TweetEntity_publisher
       _this.id = result.TweetEntity_id
+      _this.publisher.id = result.pubUser_id
       _this.publisher.name = result.pubUser_name
       _this.publisher.account = result.pubUser_account
       _this.publisher.email = result.pubUser_email

@@ -4,8 +4,7 @@
       <n-thing>
         <template #header>
           <n-space align="center" justify="center">
-            <n-avatar object-fit="cover" :src="userData?.avatarUrl" :size="110"
-              style="margin: 0 auto;cursor: pointer;" />
+            <avatar-link :userData="userData" :size="110" ></avatar-link>
             <n-el>
               <span style="font-size: 1.3rem;">{{ userData?.name }}</span>
               <n-button style="font-size: 1rem;" text>@{{ userData?.account }}</n-button>
@@ -43,10 +42,19 @@ import { useI18n } from 'vue-i18n'
 import { getLanguage, toggleLocale } from '../../utils/language'
 import { useAuthModal } from '../../components/authModal/useAuthModal'
 import { http } from '../../utils/http'
-
+import avatarLink from '../../components/link/avatarLink.vue'
 export default defineComponent({
   components: {
-    NCard, NSwitch, NPopselect, NIcon, NSpace, NButton, NAvatar, NEl, NThing
+    NCard,
+    NSwitch,
+    NPopselect,
+    NIcon,
+    NSpace,
+    NButton,
+    NAvatar,
+    NEl,
+    NThing,
+    avatarLink
   },
   methods: {
     onThemeToggle() {

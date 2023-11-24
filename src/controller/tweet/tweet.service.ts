@@ -201,18 +201,28 @@ export function getTweetByTag(tagId: string): Promise<HttpDTO | ErrorDTO> {
 }
 export function getTweetByUser(id: string): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    tweetRepository.find({
-      where: {
-        publisher: id
-      }
-    })
-    .then((result) => {
-      resolve({
-        status: StatusCodes.OK,
-        data: {
-          userid: id,
-          tweets: result
-        }
+    tweetRepository.createQueryBuilder()
+    .select()
+    .where('TweetEntity.publisher = :id', { id: id })
+    .getMany()
+    .then(result => {
+      Promise.all(result.map(t => getTweetDetail(t.id, id)))
+      .then(values => {
+        resolve({
+          status: StatusCodes.OK,
+          data: {
+            tweets: values.map((v:any) => v.data)
+          }
+        })
+      })
+      .catch((_) => {
+        reject({
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: {
+            name: 'INTERNAL_SERVER_ERROR',
+            message: 'unknown error'
+          }
+        })
       })
     })
     .catch((err) => {
@@ -224,6 +234,7 @@ export function getTweetByUser(id: string): Promise<HttpDTO | ErrorDTO> {
         }
       })
     })
+    
   })
 }
 export function deleteTweet(tweetId: string, userId: string): Promise<HttpDTO | ErrorDTO> {

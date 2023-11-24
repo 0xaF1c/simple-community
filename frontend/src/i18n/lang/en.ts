@@ -115,5 +115,26 @@ export default {
   },
   publish_tweet_success: {
     name: 'Publish success'
+  },
+  input_comment: {
+    name: 'Leave your comment 🚀'
+  },
+  reply: {
+    name: 'Reply'
+  },
+  confirm_delete_comment: {
+    name: 'Are you sure to delete this comment?'
+  },
+  delete_comment_success: {
+    name: 'Delete comment success'
+  },
+  delete_comment_failed: {
+    name: "Don't delete other people's comments"
+  },
+  tweet: {
+    name: 'Tweet'
+  },
+  emtry: {
+    name: 'Emtry'
   }
 }

@@ -133,7 +133,7 @@ export const userController: ControllerOptions = {
       handlers: [
         (req, res) => {
           // @ts-ignore
-          getTweetByUser(req.auth.id)
+          getTweetByUser(req.query.id)
             .then((result) => {
               res.json(result)
             })

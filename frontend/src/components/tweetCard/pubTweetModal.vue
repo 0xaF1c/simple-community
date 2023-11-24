@@ -117,6 +117,8 @@ export default defineComponent({
     const uploadsImage = new Map()
     const loading = ref(false)
     const submit = () => {
+      if (title.value.length <= 0) return
+      if (content.value.length <= 0) return
       const images = Array.from(uploadsImage, ([_, value]) => value)
       const tags = choosedTag.value.map((t: any) => t.id)
       loading.value = true

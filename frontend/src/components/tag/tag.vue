@@ -1,19 +1,19 @@
 <template>
-  <n-tooltip :style="{
-    width: tag.poster ? '100px' : 'auto'
-  }">
+  <n-tooltip>
     <template #trigger>
-      <n-button text style="font-size: 1.2rem">
-        #{{ tag.title }}
-      </n-button>
-      <n-button v-if="closable" @click="$emit('close')">
-        <n-icon :component="Dismiss24Filled"></n-icon>
-      </n-button>
+      <n-tag :bordered="false" style="cursor: pointer;" @click="$router.push({
+        path: '/tag/detail',
+        query: {
+          id: tag.id
+        }
+      })">
+        {{ tag.title }}
+        <template #avatar>
+          <n-avatar :src="tag.poster"></n-avatar>
+        </template>
+      </n-tag>
     </template>
-    <n-space vertical align="center">
-      <n-avatar :src="tag.poster" :size="100"></n-avatar>
-      {{ tag.description }}
-    </n-space>
+    {{ tag.description }}
   </n-tooltip>
 </template>
 
@@ -22,9 +22,12 @@ import { defineComponent } from 'vue'
 import {
   NButton,
   NTooltip,
-  NAvatar,
+  NImage,
   NSpace,
   NIcon,
+  NEllipsis,
+  NTag,
+  NAvatar
 } from 'naive-ui'
 import {
   Dismiss24Filled
@@ -34,9 +37,12 @@ export default defineComponent({
   components: {
     NButton,
     NTooltip,
-    NAvatar,
+    NImage,
     NSpace,
-    NIcon
+    NIcon,
+    NEllipsis,
+    NTag,
+    NAvatar
   },
   emits: [
     'close'

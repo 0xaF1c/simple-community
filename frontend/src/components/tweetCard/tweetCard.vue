@@ -2,28 +2,28 @@
   <n-card hoverable bordered>
     <template #default>
       <n-image-group>
-        <n-space>
-          <n-el style="display: flex;justify-content: center;align-items: center;">
-            <n-image lazy width="150" height="150" object-fit="contain" v-for="(img) in tweet.images" :src="img"></n-image>
+        <n-space item-style="margin: 0 4px 0 0;">
+          <n-el  v-for="(img) in tweet.images" style="display: flex;justify-content: center;align-items: center;">
+            <n-image lazy width="150" height="150" object-fit="cover" :src="img"></n-image>
           </n-el>
         </n-space>
       </n-image-group>
     </template>
     <template #header>
+      
       <n-space align="center">
-        <n-avatar object-fit="cover" :src="tweet.publisher.avatarUrl" :size="50"
-          style="display: flex; justify-content: center; align-items: center;" />
+        <avatar-link :userData="tweet.publisher" :size="50"></avatar-link>
         <n-text>{{ tweet.publisher.name }}@{{ tweet.publisher.account }}</n-text>
       </n-space>
       <h2>{{ tweet.title }}</h2>
       <n-el v-html="tweet.content"></n-el>
     </template>
-    <template #header-extra>
+    <!-- <template #header-extra>
       <n-button text size="large">
         详情
         <n-icon :size="20" :component="ChevronDoubleRight20Filled"></n-icon>
       </n-button>
-    </template>
+    </template> -->
 
     <template #footer>
       <n-el>
@@ -42,14 +42,36 @@
         </n-button>
       </n-space>
       <n-el v-show="commentShow">
-        <my-comment v-for="c in commentData?.comments" :comment="c" :reply="reply[c.id] ?? []"></my-comment>
+        <my-comment
+          @on-select="s => selectedReply = s"
+          v-for="c in commentData?.comments"
+          :comment="c"
+          :reply="reply[c.id] ?? []"
+          @need-update="getCommentData()"
+        ></my-comment>
+        <!-- <n-el v-show="selectedReply !== null">{{ $t('reply.name') }}{{ selectedReply?.at }}</n-el> -->
+        <n-mention
+          :options="replyList"
+          type="textarea"
+          :placeholder="selectedReply !== null ? `${$t('reply.name')} ${selectedReply!.at}` : $t('input_comment.name')"
+          v-model:value="content"
+        >
+        </n-mention>
+        <n-button
+          @click="sendComment"
+          type="primary"
+          :loading="loading"
+          :disabled="loading"
+        >
+          {{ $t('send.name') }}
+        </n-button>
       </n-el>
     </template>
   </n-card>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive } from 'vue'
+import { defineComponent, ref } from 'vue'
 import {
   NCard,
   NCarousel,
@@ -61,7 +83,10 @@ import {
   NThing,
   NEl,
   NImageGroup,
-  NImage
+  NImage,
+  NMention,
+  MentionOption,
+  useMessage,
 } from 'naive-ui'
 import {
   ArrowRight24Filled,
@@ -75,6 +100,9 @@ import {
 import tag from '../tag/tag.vue'
 import myComment from '../comment/commentWarpper.vue'
 import { http } from '../../utils/http'
+import { useI18n } from 'vue-i18n'
+import avatarLink from '../../components/link/avatarLink.vue'
+
 export default defineComponent({
   components: {
     NCard,
@@ -89,7 +117,9 @@ export default defineComponent({
     NEl,
     myComment,
     NImageGroup,
-    NImage
+    NImage,
+    NMention,
+    avatarLink
   },
   props: {
     tweet: {
@@ -98,14 +128,20 @@ export default defineComponent({
     }
   },
   setup(props) {
+    const { success, error } = useMessage()
+    const { t } = useI18n()
     const imgs = ref<HTMLImageElement[]>([])
     const commentData = ref<Record<string, any>>()
     const carouselHeight = ref(300)
     const carouselIndex = ref(0)
     const liked = ref(false)
     const commentShow = ref(false)
-    const reply = reactive<Record<string, any>>({})
-
+    const reply = ref<Record<string, any>>({})
+    const replyList = ref<MentionOption[]>([])
+    const selectedReply = ref<any>(null)
+    const content = ref('')
+    const loading = ref(false)
+    
     const getCommentData = async () => {
       commentData.value = (await http.get('/api/tweet/comments', {
         params: {
@@ -113,10 +149,11 @@ export default defineComponent({
         }
       })).data
 
+      reply.value = {}
       commentData.value?.comments.forEach((c: any) => {
         if (c.replyTo !== null) {
-          if (reply[c.replyTo] === undefined) reply[c.replyTo] = []
-          reply[c.replyTo]?.push(c)
+          if (reply.value[c.replyTo] === undefined) reply.value[c.replyTo] = []
+          reply.value[c.replyTo]?.push(c)
         }
       })
     }
@@ -147,8 +184,31 @@ export default defineComponent({
         console.log(err)
       })
     }
+    const sendComment = () => {
+      if (content.value.length === 0) return
+      loading.value = true
+      http.post('/api/tweet/comment/send', {
+        "content": content.value,
+        "tweetId": props.tweet.id,
+        "replyTo": selectedReply.value?.reply ?? null
+      })
+      .then(() => {
+        content.value = ''
+        success(t('publish_tweet_success.name'))
+        getCommentData()
+        setTimeout(() => {
+          loading.value = false
+        }, 200)
+      })
+      .catch((err) => {
+        console.log(err);
+        error(t('unknown_error.name'))
+        setTimeout(() => {
+          loading.value = false
+        }, 200)
+      })
+    }
     init()
-    getCommentData()
 
     return {
       imgs,
@@ -158,6 +218,12 @@ export default defineComponent({
       commentShow,
       commentData,
       reply,
+      replyList,
+      selectedReply,
+      content,
+      loading,
+      sendComment,
+      getCommentData,
       like,
       ArrowRight24Filled,
       ArrowLeft24Filled,
@@ -178,6 +244,9 @@ export default defineComponent({
         this.carouselHeight = this.imgs[i].height
       }
     }
+  },
+  mounted() {
+    this.getCommentData()
   }
 })
 </script>

@@ -118,5 +118,26 @@ export default {
   },
   publish_tweet_success: {
     name: '发布成功'
+  },
+  input_comment: {
+    name: '留下你的评论 🚀'
+  },
+  reply: {
+    name: '回复'
+  },
+  confirm_delete_comment: {
+    name: '确认删除这条评论'
+  },
+  delete_comment_success: {
+    name: '删除成功'
+  },
+  delete_comment_failed: {
+    name: '哥们 这是别人的评论'
+  },
+  tweet: {
+    name: '推文'
+  },
+  emtry: {
+    name: '这里啥也没有'
   }
 }

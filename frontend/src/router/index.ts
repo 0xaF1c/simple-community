@@ -12,6 +12,22 @@ const routes = [
     name: 'space',
     component: () => import('../views/space/index.vue'),
   },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/profile/index.vue'),
+  },
+  {
+    path: '/tag',
+    name: 'tag',
+    children: [
+      {
+        path: '/tag/detail',
+        name: 'tagDetail',
+        component: () => import('../views/tag/detail.vue')
+      }
+    ]
+  }
 ]
 const router = createRouter({
   routes,

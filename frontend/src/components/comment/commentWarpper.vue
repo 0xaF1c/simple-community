@@ -2,19 +2,31 @@
   <n-el v-if="comment.replyTo === null" :style="{
     borderLeft: `${theme.borderColor} solid 0.5px`,
     borderTop: `${theme.borderColor} solid 0.5px`,
-    padding: '10px 0 0 10px'
+    padding: '10px 0 0 20px'
   }">
-    <comment :comment="comment" />
-    <comment :style="{
-      borderLeft: `${theme.borderColor} solid 0.5px`,
-      borderTop: `${theme.borderColor} solid 0.5px`,
-      padding: '10px 10px'
-    }" v-for="c in reply" :comment="c" />
+    <comment
+      :comment="comment"
+      :selected="selectedId === comment.id"
+      @on-reply-click="onReplyClick(comment, comment.id)"
+      @need-update="$emit('needUpdate')"
+    />
+    <comment
+      :style="{
+        borderLeft: `${theme.borderColor} solid 0.5px`,
+        borderTop: `${theme.borderColor} solid 0.5px`,
+        padding: '10px 20px'
+      }"
+      :selected="selectedId === c.id"
+      v-for="c in reply"
+      :comment="c"
+      @on-reply-click="onReplyClick(c, comment.id)"
+      @need-update="$emit('needUpdate')"
+    />
   </n-el>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import {
   NEl,
   useThemeVars
@@ -30,12 +42,27 @@ export default defineComponent({
     reply: {
       required: true,
       type: Object as any
-    },
+    }
   },
-  setup() {
+  emits: ['onSelect', 'needUpdate'],
+  setup(_, { emit }) {
     const theme = useThemeVars()
+    const selectedId = ref(null)
     return {
-      theme
+      theme,
+      selectedId,
+      onReplyClick(comment: any, replyId: string) {
+        if (selectedId.value === null) {
+          selectedId.value = comment.id
+          emit('onSelect', {
+            at: comment.publisher.name,
+            reply: replyId
+          })
+        } else {
+          selectedId.value = null
+          emit('onSelect', null)
+        }
+      }
     }
   }
 })
