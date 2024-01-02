@@ -1,7 +1,7 @@
 <template>
   <n-card bordered>
     <n-el style="font-size: 1.3rem;">{{ $t('tag_recommend.name') }}</n-el>
-    <n-space vertical style="margin-top: 5px;" item-style="margin-top: 12px">
+    <n-space vertical style="margin-top: 10px">
       <tag v-for="t in data" :tag="t"></tag>
     </n-space>
   </n-card>

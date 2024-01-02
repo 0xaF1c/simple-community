@@ -1,5 +1,5 @@
 <template>
-  <n-card bordered>
+  <n-card :bordered="false">
     <n-button
       type="primary"
       style="margin: 3px 7.8px; width: calc(100% - 15.6px);"

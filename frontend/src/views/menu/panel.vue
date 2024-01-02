@@ -4,38 +4,65 @@
       <n-thing>
         <template #header>
           <n-space align="center" justify="center">
-            <avatar-link :userData="userData" :size="110" ></avatar-link>
-            <n-el>
-              <span style="font-size: 1.3rem;">{{ userData?.name }}</span>
-              <n-button style="font-size: 1rem;" text>@{{ userData?.account }}</n-button>
-            </n-el>
           </n-space>
         </template>
-        <template #footer>
-          
-        </template>
       </n-thing>
-      <n-space item-style="font-size: 17px;" align="center" v-if="userData === null">
-        <n-button quaternary @click="showLoginModal()">{{ $t('login.name') }} / {{ $t('register.name') }}</n-button>
+      <n-space item-style="font-size: 17px;">
+        <avatar-link :userData="userData" style="display: flex; justify-items: center;" :size="32" ></avatar-link>
+        <n-el>
+          <span style="font-size: 1.3rem;">{{ userData?.name }}</span>
+          <n-button style="font-size: 1rem;" text>@{{ userData?.account }}</n-button>
+        </n-el>
+        <n-button 
+          align="center"
+          v-if="userData === null"
+          quaternary
+          @click="showLoginModal()"
+        >
+          {{ $t('login.name') }} / {{ $t('register.name') }}
+        </n-button>
       </n-space>
     </n-space>
-    <n-space item-style="font-size: 17px;" align="center">
-      <n-popselect :options="options" v-model:value="localeKey" trigger="click">
-        <n-button quaternary style="cursor: pointer;">
-          {{ $t('lang.name') }}
-        </n-button>
-      </n-popselect>
-      <n-button @click="onThemeToggle" quaternary circle style="cursor: pointer;display: flex; align-items: center;">
-        <n-icon :size="20" v-if="!currentThemeBool" :component="WeatherSunny24Filled"></n-icon>
-        <n-icon :size="20" v-if="currentThemeBool" :component="WeatherMoon24Filled"></n-icon>
-      </n-button>
-    </n-space>
   </n-card>
+  <!-- <n-space item-style="font-size: 17px;" align="center">
+    <n-popselect :options="options" v-model:value="localeKey" trigger="click">
+      <n-button quaternary style="cursor: pointer;">
+        {{ $t('lang.name') }}
+      </n-button>
+    </n-popselect>
+    <n-button @click="onThemeToggle" quaternary circle style="cursor: pointer;display: flex; align-items: center;">
+      <n-icon :size="20" v-if="!currentThemeBool" :component="WeatherSunny24Filled"></n-icon>
+      <n-icon :size="20" v-if="currentThemeBool" :component="WeatherMoon24Filled"></n-icon>
+    </n-button>
+    <n-grid :cols="2" item-style="text-align: center">
+      <n-gi :span="1">
+        <n-statistic :label="$t('following.name')" :value="following?.length" />
+      </n-gi>
+      <n-gi :span="1">
+        <n-statistic :label="$t('follower.name')" :value="follower?.length" />
+      </n-gi>
+    </n-grid>
+  </n-space> -->
+  
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { NCard, NSwitch, NPopselect, NIcon, NSpace, NButton, NAvatar, NEl, useMessage, NThing } from 'naive-ui'
+import {
+  NCard,
+  NSwitch,
+  NPopselect,
+  NIcon,
+  NSpace,
+  NButton,
+  NAvatar,
+  NEl,
+  useMessage,
+  NThing,
+  NGrid,
+  NGi,
+  NStatistic,
+} from 'naive-ui'
 import { useToggleTheme } from '../../utils/toggleTheme'
 import { WeatherMoon24Filled, WeatherSunny24Filled } from '@vicons/fluent'
 import { useI18n } from 'vue-i18n'
@@ -54,6 +81,9 @@ export default defineComponent({
     NAvatar,
     NEl,
     NThing,
+    NGrid,
+    NGi,
+    NStatistic,
     avatarLink
   },
   methods: {
@@ -66,6 +96,8 @@ export default defineComponent({
   setup() {
     const userData = ref<any>(null)
     const darkMode = ref(false)
+    const follower = ref([])
+    const following = ref([])
     const localeKey = ref(getLanguage())
     const { theme, toggleTheme, currentTheme, currentThemeBool } = useToggleTheme()
     const { messages, locale } = useI18n()
@@ -85,6 +117,9 @@ export default defineComponent({
         .catch(() => {
           error(t('unknown_error.name'))
         })
+        
+      follower.value = (await http.get('/api/user/following/list')).data
+      following.value = (await http.get('/api/user/follower/list')).data
     } )()
 
     const options = Object.keys(messages.value).map((k) => {
@@ -99,6 +134,8 @@ export default defineComponent({
       darkMode,
       theme,
       toggleTheme,
+      follower,
+      following,
       toggleLocale() {
         toggleLocale(localeKey.value, locale)
       },

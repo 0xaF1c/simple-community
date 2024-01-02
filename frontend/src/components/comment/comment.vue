@@ -2,8 +2,9 @@
   <n-thing>
     <template #header>
       <n-space align="center">
-        <n-avatar :src="comment.publisher.avatarUrl" :size="50" object-fit="cover"
-          style="display: flex; justify-content: center; align-items: center;" />
+        <avatar-link :user-data="comment.publisher"></avatar-link>
+        <!-- <n-avatar :src="comment.publisher.avatarUrl" :size="50" object-fit="cover"
+          style="display: flex; justify-content: center; align-items: center;" /> -->
         <n-text>{{ comment.publisher.name }}@{{ comment.publisher.account }}</n-text>
       </n-space>
     </template>
@@ -25,6 +26,7 @@
           :positive-text="$t('confirm.name')"
           :negative-text="$t('cancel.name')"
           v-model:show="popConfirmShow"
+          v-if="isPublisher"
         >
           {{ $t('confirm_delete_comment.name') }}
           <template #trigger>
@@ -40,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from 'vue'
 
 import {
   NThing,
@@ -51,7 +53,7 @@ import {
   NEl,
   NAvatar,
   NPopconfirm,
-useMessage
+  useMessage
 } from 'naive-ui'
 import {
   Comment24Regular,
@@ -61,8 +63,9 @@ import {
   Delete24Regular,
   Delete24Filled,
 } from '@vicons/fluent'
-import { http } from '../../utils/http';
-import { useI18n } from 'vue-i18n';
+import { http } from '../../utils/http'
+import { useI18n } from 'vue-i18n'
+import avatarLink from '../link/avatarLink.vue'
 
 export default defineComponent({
   props: {
@@ -87,7 +90,8 @@ export default defineComponent({
     NText,
     NEl,
     NAvatar,
-    NPopconfirm
+    NPopconfirm,
+    avatarLink
   },
   setup(props, { emit }) {
     const { t } = useI18n()
@@ -95,6 +99,12 @@ export default defineComponent({
     const popConfirmShow = ref(false)
     const commentShow = ref(false)
     const liked = ref(false)
+    const isPublisher = ref<boolean>(false)
+    const update = async () => {
+      
+      const res = await http.get('/api/user/status')
+      isPublisher.value = res.data.id === props.comment.publisher.id
+    }
     const like = () => {
       liked.value = !liked.value
       if (liked.value) {
@@ -110,8 +120,7 @@ export default defineComponent({
       })
     }
     const deleteComment = async () => {
-      const res = await http.get('/api/user/status')
-      if (res.data.id === props.comment.publisher.id) {
+      if (isPublisher.value) {
         http.get('/api/comment/delete', {
           params: {
             commentId: props.comment.id
@@ -137,12 +146,14 @@ export default defineComponent({
       liked,
       deleteComment,
       like,
+      isPublisher,
       submit() {
         deleteComment()
       },
       cancel() {
 
       },
+      update,
       Comment24Regular,
       Comment24Filled,
       Delete24Regular,
@@ -150,6 +161,9 @@ export default defineComponent({
       Heart24Regular,
       Heart24Filled
     }
+  },
+  mounted() {
+    this.update()
   }
 })
 

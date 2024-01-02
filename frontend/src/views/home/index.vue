@@ -2,7 +2,7 @@
   <div style="padding: 0 15px;">
     <banner style="margin-bottom: 5px" />
     <!-- {{ recommendTweet }} -->
-    <tweet-card v-for="tweet in recommendTweet" :tweet="tweet" style="margin: 5px auto"></tweet-card>
+    <tweet-card v-for="tweet in recommendTweet" :tweet="tweet" style=""></tweet-card>
   </div>
   
 </template>

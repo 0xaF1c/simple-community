@@ -1,7 +1,7 @@
 import { inject } from 'vue'
-import { loginApiInjectionKey } from './authModalProvider.vue'
+import { loginApiInjectionKey, loginApiInjection } from './authModalProvider.vue'
 
-export function useAuthModal() {
+export function useAuthModal(): loginApiInjection {
   const api = inject(loginApiInjectionKey)
 
   if (api === undefined) {

@@ -159,7 +159,7 @@ export const userController: ControllerOptions = {
         }
       ]
     },
-    '/follow/list': {
+    '/follower/list': {
       method: 'get',
       handlers: [
         (req, res) => {

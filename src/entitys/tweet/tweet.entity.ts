@@ -187,6 +187,7 @@ export class TweetDTO {
       _this.publisher.updateTime = result.pubUser_updateTime
 
       _this.tags.push({
+        id: result.tag_id,
         title: result.tag_title,
         description: result.tag_description,
         poster: result.tag_poster,

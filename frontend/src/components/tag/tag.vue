@@ -1,24 +1,35 @@
 <template>
   <n-tooltip>
     <template #trigger>
-      <n-tag :bordered="false" style="cursor: pointer;" @click="$router.push({
-        path: '/tag/detail',
-        query: {
-          id: tag.id
-        }
-      })">
-        {{ tag.title }}
-        <template #avatar>
-          <n-avatar :src="tag.poster"></n-avatar>
-        </template>
-      </n-tag>
+      <n-button
+        text
+        @mouseenter="bordered = true"
+        @mouseleave="bordered = false"
+        :bordered="bordered"
+        style="
+          cursor: pointer;
+        "
+        @click="$router.push({
+          path: '/tag/detail',
+          query: {
+            id: tag.id
+          }
+        })"
+      >
+        <!-- <n-avatar :src="tag.poster" object-fit="cover" :size="25"></n-avatar> -->
+        <span
+          style="font-size: large; margin-bottom: 10px;"
+        >
+          # {{ tag.title }}
+        </span>
+      </n-button>
     </template>
     {{ tag.description }}
   </n-tooltip>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import {
   NButton,
   NTooltip,
@@ -58,7 +69,9 @@ export default defineComponent({
     }
   },
   setup() {
+    const bordered = ref(false)
     return {
+      bordered,
       Dismiss24Filled
     }
   }

@@ -8,6 +8,9 @@ export default {
   space: {
     name: 'Space',
   },
+  tag: {
+    name: 'Tag',
+  },
   tag_recommend: {
     name: 'Recommend Tags'
   },
@@ -136,5 +139,17 @@ export default {
   },
   emtry: {
     name: 'Emtry'
+  },
+  follower: {
+    name: 'Follower'
+  },
+  following: {
+    name: 'Following'
+  },
+  time: {
+    format: 'yyyy-MM-dd hh:mm:ss'
+  },
+  updateAt: {
+    name: 'Update At '
   }
 }

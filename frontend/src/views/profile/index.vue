@@ -1,6 +1,6 @@
 <template>
   <n-el style="padding: 0 15px;">
-    <n-card style="margin-bottom: -10px;">
+    <n-card style="margin-bottom: -10px;" :bordered="false">
       <template #header>
         <n-button quaternary circle @click="$router.back()">
           <n-icon :component="ChevronLeft24Filled"></n-icon>
@@ -13,7 +13,7 @@
         </n-space>
       </template>
     </n-card>
-    <n-card bordered>
+    <n-card :bordered="false">
       <n-result v-if="renderData === null" status="404" title="404 资源不存在" description="生活总归带点荒谬"></n-result>
       <template #cover>
         <n-image :src="renderData.backgroundUrl"></n-image>
@@ -30,7 +30,6 @@
       </template>
       <n-divider title-placement="left">{{ $t('tweet.name') }}</n-divider>
       <n-el v-for="t in tweets" style="margin: 10px 0;">
-        <n-time :time="new Date(t.updateTime)" type="datetime"></n-time>
         <tweet-card :tweet="t" />
       </n-el>
     </n-card>
@@ -50,7 +49,8 @@ import {
   NDivider,
   NTime,
   NButton,
-  NIcon
+  NIcon,
+  NTooltip
 } from 'naive-ui'
 
 import {
@@ -71,7 +71,8 @@ export default defineComponent({
     TweetCard,
     NTime,
     NButton,
-    NIcon
+    NIcon,
+    NTooltip
   },
   setup() {
     const route = useRoute()

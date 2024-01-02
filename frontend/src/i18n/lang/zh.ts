@@ -8,6 +8,9 @@ export default {
   space: {
     name: '空间',
   },
+  tag: {
+    name: '话题',
+  },
   tag_recommend: {
     name: '热门话题'
   },
@@ -15,13 +18,13 @@ export default {
     name: '中文'
   },
   tweet_pub: {
-    name: '发推文'
+    name: '发动态'
   },
   input_tweet_title: {
     name: '标题'
   },
   input_tweet_content: {
-    name: '推文内容'
+    name: '动态内容'
   },
   article_write: {
     name: '写文章'
@@ -135,9 +138,21 @@ export default {
     name: '哥们 这是别人的评论'
   },
   tweet: {
-    name: '推文'
+    name: '动态'
   },
   emtry: {
     name: '这里啥也没有'
+  },
+  follower: {
+    name: '粉丝'
+  },
+  following: {
+    name: '关注'
+  },
+  time: {
+    format: 'yyyy年MM月dd日 hh时mm分ss秒'
+  },
+  updateAt: {
+    name: '更新于'
   }
 }

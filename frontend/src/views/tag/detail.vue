@@ -1,6 +1,20 @@
 <template>
-  <div style="padding: 0 15px;">
-    <n-card bordered>
+  <n-el style="padding: 0 15px;">
+    <n-card :bordered="false" style="margin-bottom: -10px;">
+      <template #header>
+        <n-button quaternary circle @click="$router.back()">
+          <n-icon :component="ChevronLeft24Filled"></n-icon>
+        </n-button>
+        {{ tagDetail?.title }}
+      </template>
+      <template #header-extra>
+        <n-space align="center">
+          {{ tweetData.length }} {{ $t('tag.name') }}
+        </n-space>
+      </template>
+    </n-card>
+    <n-divider style="margin: 0;"></n-divider>
+    <n-card :bordered="false">
       <template #header>
         <n-space align="center">
           <n-image :height="100" :width="100" object-fit="cover" :src="tagDetail?.poster"></n-image>
@@ -17,8 +31,8 @@
     </n-card>
 
     <n-empty v-if="tweetData.length === 0" :description="$t('emtry.name')"></n-empty>
-    <tweet-card v-for="t in tweetData" :tweet="t" style="margin: 5px auto"></tweet-card>
-  </div>
+    <tweet-card v-for="t in tweetData" :tweet="t"></tweet-card>
+  </n-el>
 </template>
 
 <script lang="ts">
@@ -31,11 +45,15 @@ import {
   NImage,
   NSpace,
   NEl,
-  NEmpty
+  NEmpty,
+  NButton,
+  NIcon,
+  NDivider
 } from 'naive-ui'
 import tweetCard from '../../components/tweetCard/tweetCard.vue'
 import { ref, watch } from 'vue'
 import { http } from '../../utils/http'
+import { ChevronLeft24Filled } from '@vicons/fluent'
 
 export default defineComponent({
   components: {
@@ -44,7 +62,10 @@ export default defineComponent({
     NImage,
     NSpace,
     NEl,
-    NEmpty
+    NEmpty,
+    NButton,
+    NIcon,
+    NDivider,
   },
   setup() {
     const { error } = useMessage()
@@ -113,6 +134,7 @@ export default defineComponent({
       loadingBar,
       tagDetail,
       update,
+      ChevronLeft24Filled
     }
   },
   mounted() {

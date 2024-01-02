@@ -1,22 +1,45 @@
 <template>
-  <n-card hoverable bordered>
+  <n-card :bordered="false">
     <template #default>
-      <n-image-group>
-        <n-space item-style="margin: 0 4px 0 0;">
-          <n-el  v-for="(img) in tweet.images" style="display: flex;justify-content: center;align-items: center;">
-            <n-image lazy width="150" height="150" object-fit="cover" :src="img"></n-image>
-          </n-el>
-        </n-space>
-      </n-image-group>
+      <n-el :style="{ paddingLeft: `${avatarSize + avatarMargin}px`}">
+        <n-image-group>
+          <n-space item-style="margin: 0 -5px 0 0;">
+            <n-el v-for="(img) in tweet.images" style="display: flex;justify-content: center;align-items: center;">
+              <n-image lazy width="150" height="150" object-fit="cover" :src="img"></n-image>
+            </n-el>
+          </n-space>
+        </n-image-group>
+      </n-el>
     </template>
     <template #header>
-      
-      <n-space align="center">
-        <avatar-link :userData="tweet.publisher" :size="50"></avatar-link>
-        <n-text>{{ tweet.publisher.name }}@{{ tweet.publisher.account }}</n-text>
-      </n-space>
-      <h2>{{ tweet.title }}</h2>
-      <n-el v-html="tweet.content"></n-el>
+      <n-el :style="{
+        height: `${avatarSize}px`,
+        verticalAlign: 'top',
+      }">
+        <avatar-link :userData="tweet.publisher" :size="avatarSize"></avatar-link>
+        <n-space
+          :style="{
+            display: 'inline-block',
+            height: `${avatarSize}px`,
+            verticalAlign: 'top',
+            marginLeft: `${avatarMargin}px`,
+          }"
+        >
+          <n-text>{{ tweet.publisher.name }}@{{ tweet.publisher.account }}</n-text>
+          <n-tooltip trigger="click">
+            <n-time :time="new Date(tweet.updateTime)" :format="$t('time.format')" type="datetime"></n-time>
+            <template #trigger>
+              <n-button text>
+                <n-time :time="new Date(tweet.updateTime)" :to="new Date().getTime()" type="relative"></n-time>
+              </n-button>
+            </template>
+          </n-tooltip>
+        </n-space>
+      </n-el>
+      <n-el :style="{ paddingLeft: `${avatarSize + avatarMargin}px`}">
+        <h2>{{ tweet.title }}</h2>
+        <n-el v-html="tweet.content"></n-el>
+      </n-el>
     </template>
     <!-- <template #header-extra>
       <n-button text size="large">
@@ -26,45 +49,47 @@
     </template> -->
 
     <template #footer>
-      <n-el>
-        <tag v-for="tag in tweet.tags" :tag="tag"></tag>
-      </n-el>
-      <n-space style="margin-top: 10px;">
-        <n-button secondary @click="like">
-          <n-icon :size="20" v-show="!liked" :component="Heart24Regular"></n-icon>
-          <n-icon :size="20" v-show="liked" :component="Heart24Filled"></n-icon>
-          <n-el style="margin-left: 7px;">{{ tweet.likeCount }}</n-el>
-        </n-button>
-        <n-button secondary @click="commentShow = !commentShow">
-          <n-icon :size="20" v-show="!commentShow" :component="Comment24Regular"></n-icon>
-          <n-icon :size="20" v-show="commentShow" :component="Comment24Filled"></n-icon>
-          <n-el style="margin-left: 7px;">{{ commentData?.comments.length }}</n-el>
-        </n-button>
-      </n-space>
-      <n-el v-show="commentShow">
-        <my-comment
-          @on-select="s => selectedReply = s"
-          v-for="c in commentData?.comments"
-          :comment="c"
-          :reply="reply[c.id] ?? []"
-          @need-update="getCommentData()"
-        ></my-comment>
-        <!-- <n-el v-show="selectedReply !== null">{{ $t('reply.name') }}{{ selectedReply?.at }}</n-el> -->
-        <n-mention
-          :options="replyList"
-          type="textarea"
-          :placeholder="selectedReply !== null ? `${$t('reply.name')} ${selectedReply!.at}` : $t('input_comment.name')"
-          v-model:value="content"
-        >
-        </n-mention>
-        <n-button
-          @click="sendComment"
-          type="primary"
-          :loading="loading"
-          :disabled="loading"
-        >
-          {{ $t('send.name') }}
-        </n-button>
+      <n-el :style="{ paddingLeft: `${avatarSize + avatarMargin}px`}">
+        <n-el v-for="tag in tweet.tags" style="margin-right: 10px; display: inline-block;">
+          <tag :tag="tag"></tag>
+        </n-el>
+        <n-space style="margin-top: 10px;">
+          <n-button secondary @click="like">
+            <n-icon :size="20" v-show="!liked" :component="Heart24Regular"></n-icon>
+            <n-icon :size="20" v-show="liked" :component="Heart24Filled"></n-icon>
+            <n-el style="margin-left: 7px;">{{ tweet.likeCount }}</n-el>
+          </n-button>
+          <n-button secondary @click="commentShow = !commentShow">
+            <n-icon :size="20" v-show="!commentShow" :component="Comment24Regular"></n-icon>
+            <n-icon :size="20" v-show="commentShow" :component="Comment24Filled"></n-icon>
+            <n-el style="margin-left: 7px;">{{ commentData?.comments.length }}</n-el>
+          </n-button>
+        </n-space>
+        <n-el v-show="commentShow">
+          <my-comment
+            @on-select="s => selectedReply = s"
+            v-for="c in commentData?.comments"
+            :comment="c"
+            :reply="reply[c.id] ?? []"
+            @need-update="getCommentData()"
+          ></my-comment>
+          <!-- <n-el v-show="selectedReply !== null">{{ $t('reply.name') }}{{ selectedReply?.at }}</n-el> -->
+          <n-mention
+            :placeholder="selectedReply !== null ? `${$t('reply.name')} ${selectedReply!.at}` : $t('input_comment.name')"
+            v-model:value="content"
+            :options="replyList"
+            type="textarea"
+          >
+          </n-mention>
+          <n-button
+            @click="sendComment"
+            type="primary"
+            :loading="loading"
+            :disabled="loading"
+          >
+            {{ $t('send.name') }}
+          </n-button>
+        </n-el>
       </n-el>
     </template>
   </n-card>
@@ -87,6 +112,8 @@ import {
   NMention,
   MentionOption,
   useMessage,
+  NTooltip,
+  NTime
 } from 'naive-ui'
 import {
   ArrowRight24Filled,
@@ -119,7 +146,9 @@ export default defineComponent({
     NImageGroup,
     NImage,
     NMention,
-    avatarLink
+    avatarLink,
+    NTime,
+    NTooltip
   },
   props: {
     tweet: {
@@ -141,6 +170,8 @@ export default defineComponent({
     const selectedReply = ref<any>(null)
     const content = ref('')
     const loading = ref(false)
+    const avatarSize = ref(50)
+    const avatarMargin = ref(15)
     
     const getCommentData = async () => {
       commentData.value = (await http.get('/api/tweet/comments', {
@@ -225,6 +256,8 @@ export default defineComponent({
       sendComment,
       getCommentData,
       like,
+      avatarSize,
+      avatarMargin,
       ArrowRight24Filled,
       ArrowLeft24Filled,
       ChevronDoubleRight20Filled,

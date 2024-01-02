@@ -52,15 +52,24 @@ export default defineComponent({
       theme,
       selectedId,
       onReplyClick(comment: any, replyId: string) {
-        if (selectedId.value === null) {
+        const select = () => {
           selectedId.value = comment.id
           emit('onSelect', {
             at: comment.publisher.name,
             reply: replyId
           })
+
+        }
+        
+        if (selectedId.value === null) {
+          select()
         } else {
-          selectedId.value = null
-          emit('onSelect', null)
+          if (comment.id === selectedId.value) {
+            selectedId.value = null
+            emit('onSelect', null)
+          } else {
+            select()
+          }
         }
       }
     }
