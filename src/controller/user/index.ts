@@ -2,7 +2,7 @@ import { ControllerOptions } from 'src/types'
 import { follow, getFollow, getFollowing, getUserCount, loginWithAccount, loginWithEmailCode, profile, register, sendEmailCode, status, updatePassword, updateProfile } from './user.service'
 import { useValidateInterceptor } from '../../middleware/validateInterceptor'
 import { FollowParams, GetLoginEmailCodeParams, LoginParams, LoginWithEmailCodeParams, RegisterParams, UpdatePasswordParams, UpdateProfileParams } from './validate'
-import { getTweetByUser } from '../tweet/tweet.service'
+import { getPostByUser } from '../post/post.service'
 
 export const userController: ControllerOptions = {
   path: '/user',
@@ -128,12 +128,11 @@ export const userController: ControllerOptions = {
         }
       ]
     },
-    '/tweets': {
+    '/posts': {
       method: 'get',
       handlers: [
-        (req, res) => {
-          // @ts-ignore
-          getTweetByUser(req.query.id)
+        (req: any, res) => {          
+          getPostByUser(req.query.id)
             .then((result) => {
               res.json(result)
             })
@@ -162,9 +161,10 @@ export const userController: ControllerOptions = {
     '/follower/list': {
       method: 'get',
       handlers: [
-        (req, res) => {
-          // @ts-ignore
-          getFollow(req.auth.id)
+        (req: any, res) => {
+          const id = req.query.id ?? req.auth.id ?? null
+
+          getFollow(id)
             .then((result) => {
               res.json(result)
             })
@@ -177,9 +177,10 @@ export const userController: ControllerOptions = {
     '/following/list': {
       method: 'get',
       handlers: [
-        (req, res) => {
-          // @ts-ignore
-          getFollowing(req.auth.id)
+        (req:any, res) => {
+          const id = req.query.id ?? req.auth.id ?? null
+          
+          getFollowing(id)
             .then((result) => {
               res.json(result)
             })

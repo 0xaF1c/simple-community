@@ -10,8 +10,6 @@ import {
 import { ref, onMounted, inject } from 'vue'
 import { loginApiInjectionKey } from './authModalProvider.vue'
 import { http, login } from '../../utils/http'
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
 const count = ref(0)
 
 const { success, error } = useMessage()
@@ -21,7 +19,7 @@ const account = ref('')
 const name = ref('')
 const password = ref('')
 const passwordRepeat = ref('')
-const description = ref(t('user_description_default.name'))
+const description = ref('这个用户很懒，什么也没留下')
 const { hideLoginModal } = inject(loginApiInjectionKey)!
 
 const sendLoading = ref(false)
@@ -35,11 +33,14 @@ const sendCaptch = () => {
         email: email.value
       }
     })
-      .then(res => {
-        
+      .then((res: any) => {
         if (!res.data) {
-          // @ts-ignore
-          error(res.error.name)
+          res.error.verifyList.forEach((e: any, _i: number) => {
+            error(JSON.stringify(e.error))
+          })
+          setTimeout(() => {
+            loading.value = false
+          }, 200);
         } else {
           loading.value = true
           // 60秒后重试计时器
@@ -54,17 +55,18 @@ const sendCaptch = () => {
           success('发送成功')
         }
       })
-      .catch(err => {
+      .catch((err) => {
         error(err.message)
+        setTimeout(() => {
+          loading.value = false
+        }, 200);
       })
-    setTimeout(() => {
-      loading.value = false
-    }, 200);
   }
 }
 const sendLoginReq = () => {
   if (password.value !== passwordRepeat.value) {
-    error(t('password_repeat_error.name'))
+    error('两次输入的密码不一致')
+    return
   } else {
     sendLoading.value = true
     http.post('/api/user/register', {
@@ -75,13 +77,14 @@ const sendLoginReq = () => {
       password: password.value,
       description: description.value,
     })
-      .then((res) => {
+      .then((res: any) => {
         if (!res.data) {
-          // @ts-ignore
-          error(res.error.name)
+          res.error.verifyList.forEach((e: any, _i: number) => {
+            error(JSON.stringify(e.error))
+          })
         } else {
           login(res.data.token)
-          success(t('register_success.name'))
+          success('注册成功')
           hideLoginModal()
           window.location.reload()
         }
@@ -91,9 +94,6 @@ const sendLoginReq = () => {
       })
       .catch((err) => {
         error(err.message)
-        setTimeout(() => {
-          sendLoading.value = false
-        }, 150)
       })
   }
 }
@@ -117,10 +117,12 @@ onMounted(async () => {
       <n-input v-model:value="description"></n-input>
     </n-form-item-row>
     <n-form-item-row :label="$t('input_password.name')">
-      <n-input :placeholder="$t('required.name')" type="password" show-password-on="click" v-model:value="password"></n-input>
+      <n-input :placeholder="$t('required.name')" type="password" show-password-on="click"
+        v-model:value="password"></n-input>
     </n-form-item-row>
     <n-form-item-row :label="$t('input_password_repeat.name')">
-      <n-input :placeholder="$t('required.name')" type="password" show-password-on="click" v-model:value="passwordRepeat"></n-input>
+      <n-input :placeholder="$t('required.name')" type="password" show-password-on="click"
+        v-model:value="passwordRepeat"></n-input>
     </n-form-item-row>
     <n-form-item-row :label="$t('verify_email.name')">
       <n-input-group>
@@ -133,7 +135,8 @@ onMounted(async () => {
     <n-form-item-row :label="$t('input_captcha.name')">
       <n-input :placeholder="$t('input_captcha.name')" v-model:value="code"></n-input>
     </n-form-item-row>
-    <n-button :loading="sendLoading" :disabled="sendLoading" type="primary" block secondary strong @click="sendLoginReq">
+    <n-button :loading="sendLoading" :disabled="sendLoading" type="primary" block secondary strong
+      @click="sendLoginReq">
       {{ $t('register.name') }} / {{ $t('login.name') }}
     </n-button>
   </n-form>

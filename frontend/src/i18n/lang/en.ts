@@ -17,8 +17,8 @@ export default {
   lang: {
     name: 'English'
   },
-  tweet_pub: {
-    name: 'Publish Tweet'
+  post_pub: {
+    name: 'Publish Post'
   },
   article_write: {
     name: 'Write Article'
@@ -86,11 +86,11 @@ export default {
   unknown_error: {
     name: 'Unknown Error'
   },
-  input_tweet_title: {
-    name: 'Tweet title'
+  input_post_title: {
+    name: 'Post title'
   },
-  input_tweet_content: {
-    name: 'Tweet content'
+  input_post_content: {
+    name: 'Post content'
   },
   share_your_ideas: {
     name: 'Share your ideas'
@@ -107,8 +107,8 @@ export default {
   add_tags: {
     name: 'Add Tags'
   },
-  upload_tweet_image: {
-    name: 'Upload Tweet Image'
+  upload_post_image: {
+    name: 'Upload Post Image'
   },
   cancel: {
     name: 'Cancel'
@@ -116,7 +116,7 @@ export default {
   confirm: {
     name: 'Confirm'
   },
-  publish_tweet_success: {
+  publish_post_success: {
     name: 'Publish success'
   },
   input_comment: {
@@ -134,8 +134,8 @@ export default {
   delete_comment_failed: {
     name: "Don't delete other people's comments"
   },
-  tweet: {
-    name: 'Tweet'
+  post: {
+    name: 'Post'
   },
   emtry: {
     name: 'Emtry'
@@ -151,5 +151,8 @@ export default {
   },
   updateAt: {
     name: 'Update At '
-  }
+  },
+  list: ' List',
+  cancel_follow: '取消关注',
+  follow: '关注',
 }

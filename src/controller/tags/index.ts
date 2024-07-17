@@ -2,7 +2,7 @@ import { useValidateInterceptor } from "../../middleware/validateInterceptor";
 import { ControllerOptions } from "src/types";
 import { CreateTagParams } from "./validate";
 import { recommendTag, createTag, getTagDetail } from "./tag.service";
-import { getTweetByTag } from "../tweet/tweet.service";
+import { getPostByTag } from "../post/post.service";
 
 export const tagController: ControllerOptions = {
   path: '/tag',
@@ -38,12 +38,12 @@ export const tagController: ControllerOptions = {
         }
       ]
     },
-    '/tweets': {
+    '/posts': {
       method: 'get',
       handlers: [
         (req, res) => {
           // @ts-ignore
-          getTweetByTag(req.query.id)
+          getPostByTag(req.query.id)
             .then((result) => {
               res.json(result)
             })

@@ -4,6 +4,7 @@ frontend/dist
 .VSCodeCounter
 yarn-error.log
 yarn.lock
+.env
 
 # Logs
 frontend/logs

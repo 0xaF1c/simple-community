@@ -35,7 +35,7 @@ const { theme } = useToggleTheme()
 const _theme = ref(theme)
 const contentWidth = ref(800)
 const leftSiderWidth = ref(200)
-const rightSiderWidth = ref(300)
+const rightSiderWidth = ref(200)
 const headerHeight = ref(4.5)
 </script>
 
@@ -64,7 +64,7 @@ const headerHeight = ref(4.5)
                 </n-scrollbar>
               </n-layout-content>
               <n-layout embedded :style="{width: `${rightSiderWidth}px`,height: 'auto'}">
-                <!-- <panel style="margin-bottom: 7px;" /> -->
+                <myMenu style="margin-bottom: 7px;" />
                 <rightMenu />
               </n-layout>
             </n-layout>

@@ -9,11 +9,11 @@ import { useAppDataSource } from "../../utils/database"
 import { formatUrl } from "../../utils/formatUrl"
 import { config } from "dotenv"
 import { randomUUID } from "crypto"
-import { TweetImagesEntity } from "../../entitys/tweet/tweetImagesRelation.entity"
+import { PostImagesEntity } from "../../entitys/post/postImagesRelation.entity"
 
 const { dataSource } = useAppDataSource()
 const imageRepository = dataSource.getRepository(ImageEntity)
-const TweetImageRelationRepository = dataSource.getRepository(TweetImagesEntity)
+const PostImageRelationRepository = dataSource.getRepository(PostImagesEntity)
 export async function formatImage(path: string, name: string) {
   let result: string | null = null
   try {
@@ -149,6 +149,7 @@ export function resetPath() {
   imageRepository.find({})
     .then(images => {
       images.forEach(img => {
+        const oldPath = img.url
         const ext = path.extname(img.url)
         const oringinalPath = path.join(process.env.UPLOADS_PATH ?? '' , '/image', path.basename(img.url))
         const newBasename = randomUUID().replace(/\-/g, '')+ext
@@ -159,7 +160,7 @@ export function resetPath() {
           img.url = `/storage/uploads/image/${newBasename}`
           imageRepository.save(img)
             .then((newImg) => {
-              console.log(`[${FgCyan}ResetURL${Reset}] old: ${img.url} new: ${newImg.url}`)
+              console.log(`[${FgCyan}ResetURL${Reset}] old: ${oldPath} new: ${newImg.url}`)
             })
             .catch((err) => {
               throw err
@@ -173,7 +174,7 @@ export function resetPath() {
 export async function deleteNoRelationImage() {
   config()
   const whitelist: string[] = []
-  ;(await TweetImageRelationRepository.find({})).forEach(img => {
+  ;(await PostImageRelationRepository.find({})).forEach(img => {
     
     const uuid = path.basename(img.url)
     

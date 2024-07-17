@@ -1,33 +1,39 @@
 <template>
   <div style="padding: 0 15px;">
     <banner style="margin-bottom: 5px" />
-    <!-- {{ recommendTweet }} -->
-    <tweet-card v-for="tweet in recommendTweet" :tweet="tweet" style=""></tweet-card>
+    <div v-for="post in recommendPost">
+      <n-divider></n-divider>
+      <post-card :post="post" style=""></post-card>
+    </div>
   </div>
   
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import TweetCard from '../../components/tweetCard/tweetCard.vue'
+import postCard from '../../components/postCard/postCard.vue'
 import banner from './banner.vue'
 import { http } from '../../utils/http'
 import { Ref } from 'vue'
-async function setRecommendTweet(recommendTweet: Ref<any>) {
-  const res: any = await http.get('/api/tweet/recommend')
-  recommendTweet.value = res.data.recommendTweet
+import { NDivider } from 'naive-ui'
+async function setRecommendPost(recommendPost: Ref<any>) {
+  const res: any = await http.get('/api/post/recommend')
+  console.log(res);
+  
+  recommendPost.value = res.data.recommendPost
 }
 
 export default defineComponent({
   components: {
     banner,
-    TweetCard
+    postCard
   },
   setup() {
-    const recommendTweet = ref<any[]>([])
-    setRecommendTweet(recommendTweet)
+    const recommendPost = ref<any[]>([])
+    
+    setRecommendPost(recommendPost)
     return {
-      recommendTweet
+      recommendPost
     }
   }
 })

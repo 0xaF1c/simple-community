@@ -18,7 +18,7 @@
       >
         <!-- <n-avatar :src="tag.poster" object-fit="cover" :size="25"></n-avatar> -->
         <span
-          style="font-size: large; margin-bottom: 10px;"
+          style="font-size: large; margin-bottom: 10px; text-wrap: wrap; text-align: left;"
         >
           # {{ tag.title }}
         </span>

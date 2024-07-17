@@ -3,9 +3,9 @@
     <n-button
       type="primary"
       style="margin: 3px 7.8px; width: calc(100% - 15.6px);"
-      @click="pubTweetModalShow = !pubTweetModalShow"
+      @click="pubPostModalShow = !pubPostModalShow"
     >
-      {{ $t('tweet_pub.name')}}
+      {{ $t('post_pub.name')}}
     </n-button>
     <n-button
       style="margin: 3px 7.8px; width: calc(100% - 15.6px);"
@@ -19,7 +19,7 @@
       :options="menuOption"
       v-model:value="selected"
     ></n-menu>
-    <pubTweetModal v-model:show="pubTweetModalShow" />
+    <pubPostModal v-model:show="pubPostModalShow" />
   </n-card>
 </template>
 
@@ -39,7 +39,7 @@ import {
   Person24Regular,
   Person24Filled
 } from '@vicons/fluent'
-import pubTweetModal from '../../components/tweetCard/pubTweetModal.vue'
+import pubPostModal from '../../components/postCard/pubPostModal.vue'
 import { RouterLink } from 'vue-router'
 import { renderIcon } from '../../utils/renderIcon'
 import { ref } from 'vue'
@@ -51,12 +51,12 @@ export default defineComponent({
     NMenu,
     NButton,
     NCard,
-    pubTweetModal
+    pubPostModal
   },
   setup() {
     const { t } = useI18n()
     const selected = ref<string | number>('home')
-    const pubTweetModalShow = ref(false)
+    const pubPostModalShow = ref(false)
 
     const selectedIcon = (condition: () => boolean, icons: any) => {
       return () => (condition() ? renderIcon(icons[0])() : renderIcon(icons[1])())
@@ -97,7 +97,7 @@ export default defineComponent({
       selected,
       darkTheme,
       info,
-      pubTweetModalShow
+      pubPostModalShow
     }
   }
 })

@@ -6,9 +6,13 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "./node_modules/.bin/ts-node-dev ./src/index.ts",
-    "start": "./node_modules/.bin/ts-node ./dist/index.js",
-    "build": "./node_modules/.bin/tsc ./src/index.ts"
+    "dev:backend": "./node_modules/.bin/ts-node-dev ./src/index.ts",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start:backend": "./node_modules/.bin/ts-node ./dist/index.js",
+    "start:frontend": "cd frontend && npm start",
+    "build": "./node_modules/.bin/tsc ./src/index.ts",
+    "dev": "powershell ./dev.ps1",
+    "start": "powershell ./start.ps1"
   },
   "dependencies": {
     "@types/dotenv": "^8.2.0",
@@ -23,7 +27,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.9.7",
     "reflect-metadata": "^0.1.13",
-    "sharp": "^0.32.6",
+    "sharp": "^0.33.4",
     "sql.js": "^1.8.0",
     "typeorm": "^0.3.17"
   },

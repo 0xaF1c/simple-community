@@ -1,5 +1,5 @@
 <template>
-  <n-card bordered>
+  <n-card :bordered="false">
     <n-el style="font-size: 1.3rem;">{{ $t('tag_recommend.name') }}</n-el>
     <n-space vertical style="margin-top: 10px">
       <tag v-for="t in data" :tag="t"></tag>

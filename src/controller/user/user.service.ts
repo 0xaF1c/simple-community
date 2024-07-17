@@ -7,6 +7,7 @@ import { FollowParams, GetLoginEmailCodeParams, LoginWithEmailCodeParams, Regist
 import { random } from "lodash"
 import { useMailer } from "../../utils/email"
 import { UserFollowEntity } from "../../entitys/user/userFollowRelation.entity"
+import { md5 } from "../../utils/md5"
 
 const { sendEmailVerifyCode } = useMailer()
 const { dataSource } = useAppDataSource()
@@ -35,8 +36,11 @@ function verify(code: string, email: string) {
 }
 
 export function createToken(payload: any) {
-
-  return 'Bearer ' + jwt.sign(payload, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '14d' })
+  return 'Bearer ' + jwt.sign(
+    payload,
+    process.env.SECRET_KEY ?? 'unknown_secret_key',
+    { expiresIn: process.env.EXPIRES_IN }
+  )
 }
 
 export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
@@ -49,6 +53,7 @@ export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
           if (!user.name) user.name = `community_user_${count + 1}`
           user.avatarUrl = '/public/avatar/default.jpg'
           user.backgroundUrl = '/public/background/default.jpg'
+          user.password = md5(user.password)
 
           userRepository.save(user)
             .then((saveResult) => {
@@ -100,7 +105,7 @@ export function loginWithAccount(user: Record<string, any>): Promise<HttpDTO | E
   return new Promise((resolve, reject) => {
     userRepository.findOne({
       where: Object.assign({}, {
-        password: user.password ?? ''
+        password: md5(user.password) ?? ''
       }, accountOption)
     })
       .then((findUser: UserEntity | null) => {
@@ -316,27 +321,27 @@ export function updatePassword(option: UpdatePasswordParams, id: number): Promis
             }
           })
         }
-        if (user?.password === oldPassword) {
+        if (user?.password === md5(oldPassword)) {
           userRepository.update({
             id: user.id
           }, {
-            password: newPassword
+            password: md5(newPassword)
           })
-          .then(result => {
-            resolve({
-              status: StatusCodes.OK,
-              data: result
+            .then(result => {
+              resolve({
+                status: StatusCodes.OK,
+                data: result
+              })
             })
-          })
-          .catch((err) => {
-            reject({
-              status: StatusCodes.INTERNAL_SERVER_ERROR,
-              error: {
-                name: err.name,
-                message: err.message
-              }
+            .catch((err) => {
+              reject({
+                status: StatusCodes.INTERNAL_SERVER_ERROR,
+                error: {
+                  name: err.name,
+                  message: err.message
+                }
+              })
             })
-          })
         } else {
           reject({
             status: StatusCodes.OK,
@@ -369,51 +374,78 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
       })
     }
     if (option.follow === undefined) { option.follow = 'true' }
-    
+
     if (option.follow === 'true') {
-      userFollowRepository.save({
-        userId: option.userId,
-        followingId: followingId
+      userFollowRepository.findOne({
+        where: {
+          userId: option.userId,
+          followingId: followingId
+        }
       })
-      .then(() => {
-        resolve({
-          status: StatusCodes.OK,
-          data: {
-            msg: 'follow success'
+        .then((res) => {
+          if (res) {
+            console.log('plz not repeat follow')
+            reject({
+              status: StatusCodes.INTERNAL_SERVER_ERROR,
+              data: {
+                msg: 'plz not repeat follow'
+              }
+            })
+          } else {
+            userFollowRepository.save({
+              userId: option.userId,
+              followingId: followingId
+            })
+              .then(() => {
+                resolve({
+                  status: StatusCodes.OK,
+                  data: {
+                    msg: 'follow success'
+                  }
+                })
+              })
+              .catch((err) => {
+                reject({
+                  status: StatusCodes.INTERNAL_SERVER_ERROR,
+                  error: {
+                    name: err.name,
+                    message: err.message
+                  }
+                })
+              })
           }
         })
-      })
-      .catch((err) => {
-        reject({
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-          error: {
-            name: err.name,
-            message: err.message
-          }
+        .catch((err) => {
+          reject({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: {
+              name: err.name,
+              message: err.message
+            }
+          })
         })
-      })
     } else {
       userFollowRepository.delete({
         userId: option.userId,
         followingId: followingId
       })
-      .then(() => {
-        resolve({
-          status: StatusCodes.OK,
-          data: {
-            msg: 'unFollow success'
-          }
+        .then(() => {
+          resolve({
+            status: StatusCodes.OK,
+            data: {
+              msg: 'unFollow success'
+            }
+          })
         })
-      })
-      .catch((err) => {
-        reject({
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-          error: {
-            name: err.name,
-            message: err.message
-          }
+        .catch((err) => {
+          reject({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: {
+              name: err.name,
+              message: err.message
+            }
+          })
         })
-      })
     }
 
   })
@@ -428,7 +460,7 @@ export function getFollowing(userId: string): Promise<HttpDTO | ErrorDTO> {
       .getRawMany()
       .then((res) => {
         console.log(res);
-        
+
         resolve({
           status: StatusCodes.OK,
           data: UserDTO.fromFindResult(res)
@@ -455,7 +487,7 @@ export function getFollow(userId: string): Promise<HttpDTO | ErrorDTO> {
       .then((res) => {
         console.log(userId);
         console.log(res);
-        
+
         resolve({
           status: StatusCodes.OK,
           data: UserDTO.fromFindResult(res)
@@ -490,5 +522,5 @@ export function getUserCount(): Promise<HttpDTO | ErrorDTO> {
           }
         })
       })
-    })
+  })
 }

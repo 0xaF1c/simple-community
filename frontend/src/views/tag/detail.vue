@@ -9,7 +9,7 @@
       </template>
       <template #header-extra>
         <n-space align="center">
-          {{ tweetData.length }} {{ $t('tag.name') }}
+          {{ postData.length }} {{ $t('post.name') }}
         </n-space>
       </template>
     </n-card>
@@ -30,8 +30,8 @@
       </template>
     </n-card>
 
-    <n-empty v-if="tweetData.length === 0" :description="$t('emtry.name')"></n-empty>
-    <tweet-card v-for="t in tweetData" :tweet="t"></tweet-card>
+    <n-empty v-if="postData.length === 0" :description="$t('emtry.name')"></n-empty>
+    <post-card v-for="t in postData" :post="t"></post-card>
   </n-el>
 </template>
 
@@ -50,7 +50,7 @@ import {
   NIcon,
   NDivider
 } from 'naive-ui'
-import tweetCard from '../../components/tweetCard/tweetCard.vue'
+import postCard from '../../components/postCard/postCard.vue'
 import { ref, watch } from 'vue'
 import { http } from '../../utils/http'
 import { ChevronLeft24Filled } from '@vicons/fluent'
@@ -58,7 +58,7 @@ import { ChevronLeft24Filled } from '@vicons/fluent'
 export default defineComponent({
   components: {
     NCard,
-    tweetCard,
+    postCard,
     NImage,
     NSpace,
     NEl,
@@ -73,7 +73,7 @@ export default defineComponent({
     const route = useRoute()
     const tagData = ref()
     const tagDetail = ref()
-    const tweetData = ref<Record<string, any>>([])
+    const postData = ref<Record<string, any>>([])
 
     const update = () => {
       http.get('/api/tag/detail', {
@@ -89,7 +89,7 @@ export default defineComponent({
           loadingBar.error()
         })
 
-      http.get('/api/tag/tweets', {
+      http.get('/api/tag/posts', {
         params: {
           id: route.query.id
         }
@@ -97,16 +97,16 @@ export default defineComponent({
         .then((res) => {
           const task: Array<Promise<any>> = []
           tagData.value = res.data
-          tagData.value?.tweets.forEach((tweetId: string) => {
-            task.push(http.get('/api/tweet/detail', {
+          tagData.value?.posts.forEach((postId: string) => {
+            task.push(http.get('/api/post/detail', {
               params: {
-                id: tweetId
+                id: postId
               }
             }))
           })
           Promise.all(task)
             .then((data) => {
-              tweetData.value = data.map(i => i.data)
+              postData.value = data.map(i => i.data)
               loadingBar.finish()
             })
             .catch(e => {
@@ -129,7 +129,7 @@ export default defineComponent({
       }
     )
     return {
-      tweetData,
+      postData,
       tagData,
       loadingBar,
       tagDetail,

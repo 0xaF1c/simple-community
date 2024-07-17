@@ -1,38 +1,38 @@
 import { ErrorDTO, HttpDTO } from "src/types"
 import { CommentEntity } from "../../entitys/comment/comment.entity"
-import { TweetCommentEntity } from "../../entitys/tweet/tweetCommentRelation.entity"
+import { PostCommentEntity } from "../../entitys/post/postCommentRelation.entity"
 import { useAppDataSource } from "../../utils/database"
-import { TweetCommentSendParams } from "../tweet/validate"
+import { PostCommentSendParams } from "../post/validate"
 import { StatusCodes } from "http-status-codes"
 import { UserEntity } from "../../entitys/user/user.entity"
 import { CommentLikeParams } from "./validate"
 import { commentLikesEntity } from "../../entitys/comment/commentLikesRelation.entity"
-import { TweetCommentsDTO } from "../../entitys/tweet/tweet.entity"
+import { PostCommentsDTO } from "../../entitys/post/post.entity"
 
 const { dataSource } = useAppDataSource()
 
 const commentRepository = dataSource.getRepository(CommentEntity)
-const tweetCommentRepository = dataSource.getRepository(TweetCommentEntity)
+const postCommentRepository = dataSource.getRepository(PostCommentEntity)
 const commentLikeRepository = dataSource.getRepository(commentLikesEntity)
 
 // fuck es-lint!!!
 export function ____dontCallThisFunction____() {
   if (false) {
     console.log(commentRepository)
-    console.log(tweetCommentRepository)
+    console.log(postCommentRepository)
   }
 }
 
-export function sendTweetComment(comment: TweetCommentSendParams, userId: string): Promise<HttpDTO | ErrorDTO> {
+export function sendPostComment(comment: PostCommentSendParams, userId: string): Promise<HttpDTO | ErrorDTO> {
   if (comment.replyTo === undefined) comment.replyTo = null
   comment.publisher = userId
 
   return new Promise((resolve, reject) => {
     commentRepository.save(comment)
-      .then((saveTweetResult) => {
-        tweetCommentRepository.save({
-          commentId: saveTweetResult.id,
-          tweetId: comment.tweetId,
+      .then((savePostResult) => {
+        postCommentRepository.save({
+          commentId: savePostResult.id,
+          postId: comment.postId,
           publisher: userId
         })
         .then(_ => {
@@ -40,7 +40,7 @@ export function sendTweetComment(comment: TweetCommentSendParams, userId: string
             status: StatusCodes.OK,
             data: {
               msg: 'success',
-              id: saveTweetResult.id
+              id: savePostResult.id
             }
           })
         })
@@ -66,19 +66,19 @@ export function sendTweetComment(comment: TweetCommentSendParams, userId: string
   })
 }
 
-export function getTweetComments(tweetId: string) {
+export function getPostComments(postId: string) {
   return new Promise((resolve, reject) => {
-    tweetCommentRepository.createQueryBuilder()
-      .leftJoinAndSelect(CommentEntity, 'comment', 'TweetCommentEntity.commentId = comment.id')
+    postCommentRepository.createQueryBuilder()
+      .leftJoinAndSelect(CommentEntity, 'comment', 'PostCommentEntity.commentId = comment.id')
       .leftJoinAndSelect(UserEntity, 'user', 'comment.publisher = user.id')
       .leftJoinAndSelect(commentLikesEntity, 'like', 'like.commentId = comment.id')
       .leftJoinAndSelect(UserEntity, 'likeUser', 'like.userId = likeUser.id')
-      .where('TweetCommentEntity.tweetId = :id', { id: tweetId })
+      .where('PostCommentEntity.postId = :id', { id: postId })
       .getRawMany()
       .then((result) => {
         resolve({
           status: StatusCodes.OK,
-          data: TweetCommentsDTO.fromFindResult(result)
+          data: PostCommentsDTO.fromFindResult(result)
         })
       })
       .catch((err) => {

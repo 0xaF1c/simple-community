@@ -9,7 +9,7 @@ const tagRepository = dataSource.getRepository(TagEntity)
 
 export function createTag(tag: CreateTagParams, id: string): Promise<HttpDTO | ErrorDTO> {
   if (!tag.poster) tag.poster = '/public/tagPoster/default.jpg'
-  if (!tag.description) tag.description = '这个话题的发起者很懒，什么都没写'
+  if (!tag.description) tag.description = 'there\'s nothing here'
   tag.creator = id
 
   return new Promise((resolve, reject) => {

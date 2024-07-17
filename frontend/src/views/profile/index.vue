@@ -9,28 +9,32 @@
       </template>
       <template #header-extra>
         <n-space align="center">
-          {{ tweets.length }} {{ $t('tweet.name') }}
+          {{ posts.length }} {{ $t('post.name') }}
         </n-space>
       </template>
     </n-card>
     <n-card :bordered="false">
-      <n-result v-if="renderData === null" status="404" title="404 资源不存在" description="生活总归带点荒谬"></n-result>
+      <n-result v-if="emtry" status="404" title="404 资源不存在" description="生活总归带点荒谬"></n-result>
       <template #cover>
-        <n-image :src="renderData.backgroundUrl"></n-image>
+        <n-image v-if="!emtry" :src="renderData.backgroundUrl"></n-image>
       </template>
       <template #header>
-        <n-space align="center">
+        <n-space align="center" v-if="!emtry">
           <n-avatar circle :size="100" :src="renderData.avatarUrl" object-fit="cover"></n-avatar>
           <n-el>
             <n-el>{{ renderData.name }}@{{ renderData.account }}</n-el>
             <n-el>{{ renderData.description }}</n-el>
             <n-el style="font-size: 0.9rem; opacity: 0.6;">{{ renderData.email }}</n-el>
+            <follow-text :id="renderData.id"></follow-text>
           </n-el>
         </n-space>
       </template>
-      <n-divider title-placement="left">{{ $t('tweet.name') }}</n-divider>
-      <n-el v-for="t in tweets" style="margin: 10px 0;">
-        <tweet-card :tweet="t" />
+      <template #header-extra>
+        <follow-button :id="renderData.id" @_update="update()"></follow-button>
+      </template>
+      <n-divider title-placement="left">{{ $t('post.name') }}</n-divider>
+      <n-el v-for="t in posts" style="margin: 10px 0;">
+        <post-card :post="t" />
       </n-el>
     </n-card>
   </n-el>
@@ -38,7 +42,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
-import TweetCard from '../../components/tweetCard/tweetCard.vue'
+import PostCard from '../../components/postCard/postCard.vue'
+import FollowButton from '../../components/follow/followButton.vue'
 import {
   NCard,
   NEl,
@@ -58,6 +63,7 @@ import {
 } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
 import { http } from '../../utils/http'
+import FollowText from '../../components/follow/text.vue'
 
 export default defineComponent({
   components: {
@@ -68,37 +74,45 @@ export default defineComponent({
     NImage,
     NSpace,
     NDivider,
-    TweetCard,
+    PostCard,
     NTime,
     NButton,
     NIcon,
-    NTooltip
+    NTooltip,
+    FollowText,
+    FollowButton
   },
   setup() {
     const route = useRoute()
     const isSelf = ref(false)
     const renderData = ref<any>({})
-    const tweets = ref<any>([])
+    const posts = ref<any>([])
+    const emtry = ref(true)
 
     const update = async () => {
       const id = route.query.id
       const res = await http.get('/api/user/status')
+
+      console.log(res)
+      
+
       isSelf.value = Number(res.data.id) === Number(id)
       if (isSelf.value) {
         renderData.value = res.data
       } else {
-        renderData.value = (await http.get(`/api/user/profile`, { params: { id: id } })).data        
+        renderData.value = (await http.get(`/api/user/profile`, { params: { id: id } })).data
       }
-      tweets.value = (await http.get('/api/user/tweets', {
+      posts.value = (await http.get('/api/user/posts', {
         params: {
           id: id
         }
-      })).data.tweets
-      
-      tweets.value = tweets.value.sort((a:any, b:any) => {
+      })).data?.posts ?? []
+
+      posts.value = posts.value.sort((a:any, b:any) => {
         const t = (v: any) => new Date(v).getTime()
         return t(b.updateTime) - t(a.updateTime)
       })
+      emtry.value = JSON.stringify(renderData) === '{}'
     }
     watch(
       () => route.query,
@@ -109,8 +123,9 @@ export default defineComponent({
     return {
       renderData,
       isSelf,
-      tweets,
+      posts,
       update,
+      emtry,
       ChevronLeft24Filled
     }
   },

@@ -9,9 +9,12 @@ import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgMagenta, FgYellow, Reset } from "./utils/color"
 import { imageController } from "./controller/image"
 import { deleteNoRelationImage, resetPath } from "./controller/image/image.service"
-import { tweetController } from "./controller/tweet"
+import { postController } from "./controller/post"
 import { tagController } from "./controller/tags"
 import { commentController } from "./controller/comment"
+import { utilsController } from "./controller/utils"
+import { adminController } from "./controller/management/admin"
+import { userManagementController } from "./controller/management/user"
 
 console.clear()
 
@@ -30,42 +33,45 @@ startup()
         process.env.API_ROOT ?? '/api',
         process.env.API_ROOT+'/' ?? '/api/',
         process.env.API_ROOT+'/user/profile',
-        process.env.API_ROOT+'/user/tweets',
+        process.env.API_ROOT+'/user/posts',
         process.env.API_ROOT+'/user/count',
-        process.env.API_ROOT+'/tag/tweets',
-        process.env.API_ROOT+'/tweet/recommend',
+        process.env.API_ROOT+'/tag/posts',
+        process.env.API_ROOT+'/post/recommend',
         process.env.API_ROOT+'/tag/recommend',
-        process.env.API_ROOT+'/tweet/comments',
+        process.env.API_ROOT+'/post/comments',
         process.env.API_ROOT+'/tag/detail',
+        new RegExp('/utils/\S*'),
         new RegExp('/image/i\S*'),
         new RegExp('/user/login\S*'),
         new RegExp('/user/register\S*'),
       ]
     })
   )
-  .use(errorHandler)
   .use('/storage/uploads' as any, express.static(path.join(process.env.UPLOADS_PATH ?? '')))
   .use('/public' as any, express.static(path.join(__dirname, './public')))
   .use(errorHandler)
   .use(successHander)
   .useController(userController)
   .useController(imageController)
-  .useController(tweetController)
+  .useController(postController)
   .useController(tagController)
   .useController(commentController)
+  .useController(utilsController)
+  .useController(adminController)
+  .useController(userManagementController)
   .onReady((app) => {    
     if (process.env.DEV_MODE === 'true') {
       console.log(`[${FgMagenta}DevMode${Reset}] Frontend Redirect: http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`);
       app.get('/', (_, res) => {
         res.redirect(`http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`)
       })
+      const token = jwt.sign({id: '1'}, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
+  
+      console.log(`[${FgYellow}temp_token${Reset}] Bearer ${token}`)
     } else {
       app.use('/' as any, express.static(path.join(__dirname, '../', process.env.FRONTEND_DIR ?? 'frontend/dist')))
     }
     // init()
-    const token = jwt.sign({id: '1'}, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
-
-    console.log(`[${FgYellow}temp_token${Reset}] Bearer ${token}`)
     
     deleteNoRelationImage()
     setTimeout(() => {

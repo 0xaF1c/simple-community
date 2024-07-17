@@ -15,6 +15,8 @@ export function useValidateInterceptor(validatorClass: any, type: 'get' | 'post'
       obj = req.body
     }
 
+    console.log(plainToClass(validatorClass, obj))
+    
     validate(plainToClass(validatorClass, obj))
       .then((result) => {
         let verifyList: any = []

@@ -1,8 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('sc_user_follow_relation')
 export class UserFollowEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column()
@@ -10,4 +10,7 @@ export class UserFollowEntity {
 
   @Column()
   followingId: string
+
+  @CreateDateColumn()
+  followAt: Date
 }

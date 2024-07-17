@@ -17,13 +17,13 @@ export default {
   lang: {
     name: '中文'
   },
-  tweet_pub: {
+  post_pub: {
     name: '发动态'
   },
-  input_tweet_title: {
+  input_post_title: {
     name: '标题'
   },
-  input_tweet_content: {
+  input_post_content: {
     name: '动态内容'
   },
   article_write: {
@@ -110,7 +110,7 @@ export default {
   add_tags: {
     name: '添加话题'
   },
-  upload_tweet_image: {
+  upload_post_image: {
     name: '上传配图'
   },
   cancel: {
@@ -119,7 +119,7 @@ export default {
   confirm: {
     name: '确认'
   },
-  publish_tweet_success: {
+  publish_post_success: {
     name: '发布成功'
   },
   input_comment: {
@@ -137,7 +137,7 @@ export default {
   delete_comment_failed: {
     name: '哥们 这是别人的评论'
   },
-  tweet: {
+  post: {
     name: '动态'
   },
   emtry: {
@@ -154,5 +154,10 @@ export default {
   },
   updateAt: {
     name: '更新于'
-  }
+  },
+  cancel_follow: '取消关注',
+  follow: '关注',
+  list: '列表',
+  'follow success': '关注成功',
+  'unFollow success': '取消关注成功'
 }
