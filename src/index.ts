@@ -8,13 +8,14 @@ import { userController } from "./controller/user"
 import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgMagenta, FgYellow, Reset } from "./utils/color"
 import { imageController } from "./controller/image"
-import { deleteNoRelationImage, resetPath } from "./controller/image/image.service"
+import { deleteNoRelationImage } from "./controller/image/image.service"
 import { postController } from "./controller/post"
 import { tagController } from "./controller/tags"
 import { commentController } from "./controller/comment"
 import { utilsController } from "./controller/utils"
 import { adminController } from "./controller/management/admin"
 import { userManagementController } from "./controller/management/user"
+import { deletNoRelationComment } from "./controller/comment/comment.service"
 
 console.clear()
 
@@ -72,9 +73,10 @@ startup()
       app.use('/' as any, express.static(path.join(__dirname, '../', process.env.FRONTEND_DIR ?? 'frontend/dist')))
     }
     // init()
+    deletNoRelationComment()
     
     deleteNoRelationImage()
     setTimeout(() => {
-      resetPath()
+      // resetPath()
     }, 10 * 1000)
   })

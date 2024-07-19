@@ -7,21 +7,16 @@ import { StatusCodes } from "http-status-codes"
 import { UserEntity } from "../../entitys/user/user.entity"
 import { CommentLikeParams } from "./validate"
 import { commentLikesEntity } from "../../entitys/comment/commentLikesRelation.entity"
-import { PostCommentsDTO } from "../../entitys/post/post.entity"
+import { PostCommentsDTO, PostEntity } from "../../entitys/post/post.entity"
+import { FgYellow, Reset } from "../../utils/color"
 
 const { dataSource } = useAppDataSource()
 
 const commentRepository = dataSource.getRepository(CommentEntity)
 const postCommentRepository = dataSource.getRepository(PostCommentEntity)
 const commentLikeRepository = dataSource.getRepository(commentLikesEntity)
+const postRepository = dataSource.getRepository(PostEntity)
 
-// fuck es-lint!!!
-export function ____dontCallThisFunction____() {
-  if (false) {
-    console.log(commentRepository)
-    console.log(postCommentRepository)
-  }
-}
 
 export function sendPostComment(comment: PostCommentSendParams, userId: string): Promise<HttpDTO | ErrorDTO> {
   if (comment.replyTo === undefined) comment.replyTo = null
@@ -35,24 +30,24 @@ export function sendPostComment(comment: PostCommentSendParams, userId: string):
           postId: comment.postId,
           publisher: userId
         })
-        .then(_ => {
-          resolve({
-            status: StatusCodes.OK,
-            data: {
-              msg: 'success',
-              id: savePostResult.id
-            }
+          .then(_ => {
+            resolve({
+              status: StatusCodes.OK,
+              data: {
+                msg: 'success',
+                id: savePostResult.id
+              }
+            })
           })
-        })
-        .catch((err) => {
-          reject({
-            status: StatusCodes.INTERNAL_SERVER_ERROR,
-            error: {
-              name: err.name,
-              message: err.message
-            }
+          .catch((err) => {
+            reject({
+              status: StatusCodes.INTERNAL_SERVER_ERROR,
+              error: {
+                name: err.name,
+                message: err.message
+              }
+            })
           })
-        })
       })
       .catch((err) => {
         reject({
@@ -162,26 +157,118 @@ export function commentLike(commentLikeParams: CommentLikeParams, id: string): P
   })
 }
 
-export function deleteComment(commentId: string, userId: string): Promise<HttpDTO | ErrorDTO>  {
+export function deleteComment(commentId: string, userId: string): Promise<HttpDTO | ErrorDTO> {
+  return new Promise((resolve, reject) => {
+    commentRepository.find({
+      where: {
+        replyTo: commentId
+      }
+    })
+      .then(comments => {
+        const result = comments.map(comment => deleteCommentRelation(comment.id, comment.publisher))
+        result.push(deleteCommentRelation(commentId, userId))
+
+        Promise.all(result)
+          .then((result) => {
+            resolve({
+              status: StatusCodes.OK,
+              data: result
+            })
+          })
+          .catch((err) => {
+            reject({
+              status: StatusCodes.INTERNAL_SERVER_ERROR,
+              error: {
+                name: err.name,
+                message: err.message
+              }
+            })
+          })
+      })
+      .catch(err => {
+        console.error(err)
+      })
+  })
+}
+export function deleteCommentRelation(commentId: string, userId: string): Promise<any> {
   return new Promise((resolve, reject) => {
     commentRepository.delete({
       id: commentId,
       publisher: userId
     })
-    .then((result) => {
-      resolve({
-        status: StatusCodes.OK,
-        data: result
+      .then((result) => {
+        resolve(result)
       })
-    })
-    .catch((err) => {
-      reject({
-        status: StatusCodes.INTERNAL_SERVER_ERROR,
-        error: {
-          name: err.name,
-          message: err.message
-        }
+      .catch((err) => {
+        reject({
+          errorId: commentId,
+          error: {
+            name: err.name,
+            message: err.message
+          }
+        })
       })
+    commentLikeRepository.delete({
+      commentId: commentId
     })
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+    postCommentRepository.delete({
+      commentId: commentId
+    })
+      .then((result) => {
+        console.info(`[${FgYellow}delete no relation PostCmment${Reset}]`)
+        console.log(result);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
   })
+}
+
+export function deletNoRelationComment(): void {
+  commentRepository.find()
+    .then(comments => {
+      const commentsId = comments.map(c => c.id)
+
+      const replys = comments.filter((c) => {
+        return c.replyTo !== null && !(commentsId.includes(c.replyTo))
+      })
+      console.info(`[${FgYellow}delete no relation comment${Reset}]`)
+      console.log(replys)
+      Promise.all(replys.map(c => deleteCommentRelation(c.id, c.publisher)))
+        .then((result) => {
+          console.log(result)
+        })
+        .catch((err) => {
+          console.error({
+            name: err.name,
+            message: err.message
+          })
+        })
+
+    })
+    .catch(err => {
+      console.error(err)
+    })
+  postRepository.find()
+    .then(posts => {
+      const postsId = posts.map(p => p.id)
+      postCommentRepository.find()
+        .then(relations => {
+          const rels = relations.filter(rel => !postsId.includes(rel.postId))
+          console.info(`[${FgYellow}delete no relation comment${Reset}]`)
+          rels.forEach((rel) => {
+            postCommentRepository.delete({
+              id: rel.id,
+              postId: rel.postId,
+              commentId: rel.commentId
+            })
+          })
+        })
+    })
 }

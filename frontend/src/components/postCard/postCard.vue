@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false">
+  <n-card :bordered="false" v-if="isDelete">
     <template #default>
       <n-el :style="{ paddingLeft: `${avatarSize + avatarMargin}px`}">
         <n-image-group>
@@ -26,14 +26,7 @@
           }"
         >
           <n-text>{{ post.publisher.name }}@{{ post.publisher.account }}</n-text>
-          <n-tooltip trigger="click">
-            <n-time :time="new Date(post.updateTime)" :format="$t('time.format')" type="datetime"></n-time>
-            <template #trigger>
-              <n-button text>
-                <n-time :time="new Date(post.updateTime)" :to="new Date().getTime()" type="relative"></n-time>
-              </n-button>
-            </template>
-          </n-tooltip>
+          <my-time :date="post.updateTime"></my-time>
         </n-space>
       </n-el>
       <n-el :style="{ paddingLeft: `${avatarSize + avatarMargin}px`}">
@@ -41,12 +34,24 @@
         <n-el v-html="post.content"></n-el>
       </n-el>
     </template>
-    <!-- <template #header-extra>
-      <n-button text size="large">
-        详情
-        <n-icon :size="20" :component="ChevronDoubleRight20Filled"></n-icon>
-      </n-button>
-    </template> -->
+    <template #header-extra>
+      <n-popconfirm
+        @positive-click="deletePost"
+        @negative-click="canceldeletePost"
+        :positive-text="$t('confirm.name')"
+        :negative-text="$t('cancel.name')"
+        v-model:show="popConfirmShow"
+        v-if="isPublisher"
+      >
+        {{ $t('confirm_delete_post.name') }}
+        <template #trigger>
+          <n-button text @click="popConfirmShow = !popConfirmShow">
+            <n-icon :size="15" v-show="!popConfirmShow" :component="Delete24Regular"></n-icon>
+            <n-icon :size="15" v-show="popConfirmShow" :component="Delete24Filled"></n-icon>
+          </n-button>
+        </template>
+      </n-popconfirm>
+    </template>
 
     <template #footer>
       <n-el :style="{ paddingLeft: `${avatarSize + avatarMargin}px`}">
@@ -113,7 +118,8 @@ import {
   MentionOption,
   useMessage,
   NTooltip,
-  NTime
+  NTime,
+  NPopconfirm
 } from 'naive-ui'
 import {
   ArrowRight24Filled,
@@ -122,13 +128,16 @@ import {
   Comment24Regular,
   Comment24Filled,
   Heart24Regular,
-  Heart24Filled
+  Heart24Filled,
+  Delete24Regular,
+  Delete24Filled,
 } from '@vicons/fluent'
 import tag from '../tag/tag.vue'
 import myComment from '../comment/commentWarpper.vue'
 import { http } from '../../utils/http'
 import { useI18n } from 'vue-i18n'
-import avatarLink from '../../components/link/avatarLink.vue'
+import avatarLink from '../link/avatarLink.vue'
+import MyTime from '../common/time.vue'
 
 export default defineComponent({
   components: {
@@ -148,7 +157,9 @@ export default defineComponent({
     NMention,
     avatarLink,
     NTime,
-    NTooltip
+    NTooltip,
+    MyTime,
+    NPopconfirm
   },
   props: {
     post: {
@@ -172,8 +183,11 @@ export default defineComponent({
     const loading = ref(false)
     const avatarSize = ref(50)
     const avatarMargin = ref(15)
+    const popConfirmShow = ref(false)
+    const isPublisher = ref(false)
+    const isDelete = ref(true)
     
-    const getCommentData = async () => {
+    const update = async () => {      
       commentData.value = (await http.get('/api/post/comments', {
         params: {
           id: props.post.id
@@ -187,6 +201,9 @@ export default defineComponent({
           reply.value[c.replyTo]?.push(c)
         }
       })
+
+      const res = await http.get('/api/user/status')
+      isPublisher.value = res.data.id === props.post.publisher.id
     }
     const like = () => {
       liked.value = !liked.value
@@ -226,7 +243,7 @@ export default defineComponent({
       .then(() => {
         content.value = ''
         success(t('publish_post_success.name'))
-        getCommentData()
+        update()
         setTimeout(() => {
           loading.value = false
         }, 200)
@@ -238,6 +255,23 @@ export default defineComponent({
           loading.value = false
         }, 200)
       })
+    }
+    const deletePost = () => {
+      http.get('/api/post/delete', {
+        params: {
+          postId: props.post.id
+        }
+      })
+      .then((res) => {
+        success(t('delete_success.name'))
+        isDelete.value = false
+      })
+      .catch(err => {
+        error(err.name)
+      }) 
+    }
+    const canceldeletePost = () => {
+      popConfirmShow.value = false
     }
     init()
 
@@ -253,18 +287,25 @@ export default defineComponent({
       selectedReply,
       content,
       loading,
-      sendComment,
-      getCommentData,
-      like,
+      popConfirmShow,
+      isPublisher,
       avatarSize,
       avatarMargin,
+      isDelete,
+      deletePost,
+      canceldeletePost,
+      sendComment,
+      getCommentData: update,
+      like,
       ArrowRight24Filled,
       ArrowLeft24Filled,
       ChevronDoubleRight20Filled,
       Comment24Regular,
       Comment24Filled,
       Heart24Regular,
-      Heart24Filled
+      Heart24Filled,
+      Delete24Regular,
+      Delete24Filled,
     }
   },
   methods: {

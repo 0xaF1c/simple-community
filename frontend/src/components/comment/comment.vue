@@ -10,7 +10,7 @@
     </template>
     {{ comment.content }}
     <template #footer>
-      <n-space>
+      <n-space align="end">
         <n-button text @click="like">
           <n-icon :size="15" v-show="!liked" :component="Heart24Regular"></n-icon>
           <n-icon :size="15" v-show="liked" :component="Heart24Filled"></n-icon>
@@ -36,6 +36,7 @@
             </n-button>
           </template>
         </n-popconfirm>
+        <my-time :date="comment.createTime"></my-time>
       </n-space>
     </template>
   </n-thing>
@@ -66,6 +67,7 @@ import {
 import { http } from '../../utils/http'
 import { useI18n } from 'vue-i18n'
 import avatarLink from '../link/avatarLink.vue'
+import MyTime from '../common/time.vue'
 
 export default defineComponent({
   props: {
@@ -91,7 +93,8 @@ export default defineComponent({
     NEl,
     NAvatar,
     NPopconfirm,
-    avatarLink
+    avatarLink,
+    MyTime
   },
   setup(props, { emit }) {
     const { t } = useI18n()
@@ -129,10 +132,10 @@ export default defineComponent({
         .then((res) => {
           console.log(res)
           emit('needUpdate')
-          success(t('delete_comment_success.name'))
+          success(t('delete_success.name'))
         })
         .catch((err) => {
-          console.log(err);
+          console.log(err)
           error(t('unknown_error.name'))
         })
       } else {

@@ -2,8 +2,8 @@
   <div style="padding: 0 15px;">
     <banner style="margin-bottom: 5px" />
     <div v-for="post in recommendPost">
-      <n-divider></n-divider>
-      <post-card :post="post" style=""></post-card>
+      <!-- <n-divider></n-divider> -->
+      <post-card :post="post" style="margin-bottom: 10px"></post-card>
     </div>
   </div>
   
@@ -26,7 +26,8 @@ async function setRecommendPost(recommendPost: Ref<any>) {
 export default defineComponent({
   components: {
     banner,
-    postCard
+    postCard,
+    NDivider
   },
   setup() {
     const recommendPost = ref<any[]>([])

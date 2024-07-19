@@ -128,7 +128,10 @@ export default {
   confirm_delete_comment: {
     name: 'Are you sure to delete this comment?'
   },
-  delete_comment_success: {
+  confirm_delete_post: {
+    name: 'Are you sure to delete this post?'
+  },
+  delete_success: {
     name: 'Delete comment success'
   },
   delete_comment_failed: {

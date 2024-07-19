@@ -6,7 +6,14 @@
     <n-list v-if="users!.length > 0">
       <n-list-item v-for="user in users">
         <n-space align="center">
-          <avatar-link :user-data="user.avatarUrl"></avatar-link>
+        <n-avatar
+          object-fit="cover"
+          :src="user?.avatarUrl ?? '/defaultAvatar.jpg'"
+          :fallback-src="'/defaultAvatar.jpg'"
+          :size="50"
+          style="margin: 0 auto; cursor: pointer;"
+          @click="onAvatarClick(user)"
+        />
           <n-text>{{ user.name }}@{{ user.account }}</n-text>
         </n-space>
       </n-list-item>
@@ -22,12 +29,13 @@ import {
   NList,
   NListItem,
   NEmpty,
-  NText
+  NText,
+  NAvatar
 } from 'naive-ui'
 
 import { ref, defineEmits } from 'vue'
 
-import avatarLink from '../link/avatarLink.vue'
+import { useRouter } from 'vue-router';
 export default {
   components: {
     NModal,
@@ -35,8 +43,8 @@ export default {
     NList,
     NListItem,
     NEmpty,
-    avatarLink,
-    NText
+    NText,
+    NAvatar 
   },
   props: {
     users: Array<any>,
@@ -45,7 +53,7 @@ export default {
   },
   setup(props) {
     const list = ref<Array<any>>([])
-
+    const router = useRouter()
     const emits = defineEmits<{
       (e: 'update:show', item: any): void
     }>()
@@ -54,7 +62,14 @@ export default {
 
     return {
       list,
-      emits
+      emits,
+      onAvatarClick(user: any) {
+        router.push({
+          path: `/profile?id=${user.id}`,
+          name: 'profile',
+          query: { id: user.id }
+        })
+      }
     }
   }
 }

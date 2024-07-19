@@ -9,13 +9,14 @@ import { isUUID } from "class-validator"
 import { PostLikesEntity } from "../../entitys/post/postLikesRelation.entity"
 import { TagEntity } from "../../entitys/tag/tag.entity"
 import { UserEntity } from "../../entitys/user/user.entity"
+import { PostCommentEntity } from "../../entitys/post/postCommentRelation.entity"
 
 const { dataSource } = useAppDataSource()
 const postRepository = dataSource.getRepository(PostEntity)
 const postImageRepository = dataSource.getRepository(PostImagesEntity)
 const postTagRepository = dataSource.getRepository(PostTagsEntity)
 const postLikesRepository = dataSource.getRepository(PostLikesEntity)
-
+const postCommentRepository = dataSource.getRepository(PostCommentEntity)
 export function postPublish(post: PostPublishParams, id: string): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     post.publisher = id
@@ -239,15 +240,31 @@ export function getPostByUser(id: string): Promise<HttpDTO | ErrorDTO> {
 }
 export function deletePost(postId: string, userId: string): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-
     postRepository.delete({
       id: postId,
       publisher: userId
     })
       .then((result) => {
-        resolve({
-          status: StatusCodes.OK,
-          data: result
+        postCommentRepository.delete({
+          postId: postId
+        })
+        .then((deleteRelation) => {
+          resolve({
+            status: StatusCodes.OK,
+            data: {
+              post: result,
+              deleteRelation
+            }
+          })
+        })
+        .catch((err) => {
+          reject({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: {
+              name: err.name,
+              message: err.message
+            }
+          })
         })
       })
       .catch((err) => {
@@ -259,6 +276,7 @@ export function deletePost(postId: string, userId: string): Promise<HttpDTO | Er
           }
         })
       })
+    
   })
 }
 

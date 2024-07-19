@@ -7,36 +7,35 @@
     style="margin: 0 auto; cursor: pointer;"
     @click="onAvatarClick"
   />
+  <user-card v-model:show="cardShow" :user-data="userData"></user-card>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import {
   NAvatar
 } from 'naive-ui'
+import userCard from './userCard.vue'
 
 import { useAuthModal } from '../authModal/useAuthModal'
-import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: {
-    NAvatar
+    NAvatar,
+    userCard
   },
   setup(props) {
     const { showLoginModal } = useAuthModal()
-    const router = useRouter()
+    const cardShow = ref(false)
     return {
+      cardShow,
       fallbackSrc: '/defaultAvatar.jpg',
       noAvatarSrc: '/public/avatar/default.jpg',
       onAvatarClick() {
         if (!props.userData) {
           showLoginModal()
         } else {
-          router.push({
-            path: `/profile?id=${props.userData.id}`,
-            name: 'profile',
-            query: { id: props.userData.id }
-          })
+          cardShow.value = !cardShow.value
         }
       }
     }

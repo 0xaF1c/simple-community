@@ -13,18 +13,13 @@
 
 <script lang="ts">
 
-import { InjectionKey, defineComponent, onMounted, ref } from 'vue'
-import { http } from '../../utils/http';
+import { defineComponent, onMounted, ref } from 'vue'
+import { http } from '../../utils/http'
 import { NButton } from 'naive-ui'
 
 import userList from './userList.vue'
-import { provide } from 'vue';
-import { useAppStore } from '../../store';
-import { watch } from 'vue';
-export const FollowTextApiInjectionKey: InjectionKey<FollowTextApiInjection> = 'FollowTextApiKey' as any
-export interface FollowTextApiInjection {
-  followTextUpdate: () => void
-}
+import { useAppStore } from '../../store'
+import { watch } from 'vue'
 export default defineComponent({
   components: {
     NButton,
@@ -50,11 +45,6 @@ export default defineComponent({
         follower.value = (await http.get('/api/user/follower/list', params)).data
       }
     }
-
-    provide(FollowTextApiInjectionKey, {
-      followTextUpdate: update
-    })
-    
 
     onMounted(() => {
       update()

@@ -131,7 +131,10 @@ export default {
   confirm_delete_comment: {
     name: '确认删除这条评论'
   },
-  delete_comment_success: {
+  confirm_delete_post: {
+    name: '确认删除这条动态'
+  },
+  delete_success: {
     name: '删除成功'
   },
   delete_comment_failed: {
