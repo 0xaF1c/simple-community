@@ -447,7 +447,6 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
           })
         })
     }
-
   })
 }
 
