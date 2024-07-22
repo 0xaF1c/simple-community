@@ -2,23 +2,45 @@
   <n-thing>
     <template #header>
       <n-space align="center">
-        <avatar-link :user-data="comment.publisher"></avatar-link>
+        <avatar-link
+          :user-data="comment.publisher"
+        ></avatar-link>
         <!-- <n-avatar :src="comment.publisher.avatarUrl" :size="50" object-fit="cover"
           style="display: flex; justify-content: center; align-items: center;" /> -->
-        <n-text>{{ comment.publisher.name }}@{{ comment.publisher.account }}</n-text>
+        <n-text
+          >{{ comment.publisher.name }}@{{
+            comment.publisher.account
+          }}</n-text
+        >
       </n-space>
     </template>
     {{ comment.content }}
     <template #footer>
       <n-space align="end">
         <n-button text @click="like">
-          <n-icon :size="15" v-show="!liked" :component="Heart24Regular"></n-icon>
-          <n-icon :size="15" v-show="liked" :component="Heart24Filled"></n-icon>
+          <n-icon
+            :size="15"
+            v-show="!liked"
+            :component="Heart24Regular"
+          ></n-icon>
+          <n-icon
+            :size="15"
+            v-show="liked"
+            :component="Heart24Filled"
+          ></n-icon>
           {{ comment.likeCount }}
         </n-button>
         <n-button text @click="$emit('onReplyClick')">
-          <n-icon :size="15" v-show="!selected" :component="Comment24Regular"></n-icon>
-          <n-icon :size="15" v-show="selected" :component="Comment24Filled"></n-icon>
+          <n-icon
+            :size="15"
+            v-show="!selected"
+            :component="Comment24Regular"
+          ></n-icon>
+          <n-icon
+            :size="15"
+            v-show="selected"
+            :component="Comment24Filled"
+          ></n-icon>
         </n-button>
         <n-popconfirm
           @positive-click="submit"
@@ -30,9 +52,20 @@
         >
           {{ $t('confirm_delete_comment.name') }}
           <template #trigger>
-            <n-button text @click="popConfirmShow = !popConfirmShow">
-              <n-icon :size="15" v-show="!popConfirmShow" :component="Delete24Regular"></n-icon>
-              <n-icon :size="15" v-show="popConfirmShow" :component="Delete24Filled"></n-icon>
+            <n-button
+              text
+              @click="popConfirmShow = !popConfirmShow"
+            >
+              <n-icon
+                :size="15"
+                v-show="!popConfirmShow"
+                :component="Delete24Regular"
+              ></n-icon>
+              <n-icon
+                :size="15"
+                v-show="popConfirmShow"
+                :component="Delete24Filled"
+              ></n-icon>
             </n-button>
           </template>
         </n-popconfirm>
@@ -62,7 +95,7 @@ import {
   Heart24Regular,
   Heart24Filled,
   Delete24Regular,
-  Delete24Filled,
+  Delete24Filled
 } from '@vicons/fluent'
 import { http } from '../../utils/http'
 import { useI18n } from 'vue-i18n'
@@ -80,10 +113,7 @@ export default defineComponent({
       type: Boolean
     }
   },
-  emit: [
-    'onReplyClick',
-    'needUpdate'
-  ],
+  emit: ['onReplyClick', 'needUpdate'],
   components: {
     NThing,
     NButton,
@@ -104,9 +134,9 @@ export default defineComponent({
     const liked = ref(false)
     const isPublisher = ref<boolean>(false)
     const update = async () => {
-      
       const res = await http.get('/api/user/status')
-      isPublisher.value = res.data.id === props.comment.publisher.id
+      isPublisher.value =
+        res.data.id === props.comment.publisher.id
     }
     const like = () => {
       liked.value = !liked.value
@@ -124,24 +154,24 @@ export default defineComponent({
     }
     const deleteComment = async () => {
       if (isPublisher.value) {
-        http.get('/api/comment/delete', {
-          params: {
-            commentId: props.comment.id
-          }
-        })
-        .then((res) => {
-          console.log(res)
-          emit('needUpdate')
-          success(t('delete_success.name'))
-        })
-        .catch((err) => {
-          console.log(err)
-          error(t('unknown_error.name'))
-        })
+        http
+          .get('/api/comment/delete', {
+            params: {
+              commentId: props.comment.id
+            }
+          })
+          .then(res => {
+            console.log(res)
+            emit('needUpdate')
+            success(t('delete_success.name'))
+          })
+          .catch(err => {
+            console.log(err)
+            error(t('unknown_error.name'))
+          })
       } else {
         warning(t('delete_comment_failed.name'))
       }
-      
     }
     return {
       popConfirmShow,
@@ -153,9 +183,7 @@ export default defineComponent({
       submit() {
         deleteComment()
       },
-      cancel() {
-
-      },
+      cancel() {},
       update,
       Comment24Regular,
       Comment24Filled,
@@ -169,5 +197,4 @@ export default defineComponent({
     this.update()
   }
 })
-
 </script>

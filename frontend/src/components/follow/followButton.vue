@@ -20,7 +20,7 @@ export default {
     NButton
   },
   props: {
-    id: String
+    id: [String, Number]
   },
   setup(props) {
     const followState = ref(false)

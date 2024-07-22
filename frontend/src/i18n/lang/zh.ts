@@ -161,6 +161,7 @@ export default {
   cancel_follow: '取消关注',
   follow: '关注',
   list: '列表',
+  detailInfo: '详细信息',
   'follow success': '关注成功',
   'unFollow success': '取消关注成功'
 }

@@ -156,6 +156,8 @@ export default {
     name: 'Update At '
   },
   list: ' List',
-  cancel_follow: '取消关注',
-  follow: '关注',
+  cancel_follow: 'cancel follow',
+  follow: 'follow',
+  'follow success': 'follow success',
+  'unFollow success': 'cancel follow success'
 }

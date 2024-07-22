@@ -1,19 +1,45 @@
 <template>
-  <n-avatar
-    object-fit="cover"
-    :src="userData?.avatarUrl ?? '/defaultAvatar.jpg'"
-    :size="size"
-    :fallback-src="'/defaultAvatar.jpg'"
-    style="margin: 0 auto; cursor: pointer;"
+  <n-button
+    :style="{
+      width: `${size!+2}px`,
+      height: `${size!+2}px`,
+      padding: '0'
+    }"
     @click="onAvatarClick"
-  />
+  >
+    <template #icon>
+      <n-avatar
+        object-fit="cover"
+        :src="userData?.avatarUrl ?? '/defaultAvatar.jpg'"
+        :size="size"
+        :fallback-src="'/defaultAvatar.jpg'"
+        :img-props="{
+          style: {
+            width: `${size}px`,
+            height: `${size}px`,
+            margin: 0,
+          }
+        }"
+        :style="{
+          margin: 0,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'absolute',
+          width: `${size}px`,
+          height: `${size}px`,
+        }"
+      />
+    </template>
+  </n-button>
   <user-card v-model:show="cardShow" :user-data="userData"></user-card>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import {
-  NAvatar
+  NAvatar,
+  NButton
 } from 'naive-ui'
 import userCard from './userCard.vue'
 
@@ -22,7 +48,8 @@ import { useAuthModal } from '../authModal/useAuthModal'
 export default defineComponent({
   components: {
     NAvatar,
-    userCard
+    userCard,
+    NButton
   },
   setup(props) {
     const { showLoginModal } = useAuthModal()
@@ -32,10 +59,14 @@ export default defineComponent({
       fallbackSrc: '/defaultAvatar.jpg',
       noAvatarSrc: '/public/avatar/default.jpg',
       onAvatarClick() {
-        if (!props.userData) {
-          showLoginModal()
+        if (props.onClick) {
+          props.onClick()
         } else {
-          cardShow.value = !cardShow.value
+          if (!props.userData) {
+            showLoginModal()
+          } else {
+            cardShow.value = !cardShow.value
+          }
         }
       }
     }
@@ -47,7 +78,12 @@ export default defineComponent({
     },
     size: {
       type: Number,
-      requird: true
+      requird: true,
+      default: 50
+    },
+    onClick: {
+      type: Function,
+      required: false
     }
   }
 })

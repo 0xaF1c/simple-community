@@ -1,9 +1,28 @@
 <template>
-  <n-modal :show="show" @update-show="(v: any) => $emit('update:show', v)" preset="card" role="dialog" :style="{ width: '550px' }"
-    size="huge" :bordered="true" style="width: 800px;">
-    <n-result v-if="emtry" status="404" title="404 资源不存在" description="生活总归带点荒谬"></n-result>
+  <n-modal
+    :show="show"
+    @update-show="(v: any) => $emit('update:show', v)"
+    preset="card" role="dialog" :style="{ width: '550px' }"
+    size="huge"
+    :bordered="true"
+    style="width: 800px;"
+    :closable="false"
+    :on-close="userDetail"
+  >
+    <n-result
+      v-if="emtry"
+      status="404"
+      title="404 资源不存在"
+      description="生活总归带点荒谬"
+    ></n-result>
     <template #cover>
-      <n-image v-if="!emtry" :src="renderData.backgroundUrl"></n-image>
+      <n-image
+        :style="{
+          width: '100%'
+        }"
+        v-if="!emtry"
+        :src="renderData.backgroundUrl"
+      ></n-image>
     </template>
     <template #header>
       <n-space align="center" v-if="!emtry">
@@ -17,12 +36,15 @@
         <follow-button :id="renderData.id" @_update="update()"></follow-button>
       </n-space>
     </template>
+    <template #header-extra>
+      <n-button text @click="userDetail">{{$t('detailInfo')}}</n-button>
+    </template>
   </n-modal>
 </template>
 
 <script lang="ts">
 import { NModal } from 'naive-ui'
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, defineEmits, ref, watch } from 'vue';
 import FollowButton from '../follow/followButton.vue'
 import FollowText from '../follow/text.vue'
 import {
@@ -42,17 +64,13 @@ import {
 import {
   ChevronRight24Filled
 } from '@vicons/fluent'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 type IUserCardProps = {
   show: Boolean,
   userData: any
 }
-// router.push({
-//   path: `/profile?id=${props.userData.id}`,
-//   name: 'profile',
-//   query: { id: props.userData.id }
-// })
+
 export default defineComponent({
   components: {
     NModal,
@@ -79,12 +97,21 @@ export default defineComponent({
       required: true,
     }
   },
-  setup(props: IUserCardProps) {
+  setup(props: IUserCardProps, context) {
     const route = useRoute()
     const isSelf = ref(false)
     const renderData = ref<any>({})
     const posts = ref<any>([])
     const emtry = ref(true)
+    const router = useRouter()
+    const userDetail = () => {
+      router.push({
+        path: `/profile?id=${props.userData.id}`,
+        name: 'profile',
+        query: { id: props.userData.id }
+      })
+      context.emit('update:show', false)
+    }
 
     const update = async () => {
       const id = route.query.id
@@ -102,8 +129,9 @@ export default defineComponent({
       renderData,
       isSelf,
       posts,
-      update,
       emtry,
+      update,
+      userDetail,
       ChevronRight24Filled
     }
   },

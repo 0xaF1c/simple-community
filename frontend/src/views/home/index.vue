@@ -6,7 +6,7 @@
       <post-card :post="post" style="margin-bottom: 10px"></post-card>
     </div>
   </div>
-  
+
 </template>
 
 <script lang="ts">
@@ -19,7 +19,7 @@ import { NDivider } from 'naive-ui'
 async function setRecommendPost(recommendPost: Ref<any>) {
   const res: any = await http.get('/api/post/recommend')
   console.log(res);
-  
+
   recommendPost.value = res.data.recommendPost
 }
 
@@ -31,7 +31,7 @@ export default defineComponent({
   },
   setup() {
     const recommendPost = ref<any[]>([])
-    
+
     setRecommendPost(recommendPost)
     return {
       recommendPost

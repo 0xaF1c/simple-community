@@ -26,7 +26,7 @@ export default defineComponent({
     userList
   },
   props: {
-    id: String
+    id: [String, Number]
   },
   setup(props) {
     const following = ref([])

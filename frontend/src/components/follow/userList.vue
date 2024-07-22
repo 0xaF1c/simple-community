@@ -51,24 +51,24 @@ export default {
     show: Boolean,
     title: String
   },
-  setup(props) {
+  emits: [
+    'update:show'
+  ],
+  setup(props, context) {
     const list = ref<Array<any>>([])
     const router = useRouter()
-    const emits = defineEmits<{
-      (e: 'update:show', item: any): void
-    }>()
     // @ts-ignore
     list.value = props.users!
 
     return {
       list,
-      emits,
       onAvatarClick(user: any) {
         router.push({
           path: `/profile?id=${user.id}`,
           name: 'profile',
           query: { id: user.id }
         })
+        context.emit('update:show', false)
       }
     }
   }

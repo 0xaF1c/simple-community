@@ -16,7 +16,13 @@
     <n-card :bordered="false">
       <n-result v-if="emtry" status="404" title="404 资源不存在" description="生活总归带点荒谬"></n-result>
       <template #cover>
-        <n-image v-if="!emtry" :src="renderData.backgroundUrl"></n-image>
+        <n-image
+          :style="{
+            width: '100%'
+          }"
+          v-if="!emtry"
+          :src="renderData.backgroundUrl"
+        ></n-image>
       </template>
       <template #header>
         <n-space align="center" v-if="!emtry">

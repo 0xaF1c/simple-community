@@ -8,15 +8,31 @@ import { userController } from "./controller/user"
 import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgMagenta, FgYellow, Reset } from "./utils/color"
 import { imageController } from "./controller/image"
-import { deleteNoRelationImage } from "./controller/image/image.service"
+// import { deleteNoRelationImage } from "./controller/image/image.service"
 import { postController } from "./controller/post"
 import { tagController } from "./controller/tags"
 import { commentController } from "./controller/comment"
 import { utilsController } from "./controller/utils"
 import { adminController } from "./controller/management/admin"
 import { userManagementController } from "./controller/management/user"
-import { deletNoRelationComment } from "./controller/comment/comment.service"
+// import { deletNoRelationComment } from "./controller/comment/comment.service"
 
+const unAuthPath = [
+  process.env.API_ROOT ?? '/api',
+  process.env.API_ROOT + '/' ?? '/api/',
+  process.env.API_ROOT + '/user/profile',
+  process.env.API_ROOT + '/user/posts',
+  process.env.API_ROOT + '/user/count',
+  process.env.API_ROOT + '/tag/posts',
+  process.env.API_ROOT + '/post/recommend',
+  process.env.API_ROOT + '/tag/recommend',
+  process.env.API_ROOT + '/post/comments',
+  process.env.API_ROOT + '/tag/detail',
+  new RegExp('/utils/\S*'),
+  new RegExp('/image/i\S*'),
+  new RegExp('/user/login\S*'),
+  new RegExp('/user/register\S*'),
+]
 console.clear()
 
 config()
@@ -29,24 +45,9 @@ startup()
       secret: process.env.SECRET_KEY ?? 'unknown_secret_key',
       algorithms: ['HS256'],
     })
-    .unless({
-      path: [
-        process.env.API_ROOT ?? '/api',
-        process.env.API_ROOT+'/' ?? '/api/',
-        process.env.API_ROOT+'/user/profile',
-        process.env.API_ROOT+'/user/posts',
-        process.env.API_ROOT+'/user/count',
-        process.env.API_ROOT+'/tag/posts',
-        process.env.API_ROOT+'/post/recommend',
-        process.env.API_ROOT+'/tag/recommend',
-        process.env.API_ROOT+'/post/comments',
-        process.env.API_ROOT+'/tag/detail',
-        new RegExp('/utils/\S*'),
-        new RegExp('/image/i\S*'),
-        new RegExp('/user/login\S*'),
-        new RegExp('/user/register\S*'),
-      ]
-    })
+      .unless({
+        path: unAuthPath
+      })
   )
   .use('/storage/uploads' as any, express.static(path.join(process.env.UPLOADS_PATH ?? '')))
   .use('/public' as any, express.static(path.join(__dirname, './public')))
@@ -60,22 +61,22 @@ startup()
   .useController(utilsController)
   .useController(adminController)
   .useController(userManagementController)
-  .onReady((app) => {    
+  .onReady((app) => {
     if (process.env.DEV_MODE === 'true') {
-      console.log(`[${FgMagenta}DevMode${Reset}] Frontend Redirect: http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`);
+      console.log(`[${FgMagenta}DevMode${Reset}] Frontend Redirect: http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`)
       app.get('/', (_, res) => {
         res.redirect(`http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`)
       })
-      const token = jwt.sign({id: '1'}, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
-  
+      const token = jwt.sign({ id: '1' }, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
+
       console.log(`[${FgYellow}temp_token${Reset}] Bearer ${token}`)
     } else {
       app.use('/' as any, express.static(path.join(__dirname, '../', process.env.FRONTEND_DIR ?? 'frontend/dist')))
     }
     // init()
-    deletNoRelationComment()
-    
-    deleteNoRelationImage()
+    // deletNoRelationComment()
+
+    // deleteNoRelationImage()
     setTimeout(() => {
       // resetPath()
     }, 10 * 1000)
