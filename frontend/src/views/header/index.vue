@@ -32,11 +32,11 @@
           @click="onThemeToggle"
           quaternary
           circle
-          style="
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-          "
+          :style="{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+          }"
         >
           <n-icon
             :size="20"

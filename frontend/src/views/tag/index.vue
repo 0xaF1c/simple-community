@@ -30,6 +30,7 @@
       </template>
     </n-card>
 
+    {{postData}}
     <n-empty v-if="postData.length === 0" :description="$t('emtry.name')"></n-empty>
     <post-card v-for="t in postData" :post="t"></post-card>
   </n-el>
@@ -107,6 +108,8 @@ export default defineComponent({
           Promise.all(task)
             .then((data) => {
               postData.value = data.map(i => i.data)
+              console.log('postData')
+              console.log(postData.value)
               loadingBar.finish()
             })
             .catch(e => {

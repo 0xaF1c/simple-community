@@ -2,29 +2,48 @@
   <n-tooltip>
     <template #trigger>
       <n-button
-        text
+        quaternary
         @mouseenter="bordered = true"
         @mouseleave="bordered = false"
         :bordered="bordered"
-        style="
-          cursor: pointer;
+        :style="{
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'left',
+          textAlign: 'left',
+          padding: '10px 7px',
+          width: width?`${width}px`:'',
+        }"
+        @click="
+          $router.push({
+            path: '/tag/detail',
+            query: {
+              id: tag.id
+            }
+          })
         "
-        @click="$router.push({
-          path: '/tag/detail',
-          query: {
-            id: tag.id
-          }
-        })"
       >
         <!-- <n-avatar :src="tag.poster" object-fit="cover" :size="25"></n-avatar> -->
         <span
-          style="font-size: large; margin-bottom: 10px; text-wrap: wrap; text-align: left;"
+          style="
+            font-size: large;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+          "
         >
           # {{ tag.title }}
         </span>
       </n-button>
     </template>
-    {{ tag.description }}
+    <div>
+      {{ tag.title }}
+    </div>
+    <div>
+      {{ tag.description }}
+    </div>
   </n-tooltip>
 </template>
 
@@ -38,11 +57,10 @@ import {
   NIcon,
   NEllipsis,
   NTag,
-  NAvatar
+  NAvatar,
+  NText
 } from 'naive-ui'
-import {
-  Dismiss24Filled
-} from '@vicons/fluent'
+import { Dismiss24Filled } from '@vicons/fluent'
 
 export default defineComponent({
   components: {
@@ -53,11 +71,10 @@ export default defineComponent({
     NIcon,
     NEllipsis,
     NTag,
-    NAvatar
+    NAvatar,
+    NText
   },
-  emits: [
-    'close'
-  ],
+  emits: ['close'],
   props: {
     tag: {
       required: true,
@@ -65,7 +82,11 @@ export default defineComponent({
     },
     closable: {
       required: false,
-      type: Boolean,
+      type: Boolean
+    },
+    width: {
+      required: false,
+      type: Number
     }
   },
   setup() {

@@ -157,6 +157,8 @@ export function getPostDetail(postId: string, userId?: string): Promise<HttpDTO 
       .where('PostEntity.id = :id', { id: postId })
       .getRawMany()
       .then(result => {
+        console.log(result);
+        
         resolve({
           status: StatusCodes.OK,
           data: PostDTO.fromFindResult(result, userId)

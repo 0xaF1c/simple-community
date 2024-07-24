@@ -168,6 +168,9 @@ export class PostDTO {
   static fromFindResult(options: IPostDetailFindResult[], userId: string | undefined) {
     const _this = new PostDTO()
 
+    if (options.length <= 0) {
+      return []
+    }
     options.forEach((result) => {      
       _this.content = result.PostEntity_content
       _this.title = result.PostEntity_title

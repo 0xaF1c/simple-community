@@ -62,7 +62,7 @@ import {
   NEl,
   NCheckboxGroup
 } from 'naive-ui'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 import { http } from '../../utils/http'
 import myTag from './tag.vue'
 import {
@@ -116,6 +116,10 @@ export default defineComponent({
       emit('update:value', [])
     }
 
+    onMounted(() => {
+      updateTag()
+    })
+
     return {
       choosedTagIndex,
       chooseTagShow,
@@ -126,9 +130,6 @@ export default defineComponent({
       Add24Filled,
       ArrowRepeatAll24Regular
     }
-  },
-  mounted() {
-    this.updateTag()
   }
 })
 
