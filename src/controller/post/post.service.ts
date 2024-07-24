@@ -240,6 +240,7 @@ export function getPostByUser(id: string): Promise<HttpDTO | ErrorDTO> {
 
   })
 }
+// TODO 删除动态相关 tag relation 和 like relation
 export function deletePost(postId: string, userId: string): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     postRepository.delete({

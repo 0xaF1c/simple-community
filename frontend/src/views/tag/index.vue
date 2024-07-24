@@ -30,8 +30,8 @@
       </template>
     </n-card>
 
-    {{postData}}
-    <n-empty v-if="postData.length === 0" :description="$t('emtry.name')"></n-empty>
+    {{ postData }}
+    <n-empty v-if="isEmtry" :description="$t('emtry.name')"></n-empty>
     <post-card v-for="t in postData" :post="t"></post-card>
   </n-el>
 </template>
@@ -75,6 +75,7 @@ export default defineComponent({
     const tagData = ref()
     const tagDetail = ref()
     const postData = ref<Record<string, any>>([])
+    const isEmtry = ref(false)
 
     const update = () => {
       http.get('/api/tag/detail', {
@@ -107,10 +108,11 @@ export default defineComponent({
           })
           Promise.all(task)
             .then((data) => {
-              postData.value = data.map(i => i.data)
-              console.log('postData')
-              console.log(postData.value)
+              
+              postData.value = data.filter(i => i.data.length > 0)
+              console.log(postData.value);
               loadingBar.finish()
+              isEmtry.value = postData.value.length <= 0
             })
             .catch(e => {
               error(e.name)
@@ -136,6 +138,7 @@ export default defineComponent({
       tagData,
       loadingBar,
       tagDetail,
+      isEmtry,
       update,
       ChevronLeft24Filled
     }
