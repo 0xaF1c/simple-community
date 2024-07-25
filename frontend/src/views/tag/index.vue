@@ -1,6 +1,6 @@
 <template>
-  <n-el style="padding: 0 15px;">
-    <n-card :bordered="false" style="margin-bottom: -10px;">
+  <n-el style="padding: 0 15px">
+    <n-card :bordered="false" style="margin-bottom: -10px">
       <template #header>
         <n-button quaternary circle @click="$router.back()">
           <n-icon :component="ChevronLeft24Filled"></n-icon>
@@ -13,13 +13,18 @@
         </n-space>
       </template>
     </n-card>
-    <n-divider style="margin: 0;"></n-divider>
+    <n-divider style="margin: 0"></n-divider>
     <n-card :bordered="false">
       <template #header>
         <n-space align="center">
-          <n-image :height="100" :width="100" object-fit="cover" :src="tagDetail?.poster"></n-image>
+          <n-image
+            :height="100"
+            :width="100"
+            object-fit="cover"
+            :src="tagDetail?.poster"
+          ></n-image>
           <n-el>
-            <n-el style="font-size: 2rem;">
+            <n-el style="font-size: 2rem">
               {{ tagDetail?.title }}
             </n-el>
             <n-el>
@@ -30,8 +35,12 @@
       </template>
     </n-card>
 
-    {{ postData }}
-    <n-empty v-if="isEmtry" :description="$t('emtry.name')"></n-empty>
+    <n-card :bordered="false">
+      <n-empty
+        v-if="isEmtry"
+        :description="$t('emtry.name')"
+      ></n-empty>
+    </n-card>
     <post-card v-for="t in postData" :post="t"></post-card>
   </n-el>
 </template>
@@ -66,7 +75,7 @@ export default defineComponent({
     NEmpty,
     NButton,
     NIcon,
-    NDivider,
+    NDivider
   },
   setup() {
     const { error } = useMessage()
@@ -78,12 +87,13 @@ export default defineComponent({
     const isEmtry = ref(false)
 
     const update = () => {
-      http.get('/api/tag/detail', {
-        params: {
-          id: route.query.id
-        }
-      })
-        .then((res) => {
+      http
+        .get('/api/tag/detail', {
+          params: {
+            id: route.query.id
+          }
+        })
+        .then(res => {
           tagDetail.value = res.data
         })
         .catch(e => {
@@ -91,26 +101,34 @@ export default defineComponent({
           loadingBar.error()
         })
 
-      http.get('/api/tag/posts', {
-        params: {
-          id: route.query.id
-        }
-      })
-        .then((res) => {
+      http
+        .get('/api/tag/posts', {
+          params: {
+            id: route.query.id
+          }
+        })
+        .then(res => {
           const task: Array<Promise<any>> = []
           tagData.value = res.data
           tagData.value?.posts.forEach((postId: string) => {
-            task.push(http.get('/api/post/detail', {
-              params: {
-                id: postId
-              }
-            }))
+            task.push(
+              http.get('/api/post/detail', {
+                params: {
+                  id: postId
+                }
+              })
+            )
           })
           Promise.all(task)
-            .then((data) => {
-              
-              postData.value = data.filter(i => i.data.length > 0)
-              console.log(postData.value);
+            .then(res => {
+              postData.value = []
+
+              res.forEach(({ data }) => {
+                if (JSON.stringify(data) !== '[]') {
+                  postData.value.push(data)
+                }
+              })
+              // postData.value = data.filter(i => i.data.length > 0)
               loadingBar.finish()
               isEmtry.value = postData.value.length <= 0
             })
@@ -148,5 +166,4 @@ export default defineComponent({
     this.update()
   }
 })
-
 </script>

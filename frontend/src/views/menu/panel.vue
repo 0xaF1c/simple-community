@@ -3,17 +3,24 @@
     <n-space>
       <n-thing>
         <template #header>
-          <n-space align="center" justify="center">
-          </n-space>
+          <n-space align="center" justify="center"> </n-space>
         </template>
       </n-thing>
       <n-space item-style="font-size: 17px;">
-        <avatar-link :userData="userData" style="display: flex; justify-items: center;" :size="32" ></avatar-link>
+        <avatar-link
+          :userData="userData"
+          style="display: flex; justify-items: center"
+          :size="32"
+        ></avatar-link>
         <n-el>
-          <span style="font-size: 1.3rem;">{{ userData?.name }}</span>
-          <n-button style="font-size: 1rem;" text>@{{ userData?.account }}</n-button>
+          <span style="font-size: 1.3rem">{{
+            userData?.name
+          }}</span>
+          <n-button style="font-size: 1rem" text
+            >@{{ userData?.account }}</n-button
+          >
         </n-el>
-        <n-button 
+        <n-button
           align="center"
           v-if="userData === null"
           quaternary
@@ -24,26 +31,22 @@
       </n-space>
     </n-space>
   </n-card>
-  <!-- <n-space item-style="font-size: 17px;" align="center">
-    <n-popselect :options="options" v-model:value="localeKey" trigger="click">
-      <n-button quaternary style="cursor: pointer;">
-        {{ $t('lang.name') }}
-      </n-button>
-    </n-popselect>
-    <n-button @click="onThemeToggle" quaternary circle style="cursor: pointer;display: flex; align-items: center;">
-      <n-icon :size="20" v-if="!currentThemeBool" :component="WeatherSunny24Filled"></n-icon>
-      <n-icon :size="20" v-if="currentThemeBool" :component="WeatherMoon24Filled"></n-icon>
-    </n-button>
+  <n-space item-style="font-size: 17px;" align="center">
     <n-grid :cols="2" item-style="text-align: center">
       <n-gi :span="1">
-        <n-statistic :label="$t('following.name')" :value="following?.length" />
+        <n-statistic
+          :label="$t('following.name')"
+          :value="following?.length"
+        />
       </n-gi>
       <n-gi :span="1">
-        <n-statistic :label="$t('follower.name')" :value="follower?.length" />
+        <n-statistic
+          :label="$t('follower.name')"
+          :value="follower?.length"
+        />
       </n-gi>
     </n-grid>
-  </n-space> -->
-  
+  </n-space>
 </template>
 
 <script lang="ts">
@@ -61,10 +64,13 @@ import {
   NThing,
   NGrid,
   NGi,
-  NStatistic,
+  NStatistic
 } from 'naive-ui'
 import { useToggleTheme } from '../../utils/toggleTheme'
-import { WeatherMoon24Filled, WeatherSunny24Filled } from '@vicons/fluent'
+import {
+  WeatherMoon24Filled,
+  WeatherSunny24Filled
+} from '@vicons/fluent'
 import { useI18n } from 'vue-i18n'
 import { getLanguage, toggleLocale } from '../../utils/language'
 import { useAuthModal } from '../../components/authModal/useAuthModal'
@@ -99,15 +105,21 @@ export default defineComponent({
     const follower = ref([])
     const following = ref([])
     const localeKey = ref(getLanguage())
-    const { theme, toggleTheme, currentTheme, currentThemeBool } = useToggleTheme()
+    const {
+      theme,
+      toggleTheme,
+      currentTheme,
+      currentThemeBool
+    } = useToggleTheme()
     const { messages, locale } = useI18n()
     const { showLoginModal, hideLoginModal } = useAuthModal()
     const { error } = useMessage()
     const { t } = useI18n()
 
     ;(async () => {
-      http.get('/api/user/status')
-        .then((res) => {
+      http
+        .get('/api/user/status')
+        .then(res => {
           if (res?.data === undefined) {
             error(t('token_timeout.name'))
           } else {
@@ -117,12 +129,16 @@ export default defineComponent({
         .catch(() => {
           error(t('unknown_error.name'))
         })
-        
-      follower.value = (await http.get('/api/user/following/list')).data
-      following.value = (await http.get('/api/user/follower/list')).data
-    } )()
 
-    const options = Object.keys(messages.value).map((k) => {
+      follower.value = (
+        await http.get('/api/user/following/list')
+      ).data
+      following.value = (
+        await http.get('/api/user/follower/list')
+      ).data
+    })()
+
+    const options = Object.keys(messages.value).map(k => {
       const t: any = messages.value[k]
       return {
         label: t.lang.name,
@@ -157,5 +173,4 @@ export default defineComponent({
     }
   }
 })
-
 </script>

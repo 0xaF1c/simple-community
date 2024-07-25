@@ -14,7 +14,6 @@ import {
 } from 'naive-ui'
 import myMenu from './views/menu/index.vue'
 import rightMenu from './views/menu/recommendTag.vue'
-// import panel from './views/menu/panel.vue'
 import headerView from './views/header/index.vue'
 import authModal from './components/authModal/authModalProvider.vue'
 import { ref } from 'vue'

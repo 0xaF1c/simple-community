@@ -35,7 +35,7 @@
           :style="{
             cursor: 'pointer',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'center'
           }"
         >
           <n-icon
@@ -49,10 +49,15 @@
             :component="WeatherMoon24Filled"
           ></n-icon>
         </n-button>
-        <avatar-link
-          :userData="userData"
-          :size="30"
-        ></avatar-link>
+        <n-popover placement="bottom" trigger="click">
+          <template #trigger>
+            <avatar-link
+              :userData="userData"
+              :size="30"
+            ></avatar-link>
+          </template>
+          
+        </n-popover>
 
         <n-button
           align="center"
@@ -76,8 +81,10 @@ import {
   NEl,
   useMessage,
   NIcon,
-  NPopselect
+  NPopselect,
+  NPopover
 } from 'naive-ui'
+import panel from '../menu/panel.vue'
 import { useToggleTheme } from '../../utils/toggleTheme'
 import {
   WeatherMoon24Filled,
@@ -97,7 +104,9 @@ export default defineComponent({
     avatarLink,
     NIcon,
     NPopselect,
-    NButton
+    NButton,
+    panel,
+    NPopover
   },
   methods: {
     onThemeToggle() {
@@ -157,9 +166,9 @@ export default defineComponent({
       headerPadding: 20,
       darkMode,
       theme,
-      toggleTheme,
       follower,
       following,
+      toggleTheme,
       toggleLocale() {
         toggleLocale(localeKey.value, locale)
       },
