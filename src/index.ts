@@ -75,11 +75,11 @@ startup()
       app.use('/' as any, express.static(path.join(__dirname, '../', process.env.FRONTEND_DIR ?? 'frontend/dist')))
     }
     // init()
-    // deletNoRelationComment()
-    deleteNoRelationPost()
-
-    // deleteNoRelationImage()
     setTimeout(() => {
+      // 清楚无根关联
+      // deletNoRelationComment()
+      // deleteNoRelationPost()
+      // deleteNoRelationImage()
       // resetPath()
     }, 10 * 1000)
   })
