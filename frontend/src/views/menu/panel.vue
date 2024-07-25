@@ -1,52 +1,74 @@
 <template>
-  <n-card bordered>
-    <n-space>
-      <n-thing>
-        <template #header>
-          <n-space align="center" justify="center"> </n-space>
+  <n-card
+    :bordered="false"
+    content-style="padding: 4px 0;"
+    style="padding: 0; margin: 0; width: 100%"
+  >
+    <n-space vertical>
+      <n-button quaternary @click="profileClick">
+        <template #icon>
+          <n-icon
+            v-show="!profileShow"
+            :component="Home24Regular"
+          ></n-icon>
+          <n-icon
+            v-show="profileShow"
+            :component="Home24Filled"
+          ></n-icon>
         </template>
-      </n-thing>
-      <n-space item-style="font-size: 17px;">
-        <avatar-link
-          :userData="userData"
-          style="display: flex; justify-items: center"
-          :size="32"
-        ></avatar-link>
-        <n-el>
-          <span style="font-size: 1.3rem">{{
-            userData?.name
-          }}</span>
-          <n-button style="font-size: 1rem" text
-            >@{{ userData?.account }}</n-button
-          >
-        </n-el>
-        <n-button
-          align="center"
-          v-if="userData === null"
-          quaternary
-          @click="showLoginModal()"
-        >
-          {{ $t('login.name') }} / {{ $t('register.name') }}
-        </n-button>
-      </n-space>
+        {{ $t('profile') }}
+      </n-button>
+      <n-button quaternary @click="messageClick">
+        <template #icon>
+          <n-icon
+            v-show="!messageShow"
+            :component="Chat24Regular"
+          ></n-icon>
+          <n-icon
+            v-show="messageShow"
+            :component="Chat24Filled"
+          ></n-icon>
+        </template>
+        {{ $t('message') }}
+      </n-button>
+      <n-button quaternary @click="settingsClick">
+        <template #icon>
+          <n-icon
+            v-show="!settingsShow"
+            :component="Settings24Regular"
+          ></n-icon>
+          <n-icon
+            v-show="settingsShow"
+            :component="Settings24Filled"
+          ></n-icon>
+        </template>
+        {{ $t('settings') }}
+      </n-button>
+      <n-popconfirm
+        @positive-click="logoutClick"
+        v-model:show="logoutShow"
+        :positive-text="$t('confirm.name')"
+        :negative-text="$t('cancel.name')"
+      >
+        {{ $t('confirm_logout') }}
+        <template #trigger>
+          <n-button quaternary>
+            <template #icon>
+              <n-icon
+                v-show="!logoutShow"
+                :component="PersonArrowLeft24Regular"
+              ></n-icon>
+              <n-icon
+                v-show="logoutShow"
+                :component="PersonArrowLeft24Filled"
+              ></n-icon>
+            </template>
+            {{ $t('logout') }}
+          </n-button>
+        </template>
+      </n-popconfirm>
     </n-space>
   </n-card>
-  <n-space item-style="font-size: 17px;" align="center">
-    <n-grid :cols="2" item-style="text-align: center">
-      <n-gi :span="1">
-        <n-statistic
-          :label="$t('following.name')"
-          :value="following?.length"
-        />
-      </n-gi>
-      <n-gi :span="1">
-        <n-statistic
-          :label="$t('follower.name')"
-          :value="follower?.length"
-        />
-      </n-gi>
-    </n-grid>
-  </n-space>
 </template>
 
 <script lang="ts">
@@ -60,22 +82,30 @@ import {
   NButton,
   NAvatar,
   NEl,
-  useMessage,
   NThing,
   NGrid,
   NGi,
-  NStatistic
+  NStatistic,
+  useMessage,
+  NPopconfirm
 } from 'naive-ui'
-import { useToggleTheme } from '../../utils/toggleTheme'
 import {
   WeatherMoon24Filled,
-  WeatherSunny24Filled
+  WeatherSunny24Filled,
+  PersonArrowLeft24Regular,
+  PersonArrowLeft24Filled,
+  Chat24Regular,
+  Chat24Filled,
+  Settings24Regular,
+  Settings24Filled,
+  Home24Regular,
+  Home24Filled
 } from '@vicons/fluent'
-import { useI18n } from 'vue-i18n'
-import { getLanguage, toggleLocale } from '../../utils/language'
+
 import { useAuthModal } from '../../components/authModal/useAuthModal'
-import { http } from '../../utils/http'
 import avatarLink from '../../components/link/avatarLink.vue'
+import { logout } from '../../utils/http'
+
 export default defineComponent({
   components: {
     NCard,
@@ -90,86 +120,65 @@ export default defineComponent({
     NGrid,
     NGi,
     NStatistic,
-    avatarLink
-  },
-  methods: {
-    onThemeToggle() {
-      this.toggleTheme()
-      this.$emit('update:theme', this.theme)
-    }
+    avatarLink,
+    NPopconfirm
   },
   emits: ['update:theme'],
   setup() {
-    const userData = ref<any>(null)
-    const darkMode = ref(false)
-    const follower = ref([])
-    const following = ref([])
-    const localeKey = ref(getLanguage())
-    const {
-      theme,
-      toggleTheme,
-      currentTheme,
-      currentThemeBool
-    } = useToggleTheme()
-    const { messages, locale } = useI18n()
+    const profileShow = ref(false)
+    const messageShow = ref(false)
+    const settingsShow = ref(false)
+    const logoutShow = ref(false)
     const { showLoginModal, hideLoginModal } = useAuthModal()
-    const { error } = useMessage()
-    const { t } = useI18n()
+    const { info } = useMessage()
 
-    ;(async () => {
-      http
-        .get('/api/user/status')
-        .then(res => {
-          if (res?.data === undefined) {
-            error(t('token_timeout.name'))
-          } else {
-            userData.value = res?.data
-          }
-        })
-        .catch(() => {
-          error(t('unknown_error.name'))
-        })
-
-      follower.value = (
-        await http.get('/api/user/following/list')
-      ).data
-      following.value = (
-        await http.get('/api/user/follower/list')
-      ).data
-    })()
-
-    const options = Object.keys(messages.value).map(k => {
-      const t: any = messages.value[k]
-      return {
-        label: t.lang.name,
-        value: k
-      }
-    })
+    const profileClick = () => {
+      profileShow.value = true
+      setTimeout(() => {
+        profileShow.value = false
+      }, 400)
+      info('尚在开发')
+    }
+    const messageClick = () => {
+      messageShow.value = true
+      setTimeout(() => {
+        messageShow.value = false
+      }, 400)
+      info('尚在开发')
+    }
+    const settingsClick = () => {
+      settingsShow.value = true
+      setTimeout(() => {
+        settingsShow.value = false
+      }, 400)
+      info('尚在开发')
+    }
+    const logoutClick = () => {
+      logout()
+      location.reload()
+    }
 
     return {
-      darkMode,
-      theme,
-      toggleTheme,
-      follower,
-      following,
-      toggleLocale() {
-        toggleLocale(localeKey.value, locale)
-      },
+      logoutShow,
+      profileShow,
+      messageShow,
+      settingsShow,
+      profileClick,
+      messageClick,
+      settingsClick,
+      logoutClick,
       showLoginModal,
       hideLoginModal,
-      currentTheme,
-      currentThemeBool,
-      options,
-      localeKey,
-      locale,
-      userData,
+      Home24Regular,
+      Home24Filled,
       WeatherMoon24Filled,
-      WeatherSunny24Filled
-    }
-  },
-  watch: {
-    localeKey() {
-      this.toggleLocale()
+      WeatherSunny24Filled,
+      Chat24Regular,
+      Chat24Filled,
+      Settings24Regular,
+      Settings24Filled,
+      PersonArrowLeft24Regular,
+      PersonArrowLeft24Filled
     }
   }
 })

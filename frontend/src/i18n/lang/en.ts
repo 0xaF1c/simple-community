@@ -159,5 +159,10 @@ export default {
   cancel_follow: 'cancel follow',
   follow: 'follow',
   'follow success': 'follow success',
-  'unFollow success': 'cancel follow success'
+  'unFollow success': 'cancel follow success',
+  profile: 'Profile',
+  message: 'Message',
+  settings: 'Settings',
+  logout: 'Logout',
+  confirm_logout: 'Do you confirm logout'
 }

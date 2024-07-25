@@ -163,5 +163,10 @@ export default {
   list: '列表',
   detailInfo: '详细信息',
   'follow success': '关注成功',
-  'unFollow success': '取消关注成功'
+  'unFollow success': '取消关注成功',
+  profile: '主页',
+  message: '消息',
+  settings: '设置',
+  logout: '登出',
+  confirm_logout: '确认是否登出'
 }

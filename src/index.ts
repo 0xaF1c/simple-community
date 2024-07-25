@@ -1,6 +1,5 @@
 import express from "express"
 import { expressjwt } from "express-jwt"
-import jwt from 'jsonwebtoken'
 import { config } from 'dotenv'
 import path from "path"
 import { startup } from "./utils/server"
@@ -15,6 +14,8 @@ import { commentController } from "./controller/comment"
 import { utilsController } from "./controller/utils"
 import { adminController } from "./controller/management/admin"
 import { userManagementController } from "./controller/management/user"
+import { deleteNoRelationPost } from "./controller/post/post.service"
+import { createToken } from "./controller/user/user.service"
 // import { deletNoRelationComment } from "./controller/comment/comment.service"
 
 const unAuthPath = [
@@ -67,14 +68,15 @@ startup()
       app.get('/', (_, res) => {
         res.redirect(`http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`)
       })
-      const token = jwt.sign({ id: '1' }, process.env.SECRET_KEY ?? 'unknown_secret_key', { expiresIn: '60d' })
+      const token = createToken({id: 1})
 
-      console.log(`[${FgYellow}temp_token${Reset}] Bearer ${token}`)
+      console.log(`[${FgYellow}temp_token${Reset}] ${token}`)
     } else {
       app.use('/' as any, express.static(path.join(__dirname, '../', process.env.FRONTEND_DIR ?? 'frontend/dist')))
     }
     // init()
     // deletNoRelationComment()
+    deleteNoRelationPost()
 
     // deleteNoRelationImage()
     setTimeout(() => {

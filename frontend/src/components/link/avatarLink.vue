@@ -10,9 +10,9 @@
     <template #icon>
       <n-avatar
         object-fit="cover"
-        :src="userData?.avatarUrl ?? '/defaultAvatar.jpg'"
+        :src="userData?.avatarUrl ?? '/public/avatar/default.jpg'"
         :size="size"
-        :fallback-src="'/defaultAvatar.jpg'"
+        :fallback-src="'/public/avatar/default.jpg'"
         :img-props="{
           style: {
             width: `${size}px`,

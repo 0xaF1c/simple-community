@@ -33,7 +33,7 @@ import {
   NAvatar
 } from 'naive-ui'
 
-import { ref, defineEmits } from 'vue'
+import { ref } from 'vue'
 
 import { useRouter } from 'vue-router';
 export default {

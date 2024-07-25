@@ -44,7 +44,7 @@
 
 <script lang="ts">
 import { NModal } from 'naive-ui'
-import { defineComponent, defineEmits, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import FollowButton from '../follow/followButton.vue'
 import FollowText from '../follow/text.vue'
 import {
@@ -114,7 +114,7 @@ export default defineComponent({
     }
 
     const update = async () => {
-      const id = route.query.id
+      // const id = route.query.id
       renderData.value = props.userData
 
       emtry.value = JSON.stringify(renderData) === '{}'

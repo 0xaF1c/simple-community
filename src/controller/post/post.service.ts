@@ -10,6 +10,7 @@ import { PostLikesEntity } from "../../entitys/post/postLikesRelation.entity";
 import { TagEntity } from "../../entitys/tag/tag.entity";
 import { UserEntity } from "../../entitys/user/user.entity";
 import { PostCommentEntity } from "../../entitys/post/postCommentRelation.entity";
+import { FgYellow, Reset } from "../../utils/color";
 
 const { dataSource } = useAppDataSource();
 const postRepository = dataSource.getRepository(PostEntity);
@@ -267,7 +268,7 @@ export function getPostByUser(id: string): Promise<HttpDTO | ErrorDTO> {
       });
   });
 }
-// TODO 删除动态相关 tag relation 和 like relation
+
 export function deletePost(
   postId: string,
   userId: string
@@ -401,5 +402,39 @@ export function isLikePost(
           },
         });
       });
+  });
+}
+
+export function deleteNoRelationPost() {
+  console.info(`[${FgYellow}delete no relation post${Reset}]`);
+  postRepository.find().then((posts) => {
+    const postsId = posts.map((p) => p.id);
+    postImageRepository.find().then((relations) => {
+      const rels = relations.filter((rel) => !postsId.includes(rel.postId));
+      rels.forEach((rel) => {
+        postImageRepository.delete({
+          id: rel.id,
+          postId: rel.postId,
+        });
+      });
+    });
+    postLikesRepository.find().then((relations) => {
+      const rels = relations.filter((rel) => !postsId.includes(rel.postId));
+      rels.forEach((rel) => {
+        postLikesRepository.delete({
+          id: rel.id,
+          postId: rel.postId,
+        });
+      });
+    });
+    postTagRepository.find().then((relations) => {
+      const rels = relations.filter((rel) => !postsId.includes(rel.postId));
+      rels.forEach((rel) => {
+        postTagRepository.delete({
+          id: rel.id,
+          postId: rel.postId,
+        });
+      });
+    });
   });
 }

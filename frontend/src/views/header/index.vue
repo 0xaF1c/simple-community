@@ -9,7 +9,7 @@
   >
     <n-el class="left" style="left: 20px">
       <n-avatar
-        src="/logo.svg"
+        src="/public/logo.svg"
         :style="{
           backgroundColor: '#0000',
           cursor: 'pointer'
@@ -49,19 +49,26 @@
             :component="WeatherMoon24Filled"
           ></n-icon>
         </n-button>
-        <n-popover placement="bottom" trigger="click">
+        <n-popover
+          placement="bottom"
+          trigger="click"
+          v-if="_isLogin"
+        >
           <template #trigger>
-            <avatar-link
-              :userData="userData"
-              :size="30"
-            ></avatar-link>
+            <div>
+              <avatar-link
+                :userData="userData"
+                :size="30"
+                :on-click="() => {}"
+              ></avatar-link>
+            </div>
           </template>
-          
+          <panel />
         </n-popover>
 
         <n-button
           align="center"
-          v-if="userData === null"
+          v-if="!_isLogin"
           quaternary
           @click="showLoginModal()"
         >
@@ -93,7 +100,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import { getLanguage, toggleLocale } from '../../utils/language'
 import { useAuthModal } from '../../components/authModal/useAuthModal'
-import { http } from '../../utils/http'
+import { http, isLogin } from '../../utils/http'
 import avatarLink from '../../components/link/avatarLink.vue'
 
 export default defineComponent({
@@ -121,6 +128,7 @@ export default defineComponent({
     const follower = ref([])
     const following = ref([])
     const localeKey = ref(getLanguage())
+    const _isLogin = ref(isLogin())
     const {
       theme,
       toggleTheme,
@@ -174,6 +182,7 @@ export default defineComponent({
       },
       showLoginModal,
       hideLoginModal,
+      _isLogin,
       currentTheme,
       currentThemeBool,
       options,

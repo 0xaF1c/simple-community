@@ -8,7 +8,10 @@ function login(_token: string) {
   token.value = localStorage.getItem('token') ?? ''
 }
 function isLogin() {
-  return localStorage.getItem('token') === ''
+  return localStorage.getItem('token') !== ''
+}
+function logout() {
+  localStorage.setItem('token', '')
 }
 export const headers = {
   'Authorization': localStorage.getItem('token') ?? token.value
@@ -24,5 +27,6 @@ http.interceptors.response.use((res) => {
 export {
   http,
   login,
+  logout,
   isLogin
 }
