@@ -14,7 +14,7 @@ import { commentController } from "./controller/comment"
 import { utilsController } from "./controller/utils"
 import { adminController } from "./controller/management/admin"
 import { userManagementController } from "./controller/management/user"
-import { deleteNoRelationPost } from "./controller/post/post.service"
+// import { deleteNoRelationPost } from "./controller/post/post.service"
 import { createToken } from "./controller/user/user.service"
 // import { deletNoRelationComment } from "./controller/comment/comment.service"
 
@@ -76,7 +76,7 @@ startup()
     }
     // init()
     setTimeout(() => {
-      // 清楚无根关联
+      // 清除无根关联
       // deletNoRelationComment()
       // deleteNoRelationPost()
       // deleteNoRelationImage()

@@ -73,7 +73,7 @@
         v-model:show="popConfirmShow"
         v-if="isPublisher"
       >
-        {{ $t('confirm_delete_post?.name') }}
+        {{ $t('confirm_delete_post.name') }}
         <template #trigger>
           <n-button
             text
@@ -176,7 +176,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import {
   NCard,
   NCarousel,
@@ -281,6 +281,7 @@ export default defineComponent({
       })
 
       const res = await http.get('/api/user/status')
+      console.log(res.data.id, props.post.publisher.id)
       isPublisher.value = res.data.id === props.post.publisher.id
     }
     const like = () => {
@@ -354,7 +355,10 @@ export default defineComponent({
     const canceldeletePost = () => {
       popConfirmShow.value = false
     }
-    init()
+    onMounted(() => {
+      init()
+      update()
+    })
 
     return {
       imgs,
