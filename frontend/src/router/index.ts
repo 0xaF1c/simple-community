@@ -27,6 +27,11 @@ const routes = [
         component: () => import('../views/tag/index.vue')
       }
     ]
+  },
+  {
+    path: '/self',
+    name: 'self',
+    component: () => import('../views/self/index.vue')
   }
 ]
 const router = createRouter({

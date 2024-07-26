@@ -1,6 +1,6 @@
 <template>
-  <n-el style="padding: 0 15px;">
-    <n-card style="margin-bottom: -10px;" :bordered="false">
+  <n-el style="padding: 0 15px">
+    <n-card style="margin-bottom: -10px" :bordered="false">
       <template #header>
         <n-button quaternary circle @click="$router.back()">
           <n-icon :component="ChevronLeft24Filled"></n-icon>
@@ -14,7 +14,12 @@
       </template>
     </n-card>
     <n-card :bordered="false">
-      <n-result v-if="emtry" status="404" title="404 资源不存在" description="生活总归带点荒谬"></n-result>
+      <n-result
+        v-if="emtry"
+        status="404"
+        title="404 资源不存在"
+        description="生活总归带点荒谬"
+      ></n-result>
       <template #cover>
         <n-image
           :style="{
@@ -26,20 +31,36 @@
       </template>
       <template #header>
         <n-space align="center" v-if="!emtry">
-          <n-avatar circle :size="100" :src="renderData.avatarUrl" object-fit="cover"></n-avatar>
+          <n-avatar
+            circle
+            :size="100"
+            :src="renderData.avatarUrl"
+            object-fit="cover"
+          ></n-avatar>
           <n-el>
-            <n-el>{{ renderData.name }}@{{ renderData.account }}</n-el>
+            <n-el
+              >{{ renderData.name }}@{{
+                renderData.account
+              }}</n-el
+            >
             <n-el>{{ renderData.description }}</n-el>
-            <n-el style="font-size: 0.9rem; opacity: 0.6;">{{ renderData.email }}</n-el>
-            <follow-text :id="renderData.id"></follow-text>
+            <n-el style="font-size: 0.9rem; opacity: 0.6">{{
+              renderData.email
+            }}</n-el>
+            <follow-text :id="id"></follow-text>
           </n-el>
         </n-space>
       </template>
       <template #header-extra>
-        <follow-button :id="renderData.id" @_update="update()"></follow-button>
+        <follow-button
+          :id="renderData.id"
+          @_update="update()"
+        ></follow-button>
       </template>
-      <n-divider title-placement="left">{{ $t('post.name') }}</n-divider>
-      <n-el v-for="t in posts" style="margin: 10px 0;">
+      <n-divider title-placement="left">{{
+        $t('post.name')
+      }}</n-divider>
+      <n-el v-for="t in posts" style="margin: 10px 0">
         <post-card :post="t" />
       </n-el>
     </n-card>
@@ -47,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 import PostCard from '../../components/postCard/postCard.vue'
 import FollowButton from '../../components/follow/followButton.vue'
 import {
@@ -64,13 +85,11 @@ import {
   NTooltip
 } from 'naive-ui'
 
-import {
-  ChevronLeft24Filled
-} from '@vicons/fluent'
+import { ChevronLeft24Filled } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
 import { http } from '../../utils/http'
 import FollowText from '../../components/follow/text.vue'
-
+import { useAppStore } from '../../store/index'
 export default defineComponent({
   components: {
     NCard,
@@ -94,32 +113,44 @@ export default defineComponent({
     const renderData = ref<any>({})
     const posts = ref<any>([])
     const emtry = ref(true)
+    const id = computed(() => route.query.id)
+
+    const { followTextUpdate } = useAppStore()
 
     const update = async () => {
-      const id = route.query.id
       const res = await http.get('/api/user/status')
 
-      console.log(res)
+      console.log('update', id.value);
       
-
-      isSelf.value = Number(res.data.id) === Number(id)
+      followTextUpdate()
+      isSelf.value = Number(res.data.id) === Number(id.value)
       if (isSelf.value) {
         renderData.value = res.data
       } else {
-        renderData.value = (await http.get(`/api/user/profile`, { params: { id: id } })).data
+        renderData.value = (
+          await http.get(`/api/user/profile`, {
+            params: { id: id.value }
+          })
+        ).data
       }
-      posts.value = (await http.get('/api/user/posts', {
-        params: {
-          id: id
-        }
-      })).data?.posts ?? []
+      posts.value =
+        (
+          await http.get('/api/user/posts', {
+            params: {
+              id: id.value
+            }
+          })
+        ).data?.posts ?? []
 
-      posts.value = posts.value.sort((a:any, b:any) => {
+      posts.value = posts.value.sort((a: any, b: any) => {
         const t = (v: any) => new Date(v).getTime()
         return t(b.updateTime) - t(a.updateTime)
       })
       emtry.value = JSON.stringify(renderData) === '{}'
     }
+    onMounted(() => {
+      update()
+    })
     watch(
       () => route.query,
       () => {
@@ -127,6 +158,7 @@ export default defineComponent({
       }
     )
     return {
+      id,
       renderData,
       isSelf,
       posts,
@@ -134,10 +166,6 @@ export default defineComponent({
       emtry,
       ChevronLeft24Filled
     }
-  },
-  mounted() {
-    this.update()
   }
 })
-
 </script>

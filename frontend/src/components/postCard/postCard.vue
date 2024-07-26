@@ -281,7 +281,6 @@ export default defineComponent({
       })
 
       const res = await http.get('/api/user/status')
-      console.log(res.data.id, props.post.publisher.id)
       isPublisher.value = res.data.id === props.post.publisher.id
     }
     const like = () => {

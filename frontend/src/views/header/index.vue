@@ -52,7 +52,7 @@
         <n-popover
           placement="bottom"
           trigger="click"
-          v-if="_isLogin"
+          v-if="loginState"
         >
           <template #trigger>
             <div>
@@ -68,7 +68,7 @@
 
         <n-button
           align="center"
-          v-if="!_isLogin"
+          v-if="!loginState"
           quaternary
           @click="showLoginModal()"
         >
@@ -128,7 +128,7 @@ export default defineComponent({
     const follower = ref([])
     const following = ref([])
     const localeKey = ref(getLanguage())
-    const _isLogin = ref(isLogin())
+    const loginState = ref(isLogin())
     const {
       theme,
       toggleTheme,
@@ -182,7 +182,7 @@ export default defineComponent({
       },
       showLoginModal,
       hideLoginModal,
-      _isLogin,
+      loginState,
       currentTheme,
       currentThemeBool,
       options,

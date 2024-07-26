@@ -121,7 +121,6 @@ export default defineComponent({
         images,
       })
         .then((result) => {
-          console.log(result)
           success(t('publish_post_success.name'))
           setTimeout(() => {
             loading.value = false

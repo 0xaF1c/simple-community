@@ -1,18 +1,28 @@
 <template>
-  <n-button text style="margin-right: 10px" @click="followerShow = !followerShow">
+  <n-button
+    text
+    style="margin-right: 10px"
+    @click="followerShow = !followerShow"
+  >
     {{ follower.length }} {{ $t('following.name') }}
-    <user-list v-model:show="followerShow" :users="follower" :title="$t('following.name')+$t('list')"></user-list>
+    <user-list
+      v-model:show="followerShow"
+      :users="follower"
+      :title="$t('following.name') + $t('list')"
+    ></user-list>
   </n-button>
 
-  <n-button text  @click="followingShow = !followingShow">
+  <n-button text @click="followingShow = !followingShow">
     {{ following.length }} {{ $t('follower.name') }}
-    <user-list v-model:show="followingShow" :users="following" :title="$t('follower.name')+$t('list')"></user-list>
+    <user-list
+      v-model:show="followingShow"
+      :users="following"
+      :title="$t('follower.name') + $t('list')"
+    ></user-list>
   </n-button>
 </template>
 
-
 <script lang="ts">
-
 import { defineComponent, onMounted, ref } from 'vue'
 import { http } from '../../utils/http'
 import { NButton } from 'naive-ui'
@@ -37,12 +47,20 @@ export default defineComponent({
 
     const update = async () => {
       if (props?.id === null) {
-        following.value = (await http.get('/api/user/following/list')).data
-        follower.value = (await http.get('/api/user/follower/list')).data
+        following.value = (
+          await http.get('/api/user/following/list')
+        ).data
+        follower.value = (
+          await http.get('/api/user/follower/list')
+        ).data
       } else {
-        const params = { params: {id: props.id}}
-        following.value = (await http.get('/api/user/following/list', params)).data
-        follower.value = (await http.get('/api/user/follower/list', params)).data
+        const params = { params: { id: props.id } }
+        following.value = (
+          await http.get('/api/user/following/list', params)
+        ).data
+        follower.value = (
+          await http.get('/api/user/follower/list', params)
+        ).data
       }
     }
 
@@ -64,5 +82,4 @@ export default defineComponent({
     }
   }
 })
-
 </script>

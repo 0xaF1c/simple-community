@@ -105,6 +105,7 @@ import {
 import { useAuthModal } from '../../components/authModal/useAuthModal'
 import avatarLink from '../../components/link/avatarLink.vue'
 import { logout } from '../../utils/http'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   components: {
@@ -129,6 +130,7 @@ export default defineComponent({
     const messageShow = ref(false)
     const settingsShow = ref(false)
     const logoutShow = ref(false)
+    const router = useRouter()
     const { showLoginModal, hideLoginModal } = useAuthModal()
     const { info } = useMessage()
 
@@ -137,7 +139,11 @@ export default defineComponent({
       setTimeout(() => {
         profileShow.value = false
       }, 400)
-      info('尚在开发')
+      
+      router.push({
+        path: `/self`,
+        name: 'self',
+      })
     }
     const messageClick = () => {
       messageShow.value = true

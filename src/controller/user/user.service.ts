@@ -484,9 +484,6 @@ export function getFollow(userId: string): Promise<HttpDTO | ErrorDTO> {
       .where('UserFollowEntity.followingId = :id', { id: userId })
       .getRawMany()
       .then((res) => {
-        console.log(userId);
-        console.log(res);
-
         resolve({
           status: StatusCodes.OK,
           data: UserDTO.fromFindResult(res)

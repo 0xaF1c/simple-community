@@ -18,8 +18,7 @@ import { Ref } from 'vue'
 import { NDivider } from 'naive-ui'
 async function setRecommendPost(recommendPost: Ref<any>) {
   const res: any = await http.get('/api/post/recommend')
-  console.log(res);
-
+  
   recommendPost.value = res.data.recommendPost
 }
 
