@@ -8,7 +8,14 @@ function login(_token: string) {
   token.value = localStorage.getItem('token') ?? ''
 }
 function isLogin() {
-  return localStorage.getItem('token') !== ''
+  const token = localStorage.getItem('token')
+  if (token === null) {
+    return false
+  }
+  if (token === '') {
+    return false
+  }
+  return token?.split('').length > 2
 }
 function logout() {
   localStorage.setItem('token', '')

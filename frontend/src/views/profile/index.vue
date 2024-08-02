@@ -113,7 +113,7 @@ export default defineComponent({
     const renderData = ref<any>({})
     const posts = ref<any>([])
     const emtry = ref(true)
-    const id = computed(() => route.query.id)
+    const id: any = computed(() => route.query.id)
 
     const { followTextUpdate } = useAppStore()
 
