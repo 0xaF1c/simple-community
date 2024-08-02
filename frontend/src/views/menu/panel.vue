@@ -141,8 +141,8 @@ export default defineComponent({
       }, 400)
       
       router.push({
-        path: `/self`,
-        name: 'self',
+        path: `/profile`,
+        name: 'profile'
       })
     }
     const messageClick = () => {

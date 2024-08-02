@@ -68,7 +68,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+  watch
+} from 'vue'
 import PostCard from '../../components/postCard/postCard.vue'
 import FollowButton from '../../components/follow/followButton.vue'
 import {
@@ -114,16 +120,20 @@ export default defineComponent({
     const posts = ref<any>([])
     const emtry = ref(true)
     const id: any = computed(() => route.query.id)
+    const req_id = ref(id.value)
 
     const { followTextUpdate } = useAppStore()
 
     const update = async () => {
       const res = await http.get('/api/user/status')
 
-      console.log('update', id.value);
-      
       followTextUpdate()
-      isSelf.value = Number(res.data.id) === Number(id.value)
+      if (id.value === undefined) {
+        isSelf.value = true
+        req_id.value = res.data.id
+      } else {
+        isSelf.value = Number(res.data.id) === Number(id.value)
+      }
       if (isSelf.value) {
         renderData.value = res.data
       } else {
@@ -137,7 +147,7 @@ export default defineComponent({
         (
           await http.get('/api/user/posts', {
             params: {
-              id: id.value
+              id: req_id.value
             }
           })
         ).data?.posts ?? []
