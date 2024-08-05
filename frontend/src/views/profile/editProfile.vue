@@ -6,7 +6,6 @@
     :style="{ width: '550px' }"
     size="huge"
     :bordered="true"
-    :segmented="{ content: 'soft', footer: 'soft' }"
   >
     <template #cover>
       <n-image :src="userData.backgroundUrl"></n-image>
@@ -67,7 +66,12 @@
           v-model:value="userData.description"
         ></n-input>
       </n-form-item-row>
+      <n-space>
+        <n-button type="primary">{{ $t('confirm.name') }}</n-button>
+        <n-button secondary>{{ $t('cancel.name') }}</n-button>
+      </n-space>
     </n-form>
+    {{ userData }}
   </n-modal>
 </template>
 
@@ -81,7 +85,8 @@ import {
   NImage,
   NUpload,
   NAvatar,
-  NModal
+  NModal,
+  NSpace
 } from 'naive-ui'
 import { onMounted } from 'vue'
 
