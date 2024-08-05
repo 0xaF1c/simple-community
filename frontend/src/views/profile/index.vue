@@ -54,7 +54,6 @@
       <template #header-extra>
         <follow-button
           :id="renderData.id"
-          @_update="update()"
         ></follow-button>
       </template>
       <n-divider title-placement="left">{{
