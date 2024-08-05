@@ -30,20 +30,28 @@
         ></n-image>
       </template>
       <template #header>
-        <n-space align="center" v-if="!emtry">
+        <n-space align="center">
           <n-avatar
             circle
             :size="100"
             :src="renderData.avatarUrl"
             object-fit="cover"
-          ></n-avatar>
+          >
+          <!-- <n-icon style="opacity: 0.1;" :component="ChevronLeft24Filled"></n-icon> -->
+        </n-avatar>
           <n-el>
-            <n-el
-              >{{ renderData.name }}@{{
-                renderData.account
-              }}</n-el
-            >
-            <n-el>{{ renderData.description }}</n-el>
+            <n-el>
+              <span :contenteditable="edit_mode">
+                {{ renderData.name }}
+              </span>
+              @
+              <span :contenteditable="edit_mode">
+                {{ renderData.account }}
+              </span>
+            </n-el>
+            <n-el :contenteditable="edit_mode">{{
+              renderData.description
+            }}</n-el>
             <n-el style="font-size: 0.9rem; opacity: 0.6">{{
               renderData.email
             }}</n-el>
@@ -52,9 +60,19 @@
         </n-space>
       </template>
       <template #header-extra>
-        <follow-button
-          :id="renderData.id"
-        ></follow-button>
+        <n-space>
+          <follow-button :id="renderData.id"></follow-button>
+          <n-button
+            v-if="isSelf"
+            @click="edit_mode = !edit_mode"
+            :secondary="!edit_mode"
+          >
+            <span v-show="!edit_mode">{{ $t('edit') }}</span>
+            <span v-show="edit_mode">{{
+              $t('editCancel')
+            }}</span>
+          </n-button>
+        </n-space>
       </template>
       <n-divider title-placement="left">{{
         $t('post.name')
@@ -90,7 +108,9 @@ import {
   NTooltip
 } from 'naive-ui'
 
-import { ChevronLeft24Filled } from '@vicons/fluent'
+import {
+  ChevronLeft24Filled,
+} from '@vicons/fluent'
 import { useRoute } from 'vue-router'
 import { http } from '../../utils/http'
 import FollowText from '../../components/follow/text.vue'
@@ -120,6 +140,7 @@ export default defineComponent({
     const emtry = ref(true)
     const id: any = computed(() => route.query.id)
     const req_id = ref(id.value)
+    const edit_mode = ref(false)
 
     const { followTextUpdate } = useAppStore()
 
@@ -171,9 +192,10 @@ export default defineComponent({
       renderData,
       isSelf,
       posts,
-      update,
+      edit_mode,
       emtry,
-      ChevronLeft24Filled
+      update,
+      ChevronLeft24Filled,
     }
   }
 })

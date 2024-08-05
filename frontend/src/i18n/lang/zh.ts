@@ -168,5 +168,7 @@ export default {
   message: '消息',
   settings: '设置',
   logout: '登出',
-  confirm_logout: '确认是否登出'
+  confirm_logout: '确认是否登出',
+  edit: '编辑',
+  editCancel: '取消编辑'
 }

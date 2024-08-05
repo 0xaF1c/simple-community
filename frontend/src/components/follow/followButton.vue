@@ -11,7 +11,7 @@
 <script lang="ts">
 import { NButton, useMessage } from 'naive-ui'
 import { http } from '../../utils/http.ts'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUpdated, ref } from 'vue'
 import { StatusCodes } from 'http-status-codes';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../store';
@@ -62,6 +62,9 @@ export default {
       followTextUpdate()
     }
 
+    onUpdated(() => {
+      update()
+    })
     onMounted(() => {
       update()
     })

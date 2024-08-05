@@ -164,5 +164,7 @@ export default {
   message: 'Message',
   settings: 'Settings',
   logout: 'Logout',
-  confirm_logout: 'Do you confirm logout'
+  confirm_logout: 'Do you confirm logout',
+  edit: 'Edit',
+  editCancel: 'Cancel'
 }
