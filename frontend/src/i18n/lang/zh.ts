@@ -147,7 +147,7 @@ export default {
     name: '这里啥也没有'
   },
   follower: {
-    name: '粉丝'
+    name: '关注者'
   },
   following: {
     name: '关注'
@@ -170,5 +170,8 @@ export default {
   logout: '登出',
   confirm_logout: '确认是否登出',
   edit: '编辑',
-  editCancel: '取消编辑'
+  editCancel: '取消编辑',
+  change_user_name: '更改用户名',
+  change_account: '更改ID',
+  change_description: '更改个性签名'
 }

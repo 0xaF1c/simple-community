@@ -166,5 +166,8 @@ export default {
   logout: 'Logout',
   confirm_logout: 'Do you confirm logout',
   edit: 'Edit',
-  editCancel: 'Cancel'
+  editCancel: 'Cancel',
+  change_user_name: 'Change name',
+  change_account: 'Change account ID',
+  change_description: 'Change Description'
 }

@@ -1,11 +1,24 @@
 <template>
-  <n-modal :show="show" @update-show="(v: any) => $emit('update:show', v)" preset="card" :style="{ width: '550px' }"
-    size="huge" :bordered="true" :segmented="{ content: 'soft', footer: 'soft' }">
+  <n-modal
+    :show="show"
+    @update-show="(v: any) => $emit('update:show', v)"
+    preset="card"
+    :style="{ width: '550px' }"
+    size="huge"
+    :bordered="true"
+    :segmented="{ content: 'soft', footer: 'soft' }"
+  >
     <template #header>
       {{ $t(`${value ?? 'login'}.name`) }}
     </template>
     <template #default>
-      <n-tabs animated default-value="login" size="large" justify-content="space-evenly" @update:value="v => value = v">
+      <n-tabs
+        animated
+        default-value="login"
+        size="large"
+        justify-content="space-evenly"
+        @update:value="v => (value = v)"
+      >
         <n-tab-pane name="login" :tab="$t('login.name')">
           <loginModal v-show="!useEmail" />
           <loginWithEmail v-show="useEmail" />
@@ -18,7 +31,11 @@
     <template #action>
       <n-space justify="center">
         <n-button @click="useEmail = !useEmail" text>
-          {{ useEmail ? $t('use_account_login.name') : $t('use_email_login.name') }}
+          {{
+            useEmail
+              ? $t('use_account_login.name')
+              : $t('use_email_login.name')
+          }}
         </n-button>
       </n-space>
     </template>
@@ -45,9 +62,7 @@ export default defineComponent({
       type: Boolean
     }
   },
-  emits: [
-    'update:show'
-  ],
+  emits: ['update:show'],
   components: {
     NModal,
     NTabs,

@@ -80,7 +80,9 @@
       <n-el v-for="t in posts" style="margin: 10px 0">
         <post-card :post="t" />
       </n-el>
+
     </n-card>
+    <edit-profile v-model:show="edit_mode" :user-data="renderData"></edit-profile>
   </n-el>
 </template>
 
@@ -94,6 +96,7 @@ import {
 } from 'vue'
 import PostCard from '../../components/postCard/postCard.vue'
 import FollowButton from '../../components/follow/followButton.vue'
+import editProfile from './editProfile.vue'
 import {
   NCard,
   NEl,
@@ -105,7 +108,8 @@ import {
   NTime,
   NButton,
   NIcon,
-  NTooltip
+  NTooltip,
+  NInput
 } from 'naive-ui'
 
 import {
@@ -130,7 +134,9 @@ export default defineComponent({
     NIcon,
     NTooltip,
     FollowText,
-    FollowButton
+    FollowButton,
+    NInput,
+    editProfile
   },
   setup() {
     const route = useRoute()
@@ -140,7 +146,7 @@ export default defineComponent({
     const emtry = ref(true)
     const id: any = computed(() => route.query.id)
     const req_id = ref(id.value)
-    const edit_mode = ref(false)
+    const edit_mode = ref<boolean>(false)
 
     const { followTextUpdate } = useAppStore()
 
