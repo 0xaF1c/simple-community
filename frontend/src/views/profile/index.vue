@@ -37,8 +37,8 @@
             :src="renderData.avatarUrl"
             object-fit="cover"
           >
-          <!-- <n-icon style="opacity: 0.1;" :component="ChevronLeft24Filled"></n-icon> -->
-        </n-avatar>
+            <!-- <n-icon style="opacity: 0.1;" :component="ChevronLeft24Filled"></n-icon> -->
+          </n-avatar>
           <n-el>
             <n-el>
               <span :contenteditable="edit_mode">
@@ -80,9 +80,11 @@
       <n-el v-for="t in posts" style="margin: 10px 0">
         <post-card :post="t" />
       </n-el>
-
     </n-card>
-    <edit-profile v-model:show="edit_mode" :user-data="renderData"></edit-profile>
+    <edit-profile
+      v-model:show="edit_mode"
+      :user-data="renderData"
+    ></edit-profile>
   </n-el>
 </template>
 
@@ -112,9 +114,7 @@ import {
   NInput
 } from 'naive-ui'
 
-import {
-  ChevronLeft24Filled,
-} from '@vicons/fluent'
+import { ChevronLeft24Filled } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
 import { http } from '../../utils/http'
 import FollowText from '../../components/follow/text.vue'
@@ -201,7 +201,7 @@ export default defineComponent({
       edit_mode,
       emtry,
       update,
-      ChevronLeft24Filled,
+      ChevronLeft24Filled
     }
   }
 })
