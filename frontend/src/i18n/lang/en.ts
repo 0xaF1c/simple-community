@@ -169,5 +169,6 @@ export default {
   editCancel: 'Cancel',
   change_user_name: 'Change name',
   change_account: 'Change account ID',
-  change_description: 'Change Description'
+  change_description: 'Change Description',
+  upload_avatar: 'Upload Avatar'
 }

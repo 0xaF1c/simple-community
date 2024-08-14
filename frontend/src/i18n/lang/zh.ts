@@ -173,5 +173,6 @@ export default {
   editCancel: '取消编辑',
   change_user_name: '更改用户名',
   change_account: '更改ID',
-  change_description: '更改个性签名'
+  change_description: '更改个性签名',
+  upload_avatar: '上传头像'
 }

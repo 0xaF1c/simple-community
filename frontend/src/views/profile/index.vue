@@ -22,8 +22,19 @@
       ></n-result>
       <template #cover>
         <n-image
+          objectFit="cover"
           :style="{
-            width: '100%'
+            width: '100%',
+            height: '400px',
+          }"
+          :img-props="{
+            objecFit: 'cover',
+            style: {
+              width: '100%',
+              height: '400px',
+              objecFit: 'cover',
+              objectPosition: 'center top'
+            }
           }"
           v-if="!emtry"
           :src="renderData.backgroundUrl"

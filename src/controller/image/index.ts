@@ -21,6 +21,9 @@ const upload = multer({
 })
 
 
+/**
+ * @deprecated this module is deprecated
+ */
 export const imageController: ControllerOptions = {
   path: '/image',
   handler: {

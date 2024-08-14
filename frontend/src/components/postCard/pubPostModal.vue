@@ -1,25 +1,52 @@
 <template>
-  <n-modal :show="show" @update-show="(v: any) => $emit('update:show', v)" preset="card" :style="{
-    width: '550px'
-  }" size="huge" :bordered="true" :segmented="{
-    content: 'soft',
-    footer: 'soft'
-  }">
+  <n-modal
+    :show="show"
+    @update-show="(v: any) => $emit('update:show', v)"
+    preset="card"
+    :style="{
+      width: '550px'
+    }"
+    size="huge"
+    :bordered="true"
+    :segmented="{
+      content: 'soft',
+      footer: 'soft'
+    }"
+  >
     <template #header>
       {{ $t('post_pub.name') }}
     </template>
     <template #default>
       <n-space vertical>
-        <n-input v-model:value="title" type="text" :placeholder="$t('input_post_title.name')"></n-input>
-        <n-input v-model:value="content" type="textarea" :placeholder="$t('share_your_ideas.name')"></n-input>
+        <n-input
+          v-model:value="title"
+          type="text"
+          :placeholder="$t('input_post_title.name')"
+        ></n-input>
+        <n-input
+          v-model:value="content"
+          type="textarea"
+          :placeholder="$t('share_your_ideas.name')"
+        ></n-input>
 
-        <n-divider style="margin: 5px 0;" title-placement="left">
-          <n-el style="margin-right: 10px;">{{ $t('add_tags.name') }}</n-el>
-          <n-button circle quaternary @click="addTagsShow = !addTagsShow">
-            <n-icon :style="{
-              transition: 'all 0.5s',
-              transform: addTagsShow ? 'rotate(180deg)' : 'rotate(0deg)'
-            }" :component="CaretDown24Filled"></n-icon>
+        <n-divider style="margin: 5px 0" title-placement="left">
+          <n-el style="margin-right: 10px">{{
+            $t('add_tags.name')
+          }}</n-el>
+          <n-button
+            circle
+            quaternary
+            @click="addTagsShow = !addTagsShow"
+          >
+            <n-icon
+              :style="{
+                transition: 'all 0.5s',
+                transform: addTagsShow
+                  ? 'rotate(180deg)'
+                  : 'rotate(0deg)'
+              }"
+              :component="CaretDown24Filled"
+            ></n-icon>
           </n-button>
         </n-divider>
         <n-space align="center" v-show="addTagsShow">
@@ -27,25 +54,50 @@
           <selectTag v-model:value="choosedTag" />
         </n-space>
 
-        <n-divider style="margin: 5px 0;" title-placement="left">
-          <n-el style="margin-right: 10px;">{{ $t('upload_post_image.name') }}</n-el>
-          <n-button circle quaternary @click="uploadShow = !uploadShow">
-            <n-icon :style="{
-              transition: 'all 0.5s',
-              transform: uploadShow ? 'rotate(180deg)' : 'rotate(0deg)'
-            }" :component="CaretDown24Filled"></n-icon>
+        <n-divider style="margin: 5px 0" title-placement="left">
+          <n-el style="margin-right: 10px">{{
+            $t('upload_post_image.name')
+          }}</n-el>
+          <n-button
+            circle
+            quaternary
+            @click="uploadShow = !uploadShow"
+          >
+            <n-icon
+              :style="{
+                transition: 'all 0.5s',
+                transform: uploadShow
+                  ? 'rotate(180deg)'
+                  : 'rotate(0deg)'
+              }"
+              :component="CaretDown24Filled"
+            ></n-icon>
           </n-button>
         </n-divider>
-        <n-upload accept="image/*" v-show="uploadShow" :default-file-list="[]" list-type="image-card" name="image"
-          action="/api/image/upload" :headers="headers" @finish="onUploadFinish" :on-remove="onUploadRemove">
+        <n-upload
+          accept="image/*"
+          v-show="uploadShow"
+          :default-file-list="[]"
+          list-type="image-card"
+          name="image"
+          action="/api/image/upload"
+          :headers="headers"
+          @finish="onUploadFinish"
+          :on-remove="onUploadRemove"
+        >
           {{ $t('upload.name') }}
         </n-upload>
       </n-space>
     </template>
     <template #footer>
       <n-space>
-        <n-button :loading="loading" :disabled="loading" @click="submit" type="primary">{{ $t('submit.name')
-          }}</n-button>
+        <n-button
+          :loading="loading"
+          :disabled="loading"
+          @click="submit"
+          type="primary"
+          >{{ $t('submit.name') }}</n-button
+        >
         <n-button>{{ $t('draft.name') }}</n-button>
       </n-space>
     </template>
@@ -66,11 +118,9 @@ import {
   NEl,
   NIcon,
   UploadFileInfo,
-  useMessage,
+  useMessage
 } from 'naive-ui'
-import {
-  CaretDown24Filled,
-} from '@vicons/fluent'
+import { CaretDown24Filled } from '@vicons/fluent'
 import selectTag from '../tag/selectTag.vue'
 import myTag from '../tag/tag.vue'
 import { ref } from 'vue'
@@ -82,9 +132,7 @@ export default defineComponent({
       default: false
     }
   },
-  emits: [
-    'update:show'
-  ],
+  emits: ['update:show'],
   components: {
     NModal,
     NInput,
@@ -111,31 +159,38 @@ export default defineComponent({
     const submit = () => {
       if (title.value.length <= 0) return
       if (content.value.length <= 0) return
-      const images = Array.from(uploadsImage, ([_, value]) => value)
+      const images = Array.from(
+        uploadsImage,
+        ([_, value]) => value
+      )
       const tags = choosedTag.value.map((t: any) => t.id)
       loading.value = true
-      http.post('/api/post/publish', {
-        title: title.value,
-        content: content.value,
-        tags,
-        images,
-      })
-        .then((result) => {
+      http
+        .post('/api/post/publish', {
+          title: title.value,
+          content: content.value,
+          tags,
+          images
+        })
+        .then(result => {
           success(t('publish_post_success.name'))
           setTimeout(() => {
             loading.value = false
             emit('update:show', false)
-          }, 200);
+          }, 200)
         })
-        .catch((err) => {
+        .catch(err => {
           error(err.name)
           setTimeout(() => {
             loading.value = false
-          }, 200);
+          }, 200)
         })
-
     }
-    const onUploadRemove = ({ file }: { file: UploadFileInfo }) => {
+    const onUploadRemove = ({
+      file
+    }: {
+      file: UploadFileInfo
+    }) => {
       uploadsImage.delete(file.id)
     }
     const onUploadFinish = ({
@@ -145,8 +200,10 @@ export default defineComponent({
       file: UploadFileInfo
       event?: ProgressEvent
     }) => {
-      console.log(file);
-      const { data } = JSON.parse((event?.target as XMLHttpRequest).responseText)
+      console.log(file)
+      const { data } = JSON.parse(
+        (event?.target as XMLHttpRequest).responseText
+      )
       uploadsImage.set(file.id, data.url)
     }
     return {
@@ -160,7 +217,7 @@ export default defineComponent({
       submit,
       onUploadFinish,
       onUploadRemove,
-      CaretDown24Filled,
+      CaretDown24Filled
     }
   }
 })

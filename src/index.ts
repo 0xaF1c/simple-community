@@ -6,7 +6,6 @@ import { startup } from "./utils/server"
 import { userController } from "./controller/user"
 import { errorHandler, successHander } from "./middleware/consoleInfo"
 import { FgMagenta, FgYellow, Reset } from "./utils/color"
-import { imageController } from "./controller/image"
 // import { deleteNoRelationImage } from "./controller/image/image.service"
 import { postController } from "./controller/post"
 import { tagController } from "./controller/tags"
@@ -55,7 +54,6 @@ startup()
   .use(errorHandler)
   .use(successHander)
   .useController(userController)
-  .useController(imageController)
   .useController(postController)
   .useController(tagController)
   .useController(commentController)

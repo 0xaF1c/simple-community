@@ -3,51 +3,47 @@
     :show="show"
     @update:show="_ => $emit('update:show', _)"
     preset="card"
-    :style="{ width: '550px' }"
+    :style="{ width: '750px' }"
     size="huge"
     :bordered="true"
   >
     <template #cover>
-      <n-image :src="userData.backgroundUrl"></n-image>
+      <n-image
+        objectFit="cover"
+        :style="{
+          width: '100%',
+          height: '400px'
+        }"
+        :img-props="{
+          style: {
+            width: '100%',
+            height: '400px',
+            objectPosition: 'center top'
+          }
+        }"
+        :src="userData.backgroundUrl"
+      ></n-image>
     </template>
     <n-form>
-      <n-upload>
-        <n-button
+      <n-space align="center">
+        <n-avatar
           circle
-          size="large"
-          :style="{
-            width: `182px`,
-            height: `182px`,
-            padding: '0',
-            borderRadius: '10000px'
-          }"
+          :size="100"
+          :src="uploadAvatar"
+          object-fit="cover"
+        ></n-avatar>
+        <n-upload
+          accept="image/*"
+          :multiple="false"
+          name="image"
+          :max="1"
+          :headers="headers"
+          @finish="onUploadFinish"
+          action="/api/image/upload"
         >
-          <template #icon>
-            <n-avatar
-              circle
-              :size="100"
-              :src="userData.avatarUrl"
-              object-fit="cover"
-              :img-props="{
-                style: {
-                  width: `180px`,
-                  height: `180px`,
-                  margin: 0
-                }
-              }"
-              :style="{
-                margin: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'absolute',
-                width: `180px`,
-                height: `180px`
-              }"
-            ></n-avatar>
-          </template>
-        </n-button>
-      </n-upload>
+          <n-button>{{ $t('upload_avatar') }}</n-button>
+        </n-upload>
+      </n-space>
       <n-form-item-row :label="$t('change_user_name')">
         <n-input
           placeholder=""
@@ -67,11 +63,12 @@
         ></n-input>
       </n-form-item-row>
       <n-space>
-        <n-button type="primary">{{ $t('confirm.name') }}</n-button>
+        <n-button type="primary">{{
+          $t('confirm.name')
+        }}</n-button>
         <n-button secondary>{{ $t('cancel.name') }}</n-button>
       </n-space>
     </n-form>
-    {{ userData }}
   </n-modal>
 </template>
 
@@ -81,14 +78,16 @@ import {
   NFormItemRow,
   NInput,
   NButton,
-  NInputGroup,
   NImage,
   NUpload,
   NAvatar,
   NModal,
-  NSpace
+  NSpace,
+  UploadFileInfo
 } from 'naive-ui'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import { headers } from '../../utils/http'
+
 
 const emits = defineEmits<{
   (e: 'update:show', value: boolean): void
@@ -98,12 +97,27 @@ const props = defineProps<{
   userData: any
   show: boolean
 }>()
+const uploadAvatar = ref(null)
 
+const onUploadFinish = ({
+  file,
+  event
+}: {
+  file: UploadFileInfo
+  event?: ProgressEvent
+}) => {
+  const { data } = JSON.parse(
+    (event?.target as XMLHttpRequest).responseText
+  )
+  uploadAvatar.value = data.url
+  console.log(uploadAvatar.value)
+}
 const update = () => {
   console.log(props.userData)
 }
 
 onMounted(() => {
+  uploadAvatar.value = props.userData.avatarUrl
   update()
 })
 </script>

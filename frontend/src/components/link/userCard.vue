@@ -2,10 +2,12 @@
   <n-modal
     :show="show"
     @update-show="(v: any) => $emit('update:show', v)"
-    preset="card" role="dialog" :style="{ width: '550px' }"
+    preset="card"
+    role="dialog"
+    :style="{ width: '550px' }"
     size="huge"
     :bordered="true"
-    style="width: 800px;"
+    style="width: 800px"
     :closable="false"
     :on-close="userDetail"
   >
@@ -17,8 +19,19 @@
     ></n-result>
     <template #cover>
       <n-image
+        objectFit="cover"
         :style="{
-          width: '100%'
+          width: '100%',
+          height: '400px'
+        }"
+        :img-props="{
+          objecFit: 'cover',
+          style: {
+            width: '100%',
+            height: '400px',
+            objecFit: 'cover',
+            objectPosition: 'center top'
+          }
         }"
         v-if="!emtry"
         :src="renderData.backgroundUrl"
@@ -26,25 +39,39 @@
     </template>
     <template #header>
       <n-space align="center" v-if="!emtry">
-        <n-avatar circle :size="100" :src="renderData.avatarUrl" object-fit="cover"></n-avatar>
+        <n-avatar
+          circle
+          :size="100"
+          :src="renderData.avatarUrl"
+          object-fit="cover"
+        ></n-avatar>
         <n-el>
-          <n-el>{{ renderData.name }}@{{ renderData.account }}</n-el>
+          <n-el
+            >{{ renderData.name }}@{{ renderData.account }}</n-el
+          >
           <n-el>{{ renderData.description }}</n-el>
-          <n-el style="font-size: 0.9rem; opacity: 0.6;">{{ renderData.email }}</n-el>
+          <n-el style="font-size: 0.9rem; opacity: 0.6">{{
+            renderData.email
+          }}</n-el>
           <follow-text :id="renderData.id"></follow-text>
         </n-el>
-        <follow-button :id="renderData.id" @_update="update()"></follow-button>
+        <follow-button
+          :id="renderData.id"
+          @_update="update()"
+        ></follow-button>
       </n-space>
     </template>
     <template #header-extra>
-      <n-button text @click="userDetail">{{$t('detailInfo')}}</n-button>
+      <n-button text @click="userDetail">{{
+        $t('detailInfo')
+      }}</n-button>
     </template>
   </n-modal>
 </template>
 
 <script lang="ts">
 import { NModal } from 'naive-ui'
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue'
 import FollowButton from '../follow/followButton.vue'
 import FollowText from '../follow/text.vue'
 import {
@@ -61,13 +88,11 @@ import {
   NTooltip
 } from 'naive-ui'
 
-import {
-  ChevronRight24Filled
-} from '@vicons/fluent'
+import { ChevronRight24Filled } from '@vicons/fluent'
 import { useRoute, useRouter } from 'vue-router'
 
 type IUserCardProps = {
-  show: Boolean,
+  show: Boolean
   userData: any
 }
 
@@ -94,7 +119,7 @@ export default defineComponent({
       type: Boolean
     },
     userData: {
-      required: true,
+      required: true
     }
   },
   setup(props: IUserCardProps, context) {
