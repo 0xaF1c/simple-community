@@ -260,7 +260,7 @@ export function loginWithEmailCode(params: LoginWithEmailCodeParams): Promise<Ht
             status: StatusCodes.INTERNAL_SERVER_ERROR,
             error: {
               name: 'INTERNAL_SERVER_ERROR',
-              message: 'unkown error'
+              message: 'unknown error'
             }
           })
         })
