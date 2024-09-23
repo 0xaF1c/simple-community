@@ -13,7 +13,7 @@ export function usePromissonGroup(group: Role[]): RequestHandler {
         status: StatusCodes.FORBIDDEN,
         error: {
           name: 'FORBIDDEN',
-          messsage: 'You do not have promisson access',
+          message: 'You do not have promisson access',
         }
       }
       res.json(errorRes)

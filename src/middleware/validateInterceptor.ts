@@ -34,7 +34,7 @@ export function useValidateInterceptor(validatorClass: any, type: 'get' | 'post'
             status: StatusCodes.BAD_REQUEST,
             error: {
               name: 'PARAMS_ERROR',
-              messsage: 'Params Error',
+              message: 'Params Error',
               verifyList
             }
           }        
@@ -46,7 +46,7 @@ export function useValidateInterceptor(validatorClass: any, type: 'get' | 'post'
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: 'INTERNAL_SERVER_ERROR',
-            messsage: err.msg,
+            message: err.msg,
           }
         }
         res.json(errorRes)

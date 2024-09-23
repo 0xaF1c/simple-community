@@ -18,7 +18,7 @@ export interface HttpDTO {
 }
 interface IError {
   name: string
-  messsage: string
+  message: string
   [other: string]: any
 }
 export interface ErrorDTO {

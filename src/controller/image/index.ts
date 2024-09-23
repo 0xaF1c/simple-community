@@ -41,7 +41,7 @@ export const imageController: ControllerOptions = {
                     status: StatusCodes.INTERNAL_SERVER_ERROR,
                     error: {
                       name: 'INTERNAL_SERVER_ERROR',
-                      messsage: 'image format error'
+                      message: 'image format error'
                     }
                   })
                 } else {
@@ -60,7 +60,7 @@ export const imageController: ControllerOptions = {
               status: StatusCodes.BAD_REQUEST,
               error: {
                 name: 'BAD_REQUEST',
-                messsage: 'not image in request body'
+                message: 'not image in request body'
               }
             } as ErrorDTO)
           }
@@ -86,7 +86,7 @@ export const imageController: ControllerOptions = {
               status: StatusCodes.BAD_REQUEST,
               error: {
                 name: 'BAD_REQUEST',
-                messsage: 'not image in request body'
+                message: 'not image in request body'
               }
             } as ErrorDTO)
           }
