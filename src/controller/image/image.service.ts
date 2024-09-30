@@ -5,61 +5,32 @@ import sharp from 'sharp'
 import { ImageEntity } from '../../entitys/image/image.entity'
 import { ErrorDTO, HttpDTO } from 'src/types'
 import { FgCyan, FgYellow, Reset } from '../../utils/color'
-import { useAppDataSource, useMinioClient } from '../../utils/database'
+import {
+  useAppDataSource
+  // useMinioClient
+} from '../../utils/database'
 import { formatUrl } from '../../utils/formatUrl'
 import { config } from 'dotenv'
 import { randomUUID } from 'crypto'
 import { PostImagesEntity } from '../../entitys/post/postImagesRelation.entity'
 
 const { dataSource } = useAppDataSource()
-const { minioClient, defaultBucket } = useMinioClient()
+
 const imageRepository = dataSource.getRepository(ImageEntity)
 const PostImageRelationRepository =
   dataSource.getRepository(PostImagesEntity)
-export async function formatImage(path: string, name: string) {
-  let result: string | null = null
-  try {
-    const img = sharp(path)
-    const metadata = await img.metadata()
-    const format = metadata.format ?? 'png'
-    const filename = `${name}.${format}`
-    const url = `/storage/uploads/image/${filename}`
-    result = url
-
-    img
-      .toFormat(format, {
-        quality: 100
-      })
-      .toFile(`${path}.${format}`, (err, _info) => {
-        if (err) {
-          result = null
-          return null
-        } else {
-          console.info(`[${FgYellow}uploaded${Reset}] ${url}`)
-          return result
-        }
-      })
-  } catch (err) {
-    result = null
-  }
-  setTimeout(() => {
-    rm(path, () => {
-      console.info(`[${FgYellow}image${Reset}] cache clean`)
-    })
-  }, 1500)
-  return result
-}
 
 export function uploadImage(
-  path: string,
-  uploader: string
+  file: any,
+  uploader: string,
+  quality: number // 1 - 100
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    saveImage(path, uploader)
-      .then((url: any) => {
+    formatImage(file, uploader, quality)
+      .then(() => {
         resolve({
           status: StatusCodes.OK,
-          data: { url }
+          data: {}
         })
       })
       .catch(err => {
@@ -78,27 +49,80 @@ export function uploadMultipleImage(
   uploader: string
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    handleMultiple(files, uploader)
-      .then(result =>
+    const result: any = []
+    files.forEach(async img => {
+      const _path = await formatImage(
+        img.path,
+        img.filename,
+        100
+      )
+
+      if (_path === null) throw 'file path error'
+
+      const url = await saveImage(_path as string, uploader)
+
+      result.push(url)
+      if (result.length === files.length) {
         resolve({
           status: StatusCodes.OK,
           data: {
             urls: result
           }
         })
-      )
-      .catch(err =>
+      } else {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
-            name: err.name,
-            message: err.message
+            name: 'unknown error'
           }
         })
-      )
+      }
+    })
   })
 }
 
+async function formatImage(
+  file: any,
+  uploader: string,
+  quality: number
+): Promise<string | any> {
+  const img = sharp(file.path)
+  const metadata = await img.metadata()
+  const format = metadata.format ?? 'png'
+  const filename = `${file.filename}.${format}`
+
+  img
+    .toFormat(format, {
+      quality: quality
+    })
+    .toFile(`${file.path}.${format}`, (err, info) => {
+      if (err) {
+        console.log(err)
+        return err
+      } else {
+        console.log(uploader)
+        console.log(file)
+        console.log(info)
+        console.log(filename)
+        console.log(file.path)
+
+        return ''
+      }
+    })
+  setTimeout(() => {
+    rm(file.path + '', err => {
+      if (err) {
+        console.log(err)
+      } else {
+        console.info(
+          `[${FgYellow}delete cache${Reset}] ${file.path}`
+        )
+      }
+    })
+  }, 3000)
+}
+
+// save to database
 function saveImage(
   _path: string,
   uploader: string
@@ -108,35 +132,24 @@ function saveImage(
     image.url = _path
     image.uploader = uploader
 
-    minioClient?.fPutObject(defaultBucket, 'tttest1', './index.ts')
-    // imageRepository.save(image)
-    //   .then((saveImage) => {
-    //     resolve(`${formatUrl(path.join(process.env.API_ROOT ?? '/api', '/image/i/'))}${saveImage.id}`)
-    //     setTimeout(() => {
-    //       deleteNoRelationImage()
-    //     }, 10 * 60 * 1000)
-    //   })
-    //   .catch((err) => {
-    //     reject(err)
-    //   })
-  })
-}
-
-function handleMultiple(files: any[], uploader: string) {
-  return new Promise((resolve, _reject) => {
-    const result: any = []
-    files.forEach(async img => {
-      const _path = await formatImage(img.path, img.filename)
-
-      if (_path === null) throw 'unkown error'
-
-      const url = await saveImage(_path as string, uploader)
-
-      result.push(url)
-      if (result.length === files.length) {
-        resolve(result)
-      }
-    })
+    imageRepository
+      .save(image)
+      .then(saveImage => {
+        resolve(
+          `${formatUrl(
+            path.join(
+              process.env.API_ROOT ?? '/api',
+              '/image/i/'
+            )
+          )}${saveImage.id}`
+        )
+        // setTimeout(() => {
+        //   deleteNoRelationImage()
+        // }, 10 * 60 * 1000)
+      })
+      .catch(err => {
+        reject(err)
+      })
   })
 }
 

@@ -90,23 +90,35 @@ export function useMinioClient(): IUseMinioClientReturn {
     minioClient = new Client({
       endPoint: process.env.MINIO_HOST,
       port: 9000,
-      useSSL: true,
+      useSSL: false,
       accessKey: process.env.MINIO_ACCESS_KEY,
       secretKey: process.env.MINIO_SECRET_KEY
     })
 
-    console.log(
-      `[${FgYellow}MiniO${Reset}] (${process.env.MINIO_HOST}) connected!`
-    )
     minioClient
       .bucketExists(process.env.MINIO_BUCKET)
       .then(() => {
+        console.log(
+          `[${FgYellow}MiniO${Reset}] (${process.env.MINIO_HOST}) connected!`
+        )
         console.log(
           `[${FgYellow}bucket${Reset}] (${process.env.MINIO_BUCKET}) alright exist!`
         )
       })
       .catch(err => {
-        console.log(err)
+        console.error(err)
+
+        minioClient
+          ?.makeBucket(process.env.MINIO_BUCKET!, 'cn-north-1')
+          .then(result => {
+            console.log(
+              `[${FgYellow}bucket${Reset}] (${process.env.MINIO_BUCKET}) created successfully in "cn-north-1"`
+            )
+            console.log(result)
+          })
+          .catch((err) => {
+            console.log(err)
+          })
       })
   }
 
@@ -117,6 +129,6 @@ export function useMinioClient(): IUseMinioClientReturn {
   return {
     init,
     minioClient,
-    defaultBucket: process.env.MINIO_BUCKET!,
+    defaultBucket: process.env.MINIO_BUCKET!
   }
 }

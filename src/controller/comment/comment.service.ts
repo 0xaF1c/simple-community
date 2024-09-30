@@ -260,7 +260,7 @@ export function deleteCommentRelation(
   });
 }
 
-export function deletNoRelationComment(): void {
+export function deleteNoRelationComment(): void {
   commentRepository
     .find()
     .then((comments) => {

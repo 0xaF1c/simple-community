@@ -2,7 +2,7 @@ import { ErrorRequestHandler } from "express"
 import { RequestHandler } from "express-serve-static-core"
 import { FgGreen, FgRed, Reset } from "../utils/color"
 
-export const successHander: RequestHandler = (req, _res, next) => {
+export const successHandler: RequestHandler = (req, _res, next) => {
   // if (req.statusCode === null) {
   //   console.log(`[${FgRed}NotFound${Reset}] ${req.method} ${req.path}`)
   // } else {

@@ -4,7 +4,7 @@ import { config } from 'dotenv'
 import path from "path"
 import { startup } from "./utils/server"
 import { userController } from "./controller/user"
-import { errorHandler, successHander } from "./middleware/consoleInfo"
+import { errorHandler, successHandler } from "./middleware/consoleInfo"
 import { FgMagenta, FgYellow, Reset } from "./utils/color"
 // import { deleteNoRelationImage } from "./controller/image/image.service"
 import { postController } from "./controller/post"
@@ -15,7 +15,10 @@ import { adminController } from "./controller/management/admin"
 import { userManagementController } from "./controller/management/user"
 // import { deleteNoRelationPost } from "./controller/post/post.service"
 import { createToken } from "./controller/user/user.service"
+import { useMinioClient } from "./utils/database"
+import { imageController } from "./controller/image"
 // import { deletNoRelationComment } from "./controller/comment/comment.service"
+const { minioClient, defaultBucket } = useMinioClient()
 
 const unAuthPath = [
   process.env.API_ROOT ?? '/api',
@@ -52,15 +55,17 @@ startup()
   .use('/storage/uploads' as any, express.static(path.join(process.env.UPLOADS_PATH ?? '')))
   .use('/public' as any, express.static(path.join(__dirname, './public')))
   .use(errorHandler)
-  .use(successHander)
+  .use(successHandler)
   .useController(userController)
   .useController(postController)
   .useController(tagController)
   .useController(commentController)
   .useController(utilsController)
+  .useController(imageController)
   .useController(adminController)
   .useController(userManagementController)
   .onReady((app) => {
+    minioClient?.fPutObject(defaultBucket, 'tttest1.png', './src/public/1.png')
     if (process.env.DEV_MODE === 'true') {
       console.log(`[${FgMagenta}DevMode${Reset}] Frontend Redirect: http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`)
       app.get('/', (_, res) => {
@@ -75,7 +80,7 @@ startup()
     // init()
     setTimeout(() => {
       // 清除无根关联
-      // deletNoRelationComment()
+      // deleteNoRelationComment()
       // deleteNoRelationPost()
       // deleteNoRelationImage()
       // resetPath()

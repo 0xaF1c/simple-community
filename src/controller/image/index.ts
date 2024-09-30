@@ -1,8 +1,12 @@
-import { ControllerOptions, ErrorDTO } from "src/types"
-import multer from "multer"
-import { existsSync, mkdir } from "fs"
-import { StatusCodes } from "http-status-codes"
-import { formatImage, getImage, uploadMultipleImage, uploadImage } from "./image.service"
+import { ControllerOptions, ErrorDTO } from 'src/types'
+import multer from 'multer'
+import { existsSync, mkdir } from 'fs'
+import { StatusCodes } from 'http-status-codes'
+import {
+  getImage,
+  uploadImage,
+  uploadMultipleImage
+} from './image.service'
 
 const upload = multer({
   dest: process.env.UPLOADS_PATH,
@@ -20,10 +24,6 @@ const upload = multer({
   })
 })
 
-
-/**
- * @deprecated this module is deprecated
- */
 export const imageController: ControllerOptions = {
   path: '/image',
   handler: {
@@ -31,29 +31,14 @@ export const imageController: ControllerOptions = {
       method: 'post',
       middleware: upload.single('image'),
       handlers: [
-        (req, res) => {
-          
-          if (req.file != undefined) {
-            formatImage(req.file.path, req.file.filename)
-              .then(url => {
-                if (url === null) {
-                  res.json({
-                    status: StatusCodes.INTERNAL_SERVER_ERROR,
-                    error: {
-                      name: 'INTERNAL_SERVER_ERROR',
-                      message: 'image format error'
-                    }
-                  })
-                } else {
-                  // @ts-ignore
-                  uploadImage(url!, req.auth.id)
-                    .then((response) => {
-                      res.json(response)
-                    })
-                    .catch((response) => {
-                      res.json(response)
-                    })
-                }
+        (req: any, res) => {
+          if (req.file != undefined) {            
+            uploadImage(req.file, req.auth.id, 100)
+              .then(response => {
+                res.json(response)
+              })
+              .catch(response => {
+                res.json(response)
               })
           } else {
             res.json({
@@ -75,10 +60,10 @@ export const imageController: ControllerOptions = {
           if (req.files) {
             // @ts-ignore
             uploadMultipleImage(req.files as any, req.auth.id)
-              .then((response) => {
+              .then(response => {
                 res.json(response)
               })
-              .catch((response) => {
+              .catch(response => {
                 res.json(response)
               })
           } else {
@@ -98,8 +83,8 @@ export const imageController: ControllerOptions = {
       handlers: [
         (req, res) => {
           getImage(req.params.id as string)
-            .then((response) => res.redirect(response as string))
-            .catch((response) => res.json(response))
+            .then(response => res.redirect(response as string))
+            .catch(response => res.json(response))
         }
       ]
     }
