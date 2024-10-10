@@ -78,7 +78,7 @@ export default defineComponent({
     },
     size: {
       type: Number,
-      requird: true,
+      required: true,
       default: 50
     },
     onClick: {

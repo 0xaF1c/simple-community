@@ -1,13 +1,13 @@
-import { rename, rm } from 'fs'
+import { createReadStream, rename, rm } from 'fs'
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
 import sharp from 'sharp'
 import { ImageEntity } from '../../entitys/image/image.entity'
 import { ErrorDTO, HttpDTO } from 'src/types'
-import { FgCyan, FgYellow, Reset } from '../../utils/color'
+import { FgCyan, Reset } from '../../utils/color'
 import {
-  useAppDataSource
-  // useMinioClient
+  useAppDataSource,
+  useMinioClient
 } from '../../utils/database'
 import { formatUrl } from '../../utils/formatUrl'
 import { config } from 'dotenv'
@@ -15,6 +15,7 @@ import { randomUUID } from 'crypto'
 import { PostImagesEntity } from '../../entitys/post/postImagesRelation.entity'
 
 const { dataSource } = useAppDataSource()
+const { minioClient, defaultBucket } = useMinioClient()
 
 const imageRepository = dataSource.getRepository(ImageEntity)
 const PostImageRelationRepository =
@@ -27,10 +28,10 @@ export function uploadImage(
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     formatImage(file, uploader, quality)
-      .then(() => {
+      .then(res => {
         resolve({
           status: StatusCodes.OK,
-          data: {}
+          data: res
         })
       })
       .catch(err => {
@@ -81,45 +82,64 @@ export function uploadMultipleImage(
   })
 }
 
-async function formatImage(
+function formatImage(
   file: any,
   uploader: string,
   quality: number
-): Promise<string | any> {
-  const img = sharp(file.path)
-  const metadata = await img.metadata()
-  const format = metadata.format ?? 'png'
-  const filename = `${file.filename}.${format}`
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const stream = createReadStream(file.path)
+    const fileBuffer: Array<Uint8Array> = []
+    stream.on('data', (data: any) => {
+      fileBuffer.push(data)
+    })
 
-  img
-    .toFormat(format, {
-      quality: quality
-    })
-    .toFile(`${file.path}.${format}`, (err, info) => {
-      if (err) {
-        console.log(err)
-        return err
-      } else {
-        console.log(uploader)
-        console.log(file)
-        console.log(info)
-        console.log(filename)
-        console.log(file.path)
+    stream.on('end', async () => {
+      const img = sharp(Buffer.concat(fileBuffer))
+      const metadata = await img.metadata()
+      const format = metadata.format ?? 'png'
+      const objectName = `${randomUUID().replace(
+        /\-/g,
+        ''
+      )}.${format}`
 
-        return ''
-      }
+      const { data, info } = await img
+        .toFormat(format, { quality })
+        .toBuffer({ resolveWithObject: true })
+      const putResult = await minioClient?.putObject(
+        defaultBucket,
+        objectName,
+        data,
+        info.size,
+        metadata
+      )
+      const url = await minioClient?.presignedGetObject(
+        defaultBucket,
+        objectName
+      )
+      console.log('uploader:' + uploader)
+      console.log(putResult)
+      rm(file.path, err => {
+        if (err) {
+          console.error(err)
+        } else {
+          console.log(`[cache removed] ${file.path}`)
+        }
+      })
+      resolve(url)
     })
-  setTimeout(() => {
-    rm(file.path + '', err => {
-      if (err) {
-        console.log(err)
-      } else {
-        console.info(
-          `[${FgYellow}delete cache${Reset}] ${file.path}`
-        )
-      }
+
+    stream.on('error', err => {
+      reject(err)
     })
-  }, 3000)
+  })
+  // rm(file.path, (err) => {
+  //   if (err) {
+  //     console.error(err)
+  //   } else {
+  //     console.info(`[${FgYellow}cache removed${Reset}] ${file.path}`)
+  //   }
+  // })
 }
 
 // save to database
