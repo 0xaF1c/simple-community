@@ -4,7 +4,7 @@ import path from 'path'
 import sharp from 'sharp'
 import { ImageEntity } from '../../entitys/image/image.entity'
 import { ErrorDTO, HttpDTO } from 'src/types'
-import { FgCyan, Reset } from '../../utils/color'
+import { FgCyan, FgYellow, Reset } from '../../utils/color'
 import {
   useAppDataSource,
   useMinioClient
@@ -27,7 +27,7 @@ export function useImageRelationTimer() {
   return {
     upload(md5: string): string {
       if (!imageRelationTimer.has(md5)) {
-        return 'file was expire'
+        return 'file was expired'
       } else {
         clearTimeout(imageRelationTimer.get(md5))
         return 'upload success'
@@ -94,6 +94,19 @@ export function uploadMultipleImage(
   })
 }
 
+
+/**
+ * The function `saveImage` processes an image file, saves it to a storage service, generates a
+ * presigned URL for access, and sets a timer for expiration.
+ * @param {any} file - The `file` parameter in the `saveImage` function is the image file that you want
+ * to save. It should contain information about the file, such as its path.
+ * @param {number} quality - The `quality` parameter in the `saveImage` function represents the quality
+ * of the image to be saved. It is a number that typically ranges from 0 to 100, where 0 is the lowest
+ * quality and 100 is the highest quality. This parameter is used when converting and saving the
+ * @returns The `saveImage` function returns a Promise that resolves with an object containing the
+ * `eTag` and `preview` properties if the image saving process is successful. If there is an error
+ * during the process, the Promise will be rejected with the error.
+ */
 function saveImage(file: any, quality: number): Promise<any> {
   return new Promise((resolve, reject) => {
     const stream = createReadStream(file.path)
@@ -121,22 +134,40 @@ function saveImage(file: any, quality: number): Promise<any> {
         info.size,
         metadata
       )
-      const url = await minioClient?.presignedGetObject(
-        defaultBucket,
-        objectName
-      )
-      rm(file.path, err => {
-        if (err) {
-          console.error(err)
-        } else {
-          console.log(`[cache removed] ${file.path}`)
-        }
-      })
-
-      resolve({
-        eTag: putResult?.etag,
-        preview: url
-      })
+      if (putResult === null) {
+        reject(putResult)
+      } else {
+        const url = await minioClient?.presignedGetObject(
+          defaultBucket,
+          objectName
+        )
+        rm(file.path, err => {
+          if (err) {
+            console.error(err)
+          } else {
+            console.log(`[cache removed] ${file.path}`)
+          }
+        })
+        imageRelationTimer.set(
+          putResult?.etag!,
+          setTimeout(() => {
+            minioClient
+              ?.removeObject(defaultBucket, objectName)
+              .then(() => {
+                console.log(
+                  `[${FgYellow}image${Reset}] ${objectName} was expired`
+                )
+              })
+              .catch((err) => {
+                console.error(err)
+              })
+          }, 1000 * 60 * 60)
+        )
+        resolve({
+          eTag: putResult?.etag,
+          preview: url
+        })
+      }
     })
 
     stream.on('error', err => {
