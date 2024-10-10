@@ -21,13 +21,29 @@ const imageRepository = dataSource.getRepository(ImageEntity)
 const PostImageRelationRepository =
   dataSource.getRepository(PostImagesEntity)
 
+// md5 : timer
+let imageRelationTimer = new Map<string, NodeJS.Timeout>()
+export function useImageRelationTimer() {
+  return {
+    upload(md5: string): string {
+      if (!imageRelationTimer.has(md5)) {
+        return 'file was expire'
+      } else {
+        clearTimeout(imageRelationTimer.get(md5))
+        return 'upload success'
+      }
+    }
+  }
+}
+
 export function uploadImage(
   file: any,
   uploader: string,
   quality: number // 1 - 100
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    formatImage(file, uploader, quality)
+    console.log(uploader)
+    saveImage(file, quality)
       .then(res => {
         resolve({
           status: StatusCodes.OK,
@@ -52,15 +68,11 @@ export function uploadMultipleImage(
   return new Promise((resolve, reject) => {
     const result: any = []
     files.forEach(async img => {
-      const _path = await formatImage(
-        img.path,
-        img.filename,
-        100
-      )
+      const _path = await saveImage(img.path, 100)
 
       if (_path === null) throw 'file path error'
 
-      const url = await saveImage(_path as string, uploader)
+      const url = await saveImage2db(_path as string, uploader)
 
       result.push(url)
       if (result.length === files.length) {
@@ -82,11 +94,7 @@ export function uploadMultipleImage(
   })
 }
 
-function formatImage(
-  file: any,
-  uploader: string,
-  quality: number
-): Promise<any> {
+function saveImage(file: any, quality: number): Promise<any> {
   return new Promise((resolve, reject) => {
     const stream = createReadStream(file.path)
     const fileBuffer: Array<Uint8Array> = []
@@ -117,8 +125,6 @@ function formatImage(
         defaultBucket,
         objectName
       )
-      console.log('uploader:' + uploader)
-      console.log(putResult)
       rm(file.path, err => {
         if (err) {
           console.error(err)
@@ -126,24 +132,21 @@ function formatImage(
           console.log(`[cache removed] ${file.path}`)
         }
       })
-      resolve(url)
+
+      resolve({
+        eTag: putResult?.etag,
+        preview: url
+      })
     })
 
     stream.on('error', err => {
       reject(err)
     })
   })
-  // rm(file.path, (err) => {
-  //   if (err) {
-  //     console.error(err)
-  //   } else {
-  //     console.info(`[${FgYellow}cache removed${Reset}] ${file.path}`)
-  //   }
-  // })
 }
 
 // save to database
-function saveImage(
+function saveImage2db(
   _path: string,
   uploader: string
 ): Promise<string | null> {
