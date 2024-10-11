@@ -163,6 +163,8 @@ export default defineComponent({
         uploadsImage,
         ([_, value]) => value
       )
+      console.log(uploadsImage);
+      
       const tags = choosedTag.value.map((t: any) => t.id)
       loading.value = true
       http
@@ -204,7 +206,7 @@ export default defineComponent({
       const { data } = JSON.parse(
         (event?.target as XMLHttpRequest).responseText
       )
-      uploadsImage.set(file.id, data.url)
+      uploadsImage.set(file.id, data.key)
     }
     return {
       uploadShow,

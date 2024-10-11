@@ -1,160 +1,179 @@
-import { ErrorDTO, HttpDTO } from "src/types";
-import { PostLikeParams, PostPublishParams } from "./validate";
-import { StatusCodes } from "http-status-codes";
-import { useAppDataSource } from "../../utils/database";
-import { PostDTO, PostEntity } from "../../entitys/post/post.entity";
-import { PostImagesEntity } from "../../entitys/post/postImagesRelation.entity";
-import { PostTagsEntity } from "../../entitys/post/postTagsRelation.entity";
-import { isUUID } from "class-validator";
-import { PostLikesEntity } from "../../entitys/post/postLikesRelation.entity";
-import { TagEntity } from "../../entitys/tag/tag.entity";
-import { UserEntity } from "../../entitys/user/user.entity";
-import { PostCommentEntity } from "../../entitys/post/postCommentRelation.entity";
-import { FgYellow, Reset } from "../../utils/color";
+import { ErrorDTO, HttpDTO } from 'src/types'
+import { PostLikeParams, PostPublishParams } from './validate'
+import { StatusCodes } from 'http-status-codes'
+import { useAppDataSource } from '../../utils/database'
+import {
+  PostDTO,
+  PostEntity
+} from '../../entitys/post/post.entity'
+import { PostImagesEntity } from '../../entitys/post/postImagesRelation.entity'
+import { PostTagsEntity } from '../../entitys/post/postTagsRelation.entity'
+import { isUUID } from 'class-validator'
+import { PostLikesEntity } from '../../entitys/post/postLikesRelation.entity'
+import { TagEntity } from '../../entitys/tag/tag.entity'
+import { UserEntity } from '../../entitys/user/user.entity'
+import { PostCommentEntity } from '../../entitys/post/postCommentRelation.entity'
+import { FgYellow, Reset } from '../../utils/color'
+import { useImageSigner } from '../image/image.service'
 
-const { dataSource } = useAppDataSource();
-const postRepository = dataSource.getRepository(PostEntity);
-const postImageRepository = dataSource.getRepository(PostImagesEntity);
-const postTagRepository = dataSource.getRepository(PostTagsEntity);
-const postLikesRepository = dataSource.getRepository(PostLikesEntity);
-const postCommentRepository = dataSource.getRepository(PostCommentEntity);
+const { dataSource } = useAppDataSource()
+const postRepository = dataSource.getRepository(PostEntity)
+const postImageRepository =
+  dataSource.getRepository(PostImagesEntity)
+const postTagRepository =
+  dataSource.getRepository(PostTagsEntity)
+const postLikesRepository =
+  dataSource.getRepository(PostLikesEntity)
+const postCommentRepository = dataSource.getRepository(
+  PostCommentEntity
+)
+const { sign } = useImageSigner()
 
 export function postPublish(
   post: PostPublishParams,
   id: string
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    post.publisher = id;
+    post.publisher = id
 
     postRepository
       .save(post)
-      .then((saveResult) => {
+      .then(saveResult => {
         if (post.images.length > 0 && post.images !== null) {
           postImageRepository
             .save(
-              post.images.map(
-                (img) =>
-                  new PostImagesEntity({
+              post.images
+                .map(etag => {
+                  return new PostImagesEntity({
                     postId: saveResult.id,
-                    url: img,
+                    url: sign(etag)
                   })
-              )
+                })
+                .filter(img => {
+                  return (
+                    img.url !== 'file was expired' &&
+                    img.url !== 'file format error'
+                  )
+                })
             )
             .then(() => {
-              console.log("save images success");
+              console.log('save images success')
             })
-            .catch((err) => {
+            .catch(err => {
               reject({
                 status: StatusCodes.INTERNAL_SERVER_ERROR,
                 error: {
                   name: err.name,
-                  message: err.message,
-                },
-              });
-            });
+                  message: err.message
+                }
+              })
+            })
         }
-        if (post.tags.length > 0 && post.tags !== null) {
+        if (post.tags !== null && post.tags.length > 0) {
           postTagRepository.insert(
             post.tags
-              .filter((id) => isUUID(id))
+              .filter(id => isUUID(id))
               .map(
-                (id) =>
+                id =>
                   new PostTagsEntity({
                     postId: saveResult.id,
-                    tagId: id,
+                    tagId: id
                   })
               )
-          );
+          )
         }
         resolve({
           status: StatusCodes.OK,
           data: {
-            msg: "success",
-            id: saveResult.id,
-          },
-        });
+            msg: 'success',
+            id: saveResult.id
+          }
+        })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: err.name,
-            message: err.message,
-          },
-        });
-      });
-  });
+            message: err.message
+          }
+        })
+      })
+  })
 }
 
-export function postLike(likeParams: PostLikeParams, id: string) {
+export function postLike(
+  likeParams: PostLikeParams,
+  id: string
+) {
   return new Promise((resolve, reject) => {
-    if (likeParams.like === "true") {
+    if (likeParams.like === 'true') {
       postLikesRepository
         .findOne({
           where: {
             userId: id,
-            postId: likeParams.postId,
-          },
+            postId: likeParams.postId
+          }
         })
-        .then((findResult) => {
+        .then(findResult => {
           if (findResult === null) {
             postLikesRepository
               .save({
                 userId: id,
-                postId: likeParams.postId,
+                postId: likeParams.postId
               })
-              .then((result) => {
+              .then(result => {
                 resolve({
                   status: StatusCodes.OK,
                   data: {
-                    msg: "success",
-                    id: result.id,
-                  },
-                });
+                    msg: 'success',
+                    id: result.id
+                  }
+                })
               })
-              .catch((err) => {
+              .catch(err => {
                 reject({
                   status: StatusCodes.INTERNAL_SERVER_ERROR,
                   error: {
                     name: err.name,
-                    message: err.message,
-                  },
-                });
-              });
+                    message: err.message
+                  }
+                })
+              })
           } else {
             reject({
               status: StatusCodes.OK,
               data: {
-                msg: "repeat like",
-              },
-            });
+                msg: 'repeat like'
+              }
+            })
           }
-        });
+        })
     } else {
       postLikesRepository
         .delete({
           userId: id,
-          postId: likeParams.postId,
+          postId: likeParams.postId
         })
-        .then((_) => {
+        .then(_ => {
           resolve({
             status: StatusCodes.OK,
             data: {
-              msg: "success",
-            },
-          });
+              msg: 'success'
+            }
+          })
         })
-        .catch((err) => {
+        .catch(err => {
           reject({
             status: StatusCodes.INTERNAL_SERVER_ERROR,
             error: {
               name: err.name,
-              message: err.message,
-            },
-          });
-        });
+              message: err.message
+            }
+          })
+        })
     }
-  });
+  })
 }
 export function getPostDetail(
   postId: string,
@@ -165,108 +184,124 @@ export function getPostDetail(
       .createQueryBuilder()
       .leftJoinAndSelect(
         PostTagsEntity,
-        "postTags",
-        "postTags.postId = PostEntity.id"
+        'postTags',
+        'postTags.postId = PostEntity.id'
       )
-      .leftJoinAndSelect(TagEntity, "tag", "tag.id = postTags.tagId")
-      .leftJoinAndSelect(PostLikesEntity, "like", "like.postId = PostEntity.id")
-      .leftJoinAndSelect(UserEntity, "user", "user.id = like.userId")
       .leftJoinAndSelect(
-        PostImagesEntity,
-        "image",
-        "image.postId = PostEntity.id"
+        TagEntity,
+        'tag',
+        'tag.id = postTags.tagId'
+      )
+      .leftJoinAndSelect(
+        PostLikesEntity,
+        'like',
+        'like.postId = PostEntity.id'
       )
       .leftJoinAndSelect(
         UserEntity,
-        "pubUser",
-        "pubUser.id = PostEntity.publisher"
+        'user',
+        'user.id = like.userId'
       )
-      .where("PostEntity.id = :id", { id: postId })
+      .leftJoinAndSelect(
+        PostImagesEntity,
+        'image',
+        'image.postId = PostEntity.id'
+      )
+      .leftJoinAndSelect(
+        UserEntity,
+        'pubUser',
+        'pubUser.id = PostEntity.publisher'
+      )
+      .where('PostEntity.id = :id', { id: postId })
       .getRawMany()
-      .then((result) => {
-        console.log(result);
+      .then(result => {
+        console.log(result)
 
         resolve({
           status: StatusCodes.OK,
-          data: PostDTO.fromFindResult(result, userId),
-        });
+          data: PostDTO.fromFindResult(result, userId)
+        })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: err.name,
-            message: err.message,
-          },
-        });
-      });
-  });
+            message: err.message
+          }
+        })
+      })
+  })
 }
-export function getPostByTag(tagId: string): Promise<HttpDTO | ErrorDTO> {
+export function getPostByTag(
+  tagId: string
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     postTagRepository
       .find({
         where: {
-          tagId: tagId,
-        },
+          tagId: tagId
+        }
       })
-      .then((result) => {
+      .then(result => {
         resolve({
           status: StatusCodes.OK,
           data: {
             tag: tagId,
-            posts: result.map((postTag) => postTag.postId),
-          },
-        });
+            posts: result.map(postTag => postTag.postId)
+          }
+        })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: err.name,
-            message: err.message,
-          },
-        });
-      });
-  });
+            message: err.message
+          }
+        })
+      })
+  })
 }
-export function getPostByUser(id: string): Promise<HttpDTO | ErrorDTO> {
+export function getPostByUser(
+  id: string
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     postRepository
       .createQueryBuilder()
       .select()
-      .where("PostEntity.publisher = :id", { id: id })
+      .where('PostEntity.publisher = :id', { id: id })
       .getMany()
-      .then((result) => {
-        Promise.all(result.map((t) => getPostDetail(t.id, id)))
-          .then((values) => {
+      .then(result => {
+        Promise.all(result.map(t => getPostDetail(t.id, id)))
+          .then(values => {
             resolve({
               status: StatusCodes.OK,
               data: {
-                posts: values.map((v: any) => v.data),
-              },
-            });
+                posts: values.map((v: any) => v.data)
+              }
+            })
           })
-          .catch((_) => {
+          .catch(_ => {
             reject({
               status: StatusCodes.INTERNAL_SERVER_ERROR,
               error: {
-                name: "INTERNAL_SERVER_ERROR",
-                message: "unknown error",
-              },
-            });
-          });
+                name: 'INTERNAL_SERVER_ERROR',
+                message: 'unknown error'
+              }
+            })
+          })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: err.name,
-            message: err.message,
-          },
-        });
-      });
-  });
+            message: err.message
+          }
+        })
+      })
+  })
 }
 
 export function deletePost(
@@ -277,52 +312,52 @@ export function deletePost(
     postRepository
       .delete({
         id: postId,
-        publisher: userId,
+        publisher: userId
       })
-      .then((result) => {
+      .then(result => {
         Promise.all([
           postImageRepository.delete({
-            postId: postId,
+            postId: postId
           }),
           postTagRepository.delete({
-            postId: postId,
+            postId: postId
           }),
           postLikesRepository.delete({
-            postId: postId,
+            postId: postId
           }),
           postCommentRepository.delete({
-            postId: postId,
-          }),
+            postId: postId
+          })
         ])
-          .then((deleteRelation) => {
+          .then(deleteRelation => {
             resolve({
               status: StatusCodes.OK,
               data: {
                 post: result,
-                deleteRelation,
-              },
-            });
+                deleteRelation
+              }
+            })
           })
-          .catch((err) => {
+          .catch(err => {
             reject({
               status: StatusCodes.INTERNAL_SERVER_ERROR,
               error: {
                 name: err.name,
-                message: err.message,
-              },
-            });
-          });
+                message: err.message
+              }
+            })
+          })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: err.name,
-            message: err.message,
-          },
-        });
-      });
-  });
+            message: err.message
+          }
+        })
+      })
+  })
 }
 
 export function recommendPost(
@@ -333,39 +368,39 @@ export function recommendPost(
     postRepository
       .createQueryBuilder()
       .select()
-      .orderBy("RAND()")
+      .orderBy('RAND()')
       .limit(limit ?? 10)
       .getMany()
-      .then((result) => {
-        Promise.all(result.map((t) => getPostDetail(t.id, userId)))
-          .then((values) => {
+      .then(result => {
+        Promise.all(result.map(t => getPostDetail(t.id, userId)))
+          .then(values => {
             resolve({
               status: StatusCodes.OK,
               data: {
-                recommendPost: values.map((v: any) => v.data),
-              },
-            });
+                recommendPost: values.map((v: any) => v.data)
+              }
+            })
           })
-          .catch((_) => {
+          .catch(_ => {
             reject({
               status: StatusCodes.INTERNAL_SERVER_ERROR,
               error: {
-                name: "INTERNAL_SERVER_ERROR",
-                message: "unknown error",
-              },
-            });
-          });
+                name: 'INTERNAL_SERVER_ERROR',
+                message: 'unknown error'
+              }
+            })
+          })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: err.name,
-            message: err.message,
-          },
-        });
-      });
-  });
+            message: err.message
+          }
+        })
+      })
+  })
 }
 
 export function isLikePost(
@@ -377,64 +412,70 @@ export function isLikePost(
       .findOne({
         where: {
           postId: postId,
-          userId: userId,
-        },
+          userId: userId
+        }
       })
-      .then((res) => {
+      .then(res => {
         if (res === null) {
           resolve({
             status: StatusCodes.OK,
-            data: false,
-          });
+            data: false
+          })
         } else {
           resolve({
             status: StatusCodes.OK,
-            data: true,
-          });
+            data: true
+          })
         }
       })
-      .catch((_) => {
+      .catch(_ => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
-            name: "INTERNAL_SERVER_ERROR",
-            message: "unknown error",
-          },
-        });
-      });
-  });
+            name: 'INTERNAL_SERVER_ERROR',
+            message: 'unknown error'
+          }
+        })
+      })
+  })
 }
 
 export function deleteNoRelationPost() {
-  console.info(`[${FgYellow}delete no relation post${Reset}]`);
-  postRepository.find().then((posts) => {
-    const postsId = posts.map((p) => p.id);
-    postImageRepository.find().then((relations) => {
-      const rels = relations.filter((rel) => !postsId.includes(rel.postId));
-      rels.forEach((rel) => {
+  console.info(`[${FgYellow}delete no relation post${Reset}]`)
+  postRepository.find().then(posts => {
+    const postsId = posts.map(p => p.id)
+    postImageRepository.find().then(relations => {
+      const rels = relations.filter(
+        rel => !postsId.includes(rel.postId)
+      )
+      rels.forEach(rel => {
         postImageRepository.delete({
           id: rel.id,
-          postId: rel.postId,
-        });
-      });
-    });
-    postLikesRepository.find().then((relations) => {
-      const rels = relations.filter((rel) => !postsId.includes(rel.postId));
-      rels.forEach((rel) => {
+          postId: rel.postId
+        })
+      })
+    })
+    postLikesRepository.find().then(relations => {
+      const rels = relations.filter(
+        rel => !postsId.includes(rel.postId)
+      )
+      rels.forEach(rel => {
         postLikesRepository.delete({
           id: rel.id,
-          postId: rel.postId,
-        });
-      });
-    });
-    postTagRepository.find().then((relations) => {
-      const rels = relations.filter((rel) => !postsId.includes(rel.postId));
-      rels.forEach((rel) => {
+          postId: rel.postId
+        })
+      })
+    })
+    postTagRepository.find().then(relations => {
+      const rels = relations.filter(
+        rel => !postsId.includes(rel.postId)
+      )
+      rels.forEach(rel => {
         postTagRepository.delete({
           id: rel.id,
-          postId: rel.postId,
-        });
-      });
-    });
-  });
+          postId: rel.postId
+        })
+      })
+    })
+  })
 }

@@ -15,10 +15,8 @@ import { adminController } from "./controller/management/admin"
 import { userManagementController } from "./controller/management/user"
 // import { deleteNoRelationPost } from "./controller/post/post.service"
 import { createToken } from "./controller/user/user.service"
-import { useMinioClient } from "./utils/database"
 import { imageController } from "./controller/image"
 // import { deletNoRelationComment } from "./controller/comment/comment.service"
-const { minioClient, defaultBucket } = useMinioClient()
 
 const unAuthPath = [
   process.env.API_ROOT ?? '/api',
@@ -65,7 +63,6 @@ startup()
   .useController(adminController)
   .useController(userManagementController)
   .onReady((app) => {
-    minioClient?.fPutObject(defaultBucket, 'tttest1.png', './src/public/1.png')
     if (process.env.DEV_MODE === 'true') {
       console.log(`[${FgMagenta}DevMode${Reset}] Frontend Redirect: http://${process.env.DEV_HOST}:${process.env.DEV_PORT}`)
       app.get('/', (_, res) => {

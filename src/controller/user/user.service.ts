@@ -35,11 +35,11 @@ function verify(code: string, email: string) {
   return false
 }
 
-export function createToken(payload: any) {
+export function createToken(payload: any, expiresIn?: string | number) {
   return 'Bearer ' + jwt.sign(
     payload,
-    process.env.SECRET_KEY ?? 'unknown_secret_key',
-    { expiresIn: process.env.EXPIRES_IN }
+    process.env.SECRET_KEY!,
+    { expiresIn: expiresIn ?? process.env.EXPIRES_IN }
   )
 }
 

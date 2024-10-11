@@ -2,12 +2,18 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 
 @Entity('sc_images')
 export class ImageEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: string
 
   @Column()
-  url: string
+  etag: string
+
+  @Column()
+  filename: string
 
   @Column()
   uploader: string
+
+  @Column()
+  key: string
 }

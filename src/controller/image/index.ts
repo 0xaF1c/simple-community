@@ -5,8 +5,9 @@ import { StatusCodes } from 'http-status-codes'
 import {
   getImage,
   uploadImage,
-  uploadMultipleImage
+  uploadMultipleImage,
 } from './image.service'
+
 
 const upload = multer({
   dest: process.env.UPLOADS_PATH,
@@ -34,7 +35,7 @@ export const imageController: ControllerOptions = {
         (req: any, res) => {
           if (req.file != undefined) {            
             uploadImage(req.file, req.auth.id, 100)
-              .then(response => {
+              .then((response) => {
                 res.json(response)
               })
               .catch(response => {
@@ -78,7 +79,7 @@ export const imageController: ControllerOptions = {
         }
       ]
     },
-    '/i/:id': {
+    '/i/:etag': {
       method: 'get',
       handlers: [
         (req, res) => {
