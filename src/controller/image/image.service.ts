@@ -123,6 +123,23 @@ export function uploadMultipleImage(
   })
 }
 
+/**
+ * The function `saveImage` takes an image file, uploader information, and quality setting, processes
+ * and uploads the image to a storage service, and returns a key, preview URL, and object name.
+ * @param {any} file - The `file` parameter in the `saveImage` function is the image file that you want
+ * to save. It should contain information about the file such as its path, mimetype, and content.
+ * @param {string} uploader - The `uploader` parameter in the `saveImage` function is a string that
+ * represents the user or entity who is uploading the image. It is used to track who uploaded the image
+ * and associate it with the image data in the storage system.
+ * @param {number} quality - The `quality` parameter in the `saveImage` function represents the quality
+ * of the image to be saved. It is a number that typically ranges from 0 to 100, where 0 is the lowest
+ * quality and 100 is the highest quality. This parameter is used when converting and saving the
+ * @returns The `saveImage` function returns a Promise that resolves with an object containing the
+ * following properties:
+ * - `key`: A randomly generated key for the saved image.
+ * - `preview`: A presigned URL for accessing the saved image.
+ * - `objectName`: The name of the saved image file in the storage.
+ */
 function saveImage(
   file: any,
   uploader: string,
@@ -202,7 +219,23 @@ function saveImage(
   })
 }
 
-// save to database
+/**
+ * The function `signImage` takes in parameters for an image's etag, filename, uploader, and key, saves
+ * the image entity, and returns a promise resolving to the saved image entity or null.
+ * @param {string} etag - An entity tag (etag) is a unique identifier for a specific version of a
+ * resource. It is typically used for caching and versioning purposes in web applications.
+ * @param {string} filename - The `filename` parameter in the `signImage` function refers to the name
+ * of the image file that is being signed before saving it to the repository.
+ * @param {string} uploader - The `uploader` parameter in the `signImage` function represents the user
+ * or entity who is uploading the image. It is a string that specifies the name or identifier of the
+ * uploader.
+ * @param {string} key - The `key` parameter in the `signImage` function is typically used to represent
+ * a unique identifier or access key that is associated with the image being signed. This key can be
+ * used for various purposes such as authentication, authorization, or tracking the image within the
+ * system. It helps in uniquely identifying the
+ * @returns The `signImage` function is returning a Promise that resolves to either an `image` object
+ * if the image was successfully saved, or `null` if there was an error during the saving process.
+ */
 function signImage(
   etag: string,
   filename: string,
@@ -228,6 +261,15 @@ function signImage(
   })
 }
 
+/**
+ * This TypeScript function retrieves an image URL using a key and returns it in a Promise, handling
+ * errors appropriately.
+ * @param {string} key - The `key` parameter is a string that is used to find an image in the image
+ * repository based on its unique identifier.
+ * @returns The `getImage` function returns a Promise that resolves with a string (URL of the image) if
+ * the image is found and the presigned URL is successfully generated. If there is an error during the
+ * process, it returns an ErrorDTO object containing the status code and error details.
+ */
 export function getImage(
   key: string
 ): Promise<string | ErrorDTO> {
