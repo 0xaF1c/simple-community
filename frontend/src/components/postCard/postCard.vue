@@ -32,7 +32,8 @@
       <n-el
         :style="{
           height: `${avatarSize}px`,
-          verticalAlign: 'top'
+          verticalAlign: 'top',
+          display: 'flex'
         }"
       >
         <avatar-link

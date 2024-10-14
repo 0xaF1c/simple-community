@@ -1,7 +1,10 @@
 import { ErrorDTO, HttpDTO } from 'src/types'
 import { PostLikeParams, PostPublishParams } from './validate'
 import { StatusCodes } from 'http-status-codes'
-import { useAppDataSource } from '../../utils/database'
+import {
+  useAppDataSource,
+  useMinioClient
+} from '../../utils/database'
 import {
   PostDTO,
   PostEntity
@@ -15,6 +18,7 @@ import { UserEntity } from '../../entitys/user/user.entity'
 import { PostCommentEntity } from '../../entitys/post/postCommentRelation.entity'
 import { FgYellow, Reset } from '../../utils/color'
 import { useImageSigner } from '../image/image.service'
+import { ImageEntity } from '../../entitys/image/image.entity'
 
 const { dataSource } = useAppDataSource()
 const postRepository = dataSource.getRepository(PostEntity)
@@ -27,6 +31,8 @@ const postLikesRepository =
 const postCommentRepository = dataSource.getRepository(
   PostCommentEntity
 )
+const imageRepository = dataSource.getRepository(ImageEntity)
+const { minioClient, defaultBucket } = useMinioClient()
 const { sign } = useImageSigner()
 
 export function postPublish(
@@ -43,10 +49,13 @@ export function postPublish(
           postImageRepository
             .save(
               post.images
-                .map(etag => {
+                .map(key => {
+                  const url = sign(key)
+                  console.log(url)
+
                   return new PostImagesEntity({
                     postId: saveResult.id,
-                    url: sign(etag)
+                    url: url
                   })
                 })
                 .filter(img => {
@@ -316,9 +325,6 @@ export function deletePost(
       })
       .then(result => {
         Promise.all([
-          postImageRepository.delete({
-            postId: postId
-          }),
           postTagRepository.delete({
             postId: postId
           }),
@@ -327,6 +333,45 @@ export function deletePost(
           }),
           postCommentRepository.delete({
             postId: postId
+          }),
+          new Promise((resolve, reject) => {
+            postImageRepository
+              .find({
+                where: {
+                  postId: postId
+                }
+              })
+              .then(findResult => {
+                console.log(findResult)
+
+                findResult.forEach(rel => {
+                  const key = rel.url.split('/image/i/')[1]
+                  imageRepository
+                    .findOne({
+                      where: { key }
+                    })
+                    .then(img => {
+                      minioClient
+                        ?.removeObject(
+                          defaultBucket,
+                          img?.filename!
+                        )
+                        .then(console.log)
+                      imageRepository
+                        .delete({
+                          id: img?.id,
+                          uploader: img?.uploader,
+                          key: img?.key
+                        })
+                        .then(resolve)
+                    })
+                    .catch(reject)
+                })
+              })
+              .catch(console.log)
+            postImageRepository.delete({
+              postId
+            })
           })
         ])
           .then(deleteRelation => {

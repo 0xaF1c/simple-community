@@ -13,6 +13,7 @@ import {
 import { config } from 'dotenv'
 import { randomUUID } from 'crypto'
 import path from 'path'
+import { formatUrl } from '../../utils/formatUrl'
 const { dataSource } = useAppDataSource()
 const { minioClient, defaultBucket } = useMinioClient()
 
@@ -45,7 +46,7 @@ export function useImageSigner() {
       signImage(etag, filename, uploader, key)
         .then(console.log)
         .catch(console.log)
-      return path.join(process.env.API_ROOT!, `/image/i/${key}`)
+      return formatUrl(path.join(process.env.API_ROOT!, `/image/i/${key}`))
     }
     // return 'file format error'
   }

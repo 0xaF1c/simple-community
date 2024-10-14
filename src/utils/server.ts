@@ -82,7 +82,7 @@ export function startup() {
   const api_port = process.env.API_PORT ?? 3000
   const app = express()
 
-  const str = `this server is running is http://localhost:${api_port}${api_path}`
+  const str = `this server is running in http://localhost:${api_port}${api_path}`
 
   app.listen(api_port, () => {
     const topBorder = str.replace(/./g, '#')

@@ -79,11 +79,12 @@ export const imageController: ControllerOptions = {
         }
       ]
     },
-    '/i/:etag': {
+    '/i/:key': {
       method: 'get',
       handlers: [
         (req, res) => {
-          getImage(req.params.id as string)
+          console.log(req.params.key)
+          getImage(req.params.key as string)
             .then(response => res.redirect(response as string))
             .catch(response => res.json(response))
         }

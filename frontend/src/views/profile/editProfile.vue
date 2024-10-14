@@ -88,7 +88,6 @@ import {
 import { onMounted, ref } from 'vue'
 import { headers } from '../../utils/http'
 
-
 const emits = defineEmits<{
   (e: 'update:show', value: boolean): void
 }>()
