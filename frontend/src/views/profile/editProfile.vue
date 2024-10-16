@@ -8,41 +8,17 @@
     :bordered="true"
   >
     <template #cover>
-      <n-image
-        objectFit="cover"
-        :style="{
-          width: '100%',
-          height: '400px'
-        }"
-        :img-props="{
-          style: {
-            width: '100%',
-            height: '400px',
-            objectPosition: 'center top'
-          }
-        }"
-        :src="userData.backgroundUrl"
-      ></n-image>
+      <upload-background-component
+        :url="userData.backgroundUrl"
+        @update-key="key => (uploadBackground = key)"
+      ></upload-background-component>
     </template>
     <n-form>
       <n-space align="center">
-        <n-avatar
-          circle
-          :size="100"
-          :src="uploadAvatar"
-          object-fit="cover"
-        ></n-avatar>
-        <n-upload
-          accept="image/*"
-          :multiple="false"
-          name="image"
-          :max="1"
-          :headers="headers"
-          @finish="onUploadFinish"
-          action="/api/image/upload"
-        >
-          <n-button>{{ $t('upload_avatar') }}</n-button>
-        </n-upload>
+        <upload-avatar-component
+          :url="userData.avatarUrl"
+          @update-key="key => (uploadAvatar = key)"
+        ></upload-avatar-component>
       </n-space>
       <n-form-item-row :label="$t('change_user_name')">
         <n-input
@@ -63,10 +39,14 @@
         ></n-input>
       </n-form-item-row>
       <n-space>
-        <n-button type="primary">{{
+        <n-button type="primary" @click="onSubmitClick">{{
           $t('confirm.name')
         }}</n-button>
-        <n-button secondary>{{ $t('cancel.name') }}</n-button>
+        <n-button
+          secondary
+          @click="emits('update:show', false)"
+          >{{ $t('cancel.name') }}</n-button
+        >
       </n-space>
     </n-form>
   </n-modal>
@@ -78,18 +58,17 @@ import {
   NFormItemRow,
   NInput,
   NButton,
-  NImage,
-  NUpload,
-  NAvatar,
   NModal,
   NSpace,
-  UploadFileInfo
 } from 'naive-ui'
-import { onMounted, ref } from 'vue'
-import { headers } from '../../utils/http'
 
+import { onMounted, ref } from 'vue'
+import uploadAvatarComponent from '../../components/upload/uploadAvatar.vue'
+import uploadBackgroundComponent from '../../components/upload/uploadBackground.vue'
+import { http } from '../../utils/http'
 const emits = defineEmits<{
   (e: 'update:show', value: boolean): void
+  (e: 'update-profile', value: null): void
 }>()
 
 const props = defineProps<{
@@ -97,19 +76,22 @@ const props = defineProps<{
   show: boolean
 }>()
 const uploadAvatar = ref(null)
+const uploadBackground = ref(null)
 
-const onUploadFinish = ({
-  file,
-  event
-}: {
-  file: UploadFileInfo
-  event?: ProgressEvent
-}) => {
-  const { data } = JSON.parse(
-    (event?.target as XMLHttpRequest).responseText
-  )
-  uploadAvatar.value = data.url
-  console.log(uploadAvatar.value)
+const onSubmitClick = () => {
+  http
+    .post('/api/user/profile/update', {
+      name: props.userData.name,
+      account: props.userData.account,
+      description: props.userData.description,
+      backgroundUrl: uploadBackground.value,
+      avatarUrl: uploadAvatar.value
+    })
+    .then(() => {
+      emits('update:show', false)
+      emits('update-profile', null)
+    })
+    .catch(console.log)
 }
 const update = () => {
   console.log(props.userData)

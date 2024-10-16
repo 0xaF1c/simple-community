@@ -35,7 +35,7 @@ const _theme = ref(theme)
 const contentWidth = ref(800)
 const leftSiderWidth = ref(200)
 const rightSiderWidth = ref(200)
-const headerHeight = ref(4.5)
+const headerHeight = ref(55)
 </script>
 
 <template>
@@ -49,7 +49,7 @@ const headerHeight = ref(4.5)
           <n-layout embedded has-header>
             <n-layout-header
               :style="{
-                height: `${headerHeight}vh`
+                height: `${headerHeight}px`,
               }"
             >
               <header-view
@@ -57,9 +57,10 @@ const headerHeight = ref(4.5)
               ></header-view>
             </n-layout-header>
             <n-layout
+            
               :style="{
-                width: `${contentWidth + leftSiderWidth + rightSiderWidth}px`,
-                height: `${100 - headerHeight}vh`,
+                maxWidth: `${contentWidth + leftSiderWidth + rightSiderWidth}px`,
+                height: `calc(100vh - ${headerHeight}px)`,
                 margin: '0 auto',
                 padding: '5px 0'
               }"
@@ -79,8 +80,9 @@ const headerHeight = ref(4.5)
               <n-layout
                 embedded
                 :style="{
-                  width: `${rightSiderWidth}px`,
-                  height: 'auto'
+                  maxWidth: `${rightSiderWidth}px`,
+                  height: 'auto',
+                  marginRight: '15px'
                 }"
               >
                 <myMenu style="margin-bottom: 7px" />

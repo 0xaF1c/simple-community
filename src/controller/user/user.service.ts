@@ -1,20 +1,36 @@
-import { ErrorDTO, HttpDTO } from "src/types"
-import { UserDTO, UserEntity } from "../../entitys/user/user.entity"
-import { useAppDataSource } from "../../utils/database"
+import { ErrorDTO, HttpDTO } from 'src/types'
+import {
+  UserDTO,
+  UserEntity
+} from '../../entitys/user/user.entity'
+import { useAppDataSource, useMinioClient } from '../../utils/database'
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
-import { FollowParams, GetLoginEmailCodeParams, LoginWithEmailCodeParams, RegisterParams, UpdatePasswordParams, UpdateProfileParams } from "./validate"
-import { random } from "lodash"
-import { useMailer } from "../../utils/email"
-import { UserFollowEntity } from "../../entitys/user/userFollowRelation.entity"
-import { md5 } from "../../utils/md5"
+import {
+  FollowParams,
+  GetLoginEmailCodeParams,
+  LoginWithEmailCodeParams,
+  RegisterParams,
+  UpdatePasswordParams,
+  UpdateProfileParams
+} from './validate'
+import { random } from 'lodash'
+import { useMailer } from '../../utils/email'
+import { UserFollowEntity } from '../../entitys/user/userFollowRelation.entity'
+import { md5 } from '../../utils/md5'
+import { useImageSigner } from '../image/image.service'
+import { ImageEntity } from '../../entitys/image/image.entity'
 
 const { sendEmailVerifyCode } = useMailer()
 const { dataSource } = useAppDataSource()
 
 const userRepository = dataSource.getRepository(UserEntity)
-const userFollowRepository = dataSource.getRepository(UserFollowEntity)
+const userFollowRepository =
+  dataSource.getRepository(UserFollowEntity)
+const imageRepository = dataSource.getRepository(ImageEntity)
 const emailCodePool: Map<string, string> = new Map()
+const { sign } = useImageSigner()
+const { minioClient, defaultBucket } = useMinioClient()
 
 function addItem(code: string, email: string) {
   if (emailCodePool.get(email) === undefined) {
@@ -35,28 +51,39 @@ function verify(code: string, email: string) {
   return false
 }
 
-export function createToken(payload: any, expiresIn?: string | number) {
-  return 'Bearer ' + jwt.sign(
-    payload,
-    process.env.SECRET_KEY!,
-    { expiresIn: expiresIn ?? process.env.EXPIRES_IN }
+export function createToken(
+  payload: any,
+  expiresIn?: string | number
+) {
+  return (
+    'Bearer ' +
+    jwt.sign(payload, process.env.SECRET_KEY!, {
+      expiresIn: expiresIn ?? process.env.EXPIRES_IN
+    })
   )
 }
 
-export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
+export function register(
+  user: RegisterParams
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     if (verify(user.code, user.email)) {
-      userRepository.count()
+      userRepository
+        .count()
         .then(count => {
-          if (!user.description) user.description = '这个用户很懒，什么也没留下'
-          if (!user.account) user.account = `community_user_${count + 1}`
-          if (!user.name) user.name = `community_user_${count + 1}`
+          if (!user.description)
+            user.description = '这个用户很懒，什么也没留下'
+          if (!user.account)
+            user.account = `community_user_${count + 1}`
+          if (!user.name)
+            user.name = `community_user_${count + 1}`
           user.avatarUrl = '/public/avatar/default.jpg'
           user.backgroundUrl = '/public/background/default.jpg'
           user.password = md5(user.password)
 
-          userRepository.save(user)
-            .then((saveResult) => {
+          userRepository
+            .save(user)
+            .then(saveResult => {
               resolve({
                 status: StatusCodes.OK,
                 data: {
@@ -65,7 +92,7 @@ export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
                 }
               })
             })
-            .catch((err) => {
+            .catch(err => {
               console.error(err)
               reject({
                 status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -96,25 +123,37 @@ export function register(user: RegisterParams): Promise<HttpDTO | ErrorDTO> {
   })
 }
 
-export function loginWithAccount(user: Record<string, any>): Promise<HttpDTO | ErrorDTO> {
+export function loginWithAccount(
+  user: Record<string, any>
+): Promise<HttpDTO | ErrorDTO> {
   const IsEmail = user.account ? false : true
   const accountOption =
-    (user.account && user.email) ?
-      (IsEmail ? { email: user.email } : { account: user.account }) : {}
+    user.account && user.email
+      ? IsEmail
+        ? { email: user.email }
+        : { account: user.account }
+      : {}
 
   return new Promise((resolve, reject) => {
-    userRepository.findOne({
-      where: Object.assign({}, {
-        password: md5(user.password) ?? ''
-      }, accountOption)
-    })
+    userRepository
+      .findOne({
+        where: Object.assign(
+          {},
+          {
+            password: md5(user.password) ?? ''
+          },
+          accountOption
+        )
+      })
       .then((findUser: UserEntity | null) => {
         if (findUser === null) {
           reject({
             status: StatusCodes.OK,
             error: {
               name: 'UserNotFound',
-              message: `${IsEmail ? 'email' : 'account'} or password error`
+              message: `${
+                IsEmail ? 'email' : 'account'
+              } or password error`
             }
           })
         } else {
@@ -127,7 +166,7 @@ export function loginWithAccount(user: Record<string, any>): Promise<HttpDTO | E
           })
         }
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -140,20 +179,23 @@ export function loginWithAccount(user: Record<string, any>): Promise<HttpDTO | E
   })
 }
 
-export function status(payload: Record<string, any>): Promise<HttpDTO | ErrorDTO> {
+export function status(
+  payload: Record<string, any>
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    userRepository.findOne({
-      where: {
-        id: payload.id
-      }
-    })
-      .then((user) => {
+    userRepository
+      .findOne({
+        where: {
+          id: payload.id
+        }
+      })
+      .then(user => {
         resolve({
           status: StatusCodes.OK,
           data: new UserDTO(user)
         })
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
 
         reject({
@@ -169,10 +211,11 @@ export function status(payload: Record<string, any>): Promise<HttpDTO | ErrorDTO
 
 export function profile(id: any): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    userRepository.findOne({
-      where: { id }
-    })
-      .then((user) => {
+    userRepository
+      .findOne({
+        where: { id }
+      })
+      .then(user => {
         if (user === null) {
           resolve({
             status: StatusCodes.NOT_FOUND,
@@ -185,7 +228,7 @@ export function profile(id: any): Promise<HttpDTO | ErrorDTO> {
           })
         }
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
 
         reject({
@@ -199,7 +242,9 @@ export function profile(id: any): Promise<HttpDTO | ErrorDTO> {
   })
 }
 
-export function sendEmailCode(params: GetLoginEmailCodeParams): Promise<HttpDTO | ErrorDTO> {
+export function sendEmailCode(
+  params: GetLoginEmailCodeParams
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     const code = random(1, 9999, false).toString()
     if (addItem(code, params.email)) {
@@ -234,11 +279,14 @@ export function sendEmailCode(params: GetLoginEmailCodeParams): Promise<HttpDTO 
   })
 }
 
-export function loginWithEmailCode(params: LoginWithEmailCodeParams): Promise<HttpDTO | ErrorDTO> {
+export function loginWithEmailCode(
+  params: LoginWithEmailCodeParams
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     if (verify(params.code, params.email)) {
-      userRepository.findOne({ where: { email: params.email } })
-        .then((user) => {
+      userRepository
+        .findOne({ where: { email: params.email } })
+        .then(user => {
           if (user === null) {
             reject({
               status: StatusCodes.NOT_FOUND,
@@ -253,7 +301,7 @@ export function loginWithEmailCode(params: LoginWithEmailCodeParams): Promise<Ht
             })
           }
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
 
           reject({
@@ -275,19 +323,55 @@ export function loginWithEmailCode(params: LoginWithEmailCodeParams): Promise<Ht
     }
   })
 }
-export function updateProfile(profile: UpdateProfileParams, id: number): Promise<HttpDTO | ErrorDTO> {
+export function updateProfile(
+  profile: UpdateProfileParams,
+  id: number
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     const updateObj: Record<string, any> = {}
     if (profile.name) updateObj.name = profile.name
     if (profile.account) updateObj.account = profile.account
     if (profile.email) updateObj.email = profile.email
-    if (profile.description) updateObj.description = profile.description
-    if (profile.avatarUrl) updateObj.avatarUrl = profile.avatarUrl
-    if (profile.backgroundUrl) updateObj.backgroundUrl = profile.backgroundUrl
+    if (profile.description)
+      updateObj.description = profile.description
+    if (profile.avatarUrl)
+      updateObj.avatarUrl = sign(profile.avatarUrl)
+    if (profile.backgroundUrl)
+      updateObj.backgroundUrl = sign(profile.backgroundUrl)
 
-    userRepository.update({
-      id,
-    }, updateObj)
+    userRepository.findOne({ where: { id } }).then(user => {
+      if (user === null) {
+        return
+      }
+      [user.avatarUrl, user.backgroundUrl].forEach((rel) => {
+        const key = rel.split('/image/i/')[1]
+        imageRepository
+          .findOne({
+            where: { key }
+          })
+          .then(img => {
+            minioClient
+              ?.removeObject(defaultBucket, img?.filename!)
+              .then(console.log)
+            imageRepository
+              .delete({
+                id: img?.id,
+                uploader: img?.uploader,
+                key: img?.key
+              })
+              .then(console.log)
+          })
+          .catch(reject)
+      })
+    })
+
+    userRepository
+      .update(
+        {
+          id
+        },
+        updateObj
+      )
       .then(result => {
         resolve({
           status: StatusCodes.OK,
@@ -305,13 +389,17 @@ export function updateProfile(profile: UpdateProfileParams, id: number): Promise
       })
   })
 }
-export function updatePassword(option: UpdatePasswordParams, id: number): Promise<HttpDTO | ErrorDTO> {
+export function updatePassword(
+  option: UpdatePasswordParams,
+  id: number
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     const { oldPassword, newPassword } = option
-    userRepository.findOne({
-      where: { id }
-    })
-      .then((user) => {
+    userRepository
+      .findOne({
+        where: { id }
+      })
+      .then(user => {
         if (user === null) {
           reject({
             status: StatusCodes.NOT_FOUND,
@@ -322,18 +410,22 @@ export function updatePassword(option: UpdatePasswordParams, id: number): Promis
           })
         }
         if (user?.password === md5(oldPassword)) {
-          userRepository.update({
-            id: user.id
-          }, {
-            password: md5(newPassword)
-          })
+          userRepository
+            .update(
+              {
+                id: user.id
+              },
+              {
+                password: md5(newPassword)
+              }
+            )
             .then(result => {
               resolve({
                 status: StatusCodes.OK,
                 data: result
               })
             })
-            .catch((err) => {
+            .catch(err => {
               reject({
                 status: StatusCodes.INTERNAL_SERVER_ERROR,
                 error: {
@@ -363,7 +455,10 @@ export function updatePassword(option: UpdatePasswordParams, id: number): Promis
   })
 }
 
-export function follow(option: FollowParams, followingId: string): Promise<HttpDTO | ErrorDTO> {
+export function follow(
+  option: FollowParams,
+  followingId: string
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     if (option.userId.toString() === followingId.toString()) {
       reject({
@@ -373,16 +468,19 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
         }
       })
     }
-    if (option.follow === undefined) { option.follow = 'true' }
+    if (option.follow === undefined) {
+      option.follow = 'true'
+    }
 
     if (option.follow === 'true') {
-      userFollowRepository.findOne({
-        where: {
-          userId: option.userId,
-          followingId: followingId
-        }
-      })
-        .then((res) => {
+      userFollowRepository
+        .findOne({
+          where: {
+            userId: option.userId,
+            followingId: followingId
+          }
+        })
+        .then(res => {
           if (res) {
             console.log('plz not repeat follow')
             reject({
@@ -392,10 +490,11 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
               }
             })
           } else {
-            userFollowRepository.save({
-              userId: option.userId,
-              followingId: followingId
-            })
+            userFollowRepository
+              .save({
+                userId: option.userId,
+                followingId: followingId
+              })
               .then(() => {
                 resolve({
                   status: StatusCodes.OK,
@@ -404,7 +503,7 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
                   }
                 })
               })
-              .catch((err) => {
+              .catch(err => {
                 reject({
                   status: StatusCodes.INTERNAL_SERVER_ERROR,
                   error: {
@@ -415,7 +514,7 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
               })
           }
         })
-        .catch((err) => {
+        .catch(err => {
           reject({
             status: StatusCodes.INTERNAL_SERVER_ERROR,
             error: {
@@ -425,10 +524,11 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
           })
         })
     } else {
-      userFollowRepository.delete({
-        userId: option.userId,
-        followingId: followingId
-      })
+      userFollowRepository
+        .delete({
+          userId: option.userId,
+          followingId: followingId
+        })
         .then(() => {
           resolve({
             status: StatusCodes.OK,
@@ -437,7 +537,7 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
             }
           })
         })
-        .catch((err) => {
+        .catch(err => {
           reject({
             status: StatusCodes.INTERNAL_SERVER_ERROR,
             error: {
@@ -450,22 +550,29 @@ export function follow(option: FollowParams, followingId: string): Promise<HttpD
   })
 }
 
-export function getFollowing(userId: string): Promise<HttpDTO | ErrorDTO> {
+export function getFollowing(
+  userId: string
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    userFollowRepository.createQueryBuilder()
-      .leftJoinAndSelect(UserEntity, 'user', 'user.id = UserFollowEntity.followingId')
+    userFollowRepository
+      .createQueryBuilder()
+      .leftJoinAndSelect(
+        UserEntity,
+        'user',
+        'user.id = UserFollowEntity.followingId'
+      )
       .select()
       .where('UserFollowEntity.userId = :id', { id: userId })
       .getRawMany()
-      .then((res) => {
-        console.log(res);
+      .then(res => {
+        console.log(res)
 
         resolve({
           status: StatusCodes.OK,
           data: UserDTO.fromFindResult(res)
         })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
@@ -476,20 +583,29 @@ export function getFollowing(userId: string): Promise<HttpDTO | ErrorDTO> {
       })
   })
 }
-export function getFollow(userId: string): Promise<HttpDTO | ErrorDTO> {
+export function getFollow(
+  userId: string
+): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    userFollowRepository.createQueryBuilder()
-      .leftJoinAndSelect(UserEntity, 'user', 'user.id = UserFollowEntity.userId')
+    userFollowRepository
+      .createQueryBuilder()
+      .leftJoinAndSelect(
+        UserEntity,
+        'user',
+        'user.id = UserFollowEntity.userId'
+      )
       .select()
-      .where('UserFollowEntity.followingId = :id', { id: userId })
+      .where('UserFollowEntity.followingId = :id', {
+        id: userId
+      })
       .getRawMany()
-      .then((res) => {
+      .then(res => {
         resolve({
           status: StatusCodes.OK,
           data: UserDTO.fromFindResult(res)
         })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
@@ -502,14 +618,15 @@ export function getFollow(userId: string): Promise<HttpDTO | ErrorDTO> {
 }
 export function getUserCount(): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    userRepository.count()
-      .then((res) => {
+    userRepository
+      .count()
+      .then(res => {
         resolve({
           status: StatusCodes.OK,
           data: res
         })
       })
-      .catch((err) => {
+      .catch(err => {
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {

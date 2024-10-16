@@ -95,6 +95,7 @@
     <edit-profile
       v-model:show="edit_mode"
       :user-data="renderData"
+      @update-profile="update()"
     ></edit-profile>
   </n-el>
 </template>

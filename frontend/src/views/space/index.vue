@@ -1,3 +1,3 @@
 <template>
-  this is space page
+  There is nothing here.
 </template>

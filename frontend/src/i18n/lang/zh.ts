@@ -174,5 +174,7 @@ export default {
   change_user_name: '更改用户名',
   change_account: '更改ID',
   change_description: '更改个性签名',
-  upload_avatar: '上传头像'
+  upload_avatar: '上传头像',
+  upload_background: '上传背景',
+  drag_upload: '拖拽上传'
 }

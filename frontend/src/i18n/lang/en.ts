@@ -170,5 +170,7 @@ export default {
   change_user_name: 'Change name',
   change_account: 'Change account ID',
   change_description: 'Change Description',
-  upload_avatar: 'Upload Avatar'
+  upload_avatar: 'Upload Avatar',
+  upload_background: 'Upload Background',
+  drag_upload: 'Drag and drop upload'
 }
