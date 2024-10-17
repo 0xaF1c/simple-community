@@ -246,7 +246,7 @@ export function sendEmailCode(
   params: GetLoginEmailCodeParams
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
-    const code = random(1, 9999, false).toString()
+    const code = random(100000, 999999, false).toString()
     if (addItem(code, params.email)) {
       if (sendEmailVerifyCode(code, params.email)) {
         resolve({
