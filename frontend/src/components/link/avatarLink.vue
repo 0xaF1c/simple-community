@@ -8,8 +8,8 @@
       style: {
         width: `${size}px`,
         height: `${size}px`,
-        margin: 0
-      }
+        margin: 0,
+      },
     }"
     :style="{
       margin: 0,
@@ -19,14 +19,11 @@
       width: `${size}px`,
       height: `${size}px`,
       borderRadius: '2.4px',
-      cursor: 'pointer'
+      cursor: 'pointer',
     }"
     @click="onAvatarClick"
   />
-  <user-card
-    v-model:show="cardShow"
-    :user-data="userData"
-  ></user-card>
+  <user-card v-model:show="cardShow" :user-data="userData"></user-card>
 </template>
 
 <script lang="ts">
@@ -40,7 +37,7 @@ export default defineComponent({
   components: {
     NAvatar,
     userCard,
-    NButton
+    NButton,
   },
   setup(props) {
     const { showLoginModal } = useAuthModal()
@@ -59,23 +56,23 @@ export default defineComponent({
             cardShow.value = !cardShow.value
           }
         }
-      }
+      },
     }
   },
   props: {
     userData: {
       type: Object as any,
-      required: true
+      required: true,
     },
     size: {
       type: Number,
-      required: true,
-      default: 50
+      required: false,
+      default: 50,
     },
     onClick: {
       type: Function,
-      required: false
-    }
-  }
+      required: false,
+    },
+  },
 })
 </script>

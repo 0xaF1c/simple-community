@@ -1,5 +1,5 @@
-import { GlobalTheme, darkTheme, lightTheme, useOsTheme } from "naive-ui";
-import { Ref, ref } from "vue"
+import { type GlobalTheme, darkTheme, lightTheme, useOsTheme } from 'naive-ui'
+import { type Ref, ref } from 'vue'
 
 type Theme = Ref<GlobalTheme | null>
 type UseToggleTheme = () => {
@@ -26,9 +26,8 @@ export const useToggleTheme: UseToggleTheme = () => {
     toggleTheme() {
       currentTheme.value = currentTheme.value == 'dark' ? 'light' : 'dark'
       currentThemeBool.value = currentTheme.value == 'dark'
-      
+
       theme.value = convert(currentTheme.value)
-      
-    }
+    },
   }
 }

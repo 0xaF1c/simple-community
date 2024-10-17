@@ -21,46 +21,28 @@
         ></upload-avatar-component>
       </n-space>
       <n-form-item-row :label="$t('change_user_name')">
-        <n-input
-          placeholder=""
-          v-model:value="userData.name"
-        ></n-input>
+        <n-input placeholder="" v-model:value="userData.name"></n-input>
       </n-form-item-row>
       <n-form-item-row :label="$t('change_account')">
-        <n-input
-          placeholder=""
-          v-model:value="userData.account"
-        ></n-input>
+        <n-input placeholder="" v-model:value="userData.account"></n-input>
       </n-form-item-row>
       <n-form-item-row :label="$t('change_description')">
-        <n-input
-          placeholder=""
-          v-model:value="userData.description"
-        ></n-input>
+        <n-input placeholder="" v-model:value="userData.description"></n-input>
       </n-form-item-row>
       <n-space>
         <n-button type="primary" @click="onSubmitClick">{{
           $t('confirm.name')
         }}</n-button>
-        <n-button
-          secondary
-          @click="emits('update:show', false)"
-          >{{ $t('cancel.name') }}</n-button
-        >
+        <n-button secondary @click="emits('update:show', false)">{{
+          $t('cancel.name')
+        }}</n-button>
       </n-space>
     </n-form>
   </n-modal>
 </template>
 
 <script setup lang="ts">
-import {
-  NForm,
-  NFormItemRow,
-  NInput,
-  NButton,
-  NModal,
-  NSpace,
-} from 'naive-ui'
+import { NForm, NFormItemRow, NInput, NButton, NModal, NSpace } from 'naive-ui'
 
 import { onMounted, ref } from 'vue'
 import uploadAvatarComponent from '../../components/upload/uploadAvatar.vue'
@@ -85,7 +67,7 @@ const onSubmitClick = () => {
       account: props.userData.account,
       description: props.userData.description,
       backgroundUrl: uploadBackground.value,
-      avatarUrl: uploadAvatar.value
+      avatarUrl: uploadAvatar.value,
     })
     .then(() => {
       emits('update:show', false)
@@ -94,7 +76,7 @@ const onSubmitClick = () => {
     .catch(console.log)
 }
 const update = () => {
-  console.log(props.userData)
+  // console.log(props.userData)
 }
 
 onMounted(() => {

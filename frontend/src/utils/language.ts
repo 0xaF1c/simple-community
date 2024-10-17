@@ -1,4 +1,4 @@
-import { Ref } from "vue"
+import { type Ref } from 'vue'
 
 export function getLanguage() {
   return localStorage.getItem('locale') || navigator.language || 'en-US'

@@ -33,8 +33,8 @@
               width: '100%',
               height: '400px',
               objecFit: 'cover',
-              objectPosition: 'center top'
-            }
+              objectPosition: 'center top',
+            },
           }"
           v-if="!emtry"
           :src="renderData.backgroundUrl"
@@ -79,15 +79,11 @@
             :secondary="!edit_mode"
           >
             <span v-show="!edit_mode">{{ $t('edit') }}</span>
-            <span v-show="edit_mode">{{
-              $t('editCancel')
-            }}</span>
+            <span v-show="edit_mode">{{ $t('editCancel') }}</span>
           </n-button>
         </n-space>
       </template>
-      <n-divider title-placement="left">{{
-        $t('post.name')
-      }}</n-divider>
+      <n-divider title-placement="left">{{ $t('post.name') }}</n-divider>
       <n-el v-for="t in posts" style="margin: 10px 0">
         <post-card :post="t" />
       </n-el>
@@ -101,13 +97,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  ref,
-  watch
-} from 'vue'
+import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 import PostCard from '../../components/postCard/postCard.vue'
 import FollowButton from '../../components/follow/followButton.vue'
 import editProfile from './editProfile.vue'
@@ -123,7 +113,7 @@ import {
   NButton,
   NIcon,
   NTooltip,
-  NInput
+  NInput,
 } from 'naive-ui'
 
 import { ChevronLeft24Filled } from '@vicons/fluent'
@@ -148,7 +138,7 @@ export default defineComponent({
     FollowText,
     FollowButton,
     NInput,
-    editProfile
+    editProfile,
   },
   setup() {
     const route = useRoute()
@@ -177,7 +167,7 @@ export default defineComponent({
       } else {
         renderData.value = (
           await http.get(`/api/user/profile`, {
-            params: { id: id.value }
+            params: { id: id.value },
           })
         ).data
       }
@@ -185,8 +175,8 @@ export default defineComponent({
         (
           await http.get('/api/user/posts', {
             params: {
-              id: req_id.value
-            }
+              id: req_id.value,
+            },
           })
         ).data?.posts ?? []
 
@@ -194,7 +184,8 @@ export default defineComponent({
         const t = (v: any) => new Date(v).getTime()
         return t(b.updateTime) - t(a.updateTime)
       })
-      emtry.value = JSON.stringify(renderData) === '{}'
+
+      emtry.value = JSON.stringify(renderData.value) === '{}'
     }
     onMounted(() => {
       update()
@@ -203,7 +194,7 @@ export default defineComponent({
       () => route.query,
       () => {
         update()
-      }
+      },
     )
     return {
       id,
@@ -213,8 +204,8 @@ export default defineComponent({
       edit_mode,
       emtry,
       update,
-      ChevronLeft24Filled
+      ChevronLeft24Filled,
     }
-  }
+  },
 })
 </script>
