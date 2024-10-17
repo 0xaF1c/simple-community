@@ -285,7 +285,7 @@ export function getImage(
         minioClient
           ?.presignedGetObject(defaultBucket, img?.filename!)
           .then(url => {
-            resolve(url)
+            resolve(url.split('127.0.0.1:9000')[1])
           })
           .catch(err => {
             reject({

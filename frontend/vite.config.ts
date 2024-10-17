@@ -30,6 +30,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: path => path.replace(/^\/storage/, ''),
       },
+      '/bucket1': {
+        target: 'http://127.0.0.1:9000/bucket1',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/bucket1/, ''),
+      },
     },
   },
 })
