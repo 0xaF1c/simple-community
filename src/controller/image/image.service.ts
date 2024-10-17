@@ -154,7 +154,9 @@ function saveImage(
     })
 
     stream.on('end', async () => {
-      const img = sharp(Buffer.concat(fileBuffer))
+      const img = sharp(Buffer.concat(fileBuffer), {
+        animated: true
+      })
       const metadata = await img.metadata()
       const format = metadata.format ?? 'png'
       const objectName = `${randomUUID().replace(

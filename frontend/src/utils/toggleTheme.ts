@@ -5,7 +5,7 @@ type Theme = Ref<GlobalTheme | null>
 type UseToggleTheme = () => {
   theme: Theme
   toggleTheme: () => void
-  currentTheme: 'dark' | 'light'
+  currentTheme: Ref<'dark' | 'light'>
   currentThemeBool: Ref<boolean>
 }
 
