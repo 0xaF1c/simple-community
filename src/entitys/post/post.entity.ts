@@ -4,6 +4,7 @@ import { PostImagesEntity } from "./postImagesRelation.entity"
 import { UserDTO, UserEntity } from "../user/user.entity"
 // import { plainToClass } from "class-transformer"
 import _ from "lodash"
+import { decode } from "utf8mb3"
 
 @Entity('sc_post')
 export class PostEntity {
@@ -168,12 +169,12 @@ export class PostDTO {
   static fromFindResult(options: IPostDetailFindResult[], userId: string | undefined) {
     const _this = new PostDTO()
 
-    if (options.length <= 0) {
+    if (!options) {      
       return []
     }
     options.forEach((result) => {      
-      _this.content = result.PostEntity_content
-      _this.title = result.PostEntity_title
+      _this.content = decode(result.PostEntity_content)
+      _this.title = decode(result.PostEntity_title)
       _this.createTime = result.PostEntity_createTime
       _this.updateTime = result.PostEntity_updateTime
       _this.publisherId = result.PostEntity_publisher
@@ -183,7 +184,7 @@ export class PostDTO {
       _this.publisher.account = result.pubUser_account
       _this.publisher.email = result.pubUser_email
       _this.publisher.password = result.pubUser_password
-      _this.publisher.description = result.pubUser_description
+      _this.publisher.description = decode(result.pubUser_description)
       _this.publisher.avatarUrl = result.pubUser_avatarUrl
       _this.publisher.backgroundUrl = result.pubUser_backgroundUrl
       _this.publisher.createTime = result.pubUser_createTime
@@ -197,19 +198,24 @@ export class PostDTO {
         createTime: result.tag_createTime,
         updateTime: result.tag_updateTime,
       })
-      _this.likes.push(new UserDTO({
-        id: result.user_id,
-        name: result.user_name,
-        account: result.user_account,
-        email: result.user_email,
-        description: result.user_description,
-        avatarUrl: result.user_avatarUrl,
-        backgroundUrl: result.user_backgroundUrl,
-        createTime: result.user_createTime,
-        updateTime: result.user_updateTime,
-      }))
+      
+      if (result.user_id) {
+        _this.likes.push(new UserDTO({
+          id: result.user_id,
+          name: result.user_name,
+          account: result.user_account,
+          email: result.user_email,
+          description: result.user_description,
+          avatarUrl: result.user_avatarUrl,
+          backgroundUrl: result.user_backgroundUrl,
+          createTime: result.user_createTime,
+          updateTime: result.user_updateTime,
+        }))
+      }
       _this.images.push(result.image_url)
     })
+
+
     _this.images = _.uniqWith(_this.images, _.isEqual)
     _this.images = _this.images.filter(img => img !== null)
 
@@ -218,10 +224,11 @@ export class PostDTO {
     _this.likeCount = _this.likes.length
 
 
-    if (userId !== undefined || userId !== null) {
-      _this.liked = _this.likes.filter(user => Number(user.id) === Number(userId)).length > 0
-    } else {
+    
+    if (userId) {
       _this.liked = false
+    } else {
+      _this.liked = _this.likes.filter(user => Number(user.id) === Number(userId)).length > 0
     }
 
     _this.tags = _.uniqWith(_this.tags, _.isEqual)
@@ -280,7 +287,7 @@ export class PostCommentsDTO {
       })
       _this.comments.push({
         id: result.comment_id,
-        content: result.comment_content,
+        content: decode(result.comment_content),
         replyTo: result.comment_replyTo,
         publisherId: result.comment_publisher,
         createTime: result.comment_createTime,

@@ -17,6 +17,7 @@ const configFn: IConfigFn = () => {
     synchronize: true,
     // print result info to console
     logging: false,
+    charset: 'utf8mb4',
     entities: [
       __dirname + '/../**/*.entity.{js,ts}',
       '../entitys/*.entity.{js,ts}'

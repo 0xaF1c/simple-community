@@ -277,6 +277,8 @@ export function getImage(
   key: string
 ): Promise<string | ErrorDTO> {
   return new Promise((resolve, reject) => {
+    console.log(key)
+    
     imageRepository
       .findOne({
         where: { key }

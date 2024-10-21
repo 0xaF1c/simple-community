@@ -2,15 +2,11 @@
   <n-thing>
     <template #header>
       <n-space align="center">
-        <avatar-link
-          :user-data="comment.publisher"
-        ></avatar-link>
+        <avatar-link :user-data="comment.publisher"></avatar-link>
         <!-- <n-avatar :src="comment.publisher.avatarUrl" :size="50" object-fit="cover"
           style="display: flex; justify-content: center; align-items: center;" /> -->
         <n-text
-          >{{ comment.publisher.name }}@{{
-            comment.publisher.account
-          }}</n-text
+          >{{ comment.publisher.name }}@{{ comment.publisher.account }}</n-text
         >
       </n-space>
     </template>
@@ -23,11 +19,7 @@
             v-show="!liked"
             :component="Heart24Regular"
           ></n-icon>
-          <n-icon
-            :size="15"
-            v-show="liked"
-            :component="Heart24Filled"
-          ></n-icon>
+          <n-icon :size="15" v-show="liked" :component="Heart24Filled"></n-icon>
           {{ comment.likeCount }}
         </n-button>
         <n-button text @click="$emit('onReplyClick')">
@@ -52,10 +44,7 @@
         >
           {{ $t('confirm_delete_comment.name') }}
           <template #trigger>
-            <n-button
-              text
-              @click="popConfirmShow = !popConfirmShow"
-            >
+            <n-button text @click="popConfirmShow = !popConfirmShow">
               <n-icon
                 :size="15"
                 v-show="!popConfirmShow"
@@ -87,7 +76,7 @@ import {
   NEl,
   NAvatar,
   NPopconfirm,
-  useMessage
+  useMessage,
 } from 'naive-ui'
 import {
   Comment24Regular,
@@ -95,7 +84,7 @@ import {
   Heart24Regular,
   Heart24Filled,
   Delete24Regular,
-  Delete24Filled
+  Delete24Filled,
 } from '@vicons/fluent'
 import { http } from '../../utils/http'
 import { useI18n } from 'vue-i18n'
@@ -106,12 +95,12 @@ export default defineComponent({
   props: {
     comment: {
       required: true,
-      type: Object as any
+      type: Object as any,
     },
     selected: {
       required: false,
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   emit: ['onReplyClick', 'needUpdate'],
   components: {
@@ -124,7 +113,7 @@ export default defineComponent({
     NAvatar,
     NPopconfirm,
     avatarLink,
-    MyTime
+    MyTime,
   },
   setup(props, { emit }) {
     const { t } = useI18n()
@@ -135,8 +124,7 @@ export default defineComponent({
     const isPublisher = ref<boolean>(false)
     const update = async () => {
       const res = await http.get('/api/user/status')
-      isPublisher.value =
-        res.data.id === props.comment.publisher.id
+      isPublisher.value = res.data.id === props.comment.publisher.id
     }
     const like = () => {
       liked.value = !liked.value
@@ -148,8 +136,8 @@ export default defineComponent({
       http.get('/api/comment/like', {
         params: {
           like: liked.value,
-          commentId: props.comment.id
-        }
+          commentId: props.comment.id,
+        },
       })
     }
     const deleteComment = async () => {
@@ -157,8 +145,8 @@ export default defineComponent({
         http
           .get('/api/comment/delete', {
             params: {
-              commentId: props.comment.id
-            }
+              commentId: props.comment.id,
+            },
           })
           .then(res => {
             console.log(res)
@@ -190,11 +178,11 @@ export default defineComponent({
       Delete24Regular,
       Delete24Filled,
       Heart24Regular,
-      Heart24Filled
+      Heart24Filled,
     }
   },
   mounted() {
     this.update()
-  }
+  },
 })
 </script>

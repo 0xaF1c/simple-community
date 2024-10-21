@@ -14,7 +14,7 @@ export const adminController: ControllerOptions = {
               status: StatusCodes.NOT_FOUND,
               error: {
                 name: 'UserNotFound',
-                message: 'unkown token'
+                message: 'unknown token'
               }
             })
             return

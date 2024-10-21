@@ -106,8 +106,9 @@ export const postController: ControllerOptions = {
       method: 'get',
       handlers: [
         (req, res) => {
+          
           // @ts-ignore
-          recommendPost(req.query.limit, req.query.id ?? undefined)
+          recommendPost(req.query.limit, req.auth?.id ?? undefined)
             .then((result) => {
               res.json(result)
             })

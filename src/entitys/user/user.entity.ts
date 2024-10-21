@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import { decode } from 'utf8mb3'
 
 @Entity('sc_user')
 export class UserEntity {
@@ -93,7 +94,7 @@ export class UserDTO {
       this.name = user.name
       this.account = user.account
       this.email = user.email
-      this.description = user.description
+      this.description = decode(user.description)
       this.avatarUrl = user.avatarUrl
       this.backgroundUrl = user.backgroundUrl
       this.createTime = user.createTime

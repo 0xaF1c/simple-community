@@ -19,6 +19,7 @@ import { PostCommentEntity } from '../../entitys/post/postCommentRelation.entity
 import { FgYellow, Reset } from '../../utils/color'
 import { useImageSigner } from '../image/image.service'
 import { ImageEntity } from '../../entitys/image/image.entity'
+import { encode } from 'utf8mb3'
 
 const { dataSource } = useAppDataSource()
 const postRepository = dataSource.getRepository(PostEntity)
@@ -41,6 +42,8 @@ export function postPublish(
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
     post.publisher = id
+    post.content = encode(post.content)
+    post.title = encode(post.title)
 
     postRepository
       .save(post)
@@ -51,8 +54,6 @@ export function postPublish(
               post.images
                 .map(key => {
                   const url = sign(key)
-                  console.log(url)
-
                   return new PostImagesEntity({
                     postId: saveResult.id,
                     url: url
@@ -224,14 +225,15 @@ export function getPostDetail(
       .where('PostEntity.id = :id', { id: postId })
       .getRawMany()
       .then(result => {
-        console.log(result)
-
+          
         resolve({
           status: StatusCodes.OK,
           data: PostDTO.fromFindResult(result, userId)
         })
       })
       .catch(err => {
+        console.log('wdnmd', postId);
+        
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
@@ -342,8 +344,6 @@ export function deletePost(
                 }
               })
               .then(findResult => {
-                console.log(findResult)
-
                 findResult.forEach(rel => {
                   const key = rel.url.split('/image/i/')[1]
                   imageRepository
@@ -410,6 +410,8 @@ export function recommendPost(
   userId?: string
 ): Promise<HttpDTO | ErrorDTO> {
   return new Promise((resolve, reject) => {
+    console.log(limit ?? 10)
+    
     postRepository
       .createQueryBuilder()
       .select()
@@ -418,7 +420,7 @@ export function recommendPost(
       .getMany()
       .then(result => {
         Promise.all(result.map(t => getPostDetail(t.id, userId)))
-          .then(values => {
+          .then(values => {            
             resolve({
               status: StatusCodes.OK,
               data: {
@@ -426,7 +428,8 @@ export function recommendPost(
               }
             })
           })
-          .catch(_ => {
+          .catch(err => {
+            console.error(err)
             reject({
               status: StatusCodes.INTERNAL_SERVER_ERROR,
               error: {

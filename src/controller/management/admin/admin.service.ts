@@ -19,7 +19,7 @@ export function create(userId: number, role: string) {
               status: StatusCodes.NOT_FOUND,
               error: {
                 name: 'UserNotFound',
-                message: 'unkown token'
+                message: 'unknown token'
               }
             })
           }
@@ -82,12 +82,12 @@ export function login(userId: number) {
             status: StatusCodes.NOT_FOUND,
             error: {
               name: 'UserNotFound',
-              message: 'unkown token'
+              message: 'unknown token'
             }
           })
         } else {
           resolve({
-            messsage: 'Admin Login Success',
+            message: 'Admin Login Success',
             token: createToken({
               id: admin.user_id,
               role: admin.role

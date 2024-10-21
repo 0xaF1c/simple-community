@@ -1,6 +1,6 @@
 <template>
   <n-card :bordered="false">
-    <n-el style="font-size: 1.3rem;">{{ $t('tag_recommend.name') }}</n-el>
+    <n-el style="font-size: 1.3rem">{{ $t('tag_recommend.name') }}</n-el>
     <n-space vertical style="margin-top: 10px">
       <tag v-for="t in data" :tag="t" :width="240"></tag>
     </n-space>
@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent,Ref,ref } from 'vue'
+import { defineComponent, type Ref, ref } from 'vue'
 import tag from '../../components/tag/tag.vue'
 import { http } from '../../utils/http'
 import { NEl, NCard, NSpace, NEllipsis } from 'naive-ui'
@@ -22,7 +22,7 @@ export default defineComponent({
     NCard,
     NSpace,
     NEl,
-    NEllipsis
+    NEllipsis,
   },
   setup() {
     const data = ref<any>([])
@@ -30,8 +30,8 @@ export default defineComponent({
     getData(data)
 
     return {
-      data
+      data,
     }
-  }
+  },
 })
 </script>

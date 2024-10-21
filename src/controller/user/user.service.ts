@@ -3,7 +3,10 @@ import {
   UserDTO,
   UserEntity
 } from '../../entitys/user/user.entity'
-import { useAppDataSource, useMinioClient } from '../../utils/database'
+import {
+  useAppDataSource,
+  useMinioClient
+} from '../../utils/database'
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import {
@@ -20,6 +23,7 @@ import { UserFollowEntity } from '../../entitys/user/userFollowRelation.entity'
 import { md5 } from '../../utils/md5'
 import { useImageSigner } from '../image/image.service'
 import { ImageEntity } from '../../entitys/image/image.entity'
+import { encode } from 'utf8mb3'
 
 const { sendEmailVerifyCode } = useMailer()
 const { dataSource } = useAppDataSource()
@@ -160,7 +164,7 @@ export function loginWithAccount(
           resolve({
             status: StatusCodes.OK,
             data: {
-              messsage: 'Login Success',
+              message: 'Login Success',
               token: createToken({ id: findUser.id })
             }
           })
@@ -202,7 +206,7 @@ export function status(
           status: StatusCodes.UNAUTHORIZED,
           error: {
             name: 'UNAUTHORIZED',
-            message: 'unkown token'
+            message: 'unknown token'
           }
         })
       })
@@ -235,7 +239,7 @@ export function profile(id: any): Promise<HttpDTO | ErrorDTO> {
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: 'INTERNAL_SERVER_ERROR',
-            message: 'unkown error'
+            message: 'unknown error'
           }
         })
       })
@@ -258,7 +262,7 @@ export function sendEmailCode(
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
             name: 'INTERNAL_SERVER_ERROR',
-            message: 'unkown error'
+            message: 'unknown error'
           }
         })
       }
@@ -333,7 +337,7 @@ export function updateProfile(
     if (profile.account) updateObj.account = profile.account
     if (profile.email) updateObj.email = profile.email
     if (profile.description)
-      updateObj.description = profile.description
+      updateObj.description = encode(profile.description)
     if (profile.avatarUrl)
       updateObj.avatarUrl = sign(profile.avatarUrl)
     if (profile.backgroundUrl)
@@ -343,23 +347,26 @@ export function updateProfile(
       if (user === null) {
         return
       }
-      [user.avatarUrl, user.backgroundUrl].forEach((rel) => {
+      ;[user.avatarUrl, user.backgroundUrl].forEach(rel => {
         const key = rel.split('/image/i/')[1]
         imageRepository
           .findOne({
             where: { key }
           })
           .then(img => {
-            minioClient
-              ?.removeObject(defaultBucket, img?.filename!)
-              .then(console.log)
-            imageRepository
-              .delete({
-                id: img?.id,
-                uploader: img?.uploader,
-                key: img?.key
-              })
-              .then(console.log)
+            if (img) {
+              minioClient
+                ?.removeObject(defaultBucket, img?.filename!)
+                .then(console.log)
+              imageRepository
+                .delete({
+                  id: img?.id,
+                  uploader: img?.uploader,
+                  key: img?.key
+                })
+                .then(console.log)
+                .catch(console.log)
+            }
           })
           .catch(reject)
       })
@@ -405,7 +412,7 @@ export function updatePassword(
             status: StatusCodes.NOT_FOUND,
             error: {
               name: 'UserNotFound',
-              message: 'unkown token'
+              message: 'unknown token'
             }
           })
         }
