@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes'
 import sharp from 'sharp'
 import { ImageEntity } from '../../entitys/image/image.entity'
 import { ErrorDTO, HttpDTO } from 'src/types'
-import { FgYellow, Reset } from '../../utils/color'
+import { FgCyan, FgRed, FgYellow, Reset } from '../../utils/color'
 import {
   useAppDataSource,
   useMinioClient
@@ -46,7 +46,9 @@ export function useImageSigner() {
       signImage(etag, filename, uploader, key)
         .then(console.log)
         .catch(console.log)
-      return formatUrl(path.join(process.env.API_ROOT!, `/image/i/${key}`))
+      return formatUrl(
+        path.join(process.env.API_ROOT!, `/image/i/${key}`)
+      )
     }
     // return 'file format error'
   }
@@ -278,7 +280,7 @@ export function getImage(
 ): Promise<string | ErrorDTO> {
   return new Promise((resolve, reject) => {
     console.log(key)
-    
+
     imageRepository
       .findOne({
         where: { key }
@@ -311,6 +313,27 @@ export function getImage(
   })
 }
 
+export function deleteImage(key: string) {
+  imageRepository
+    .findOne({
+      where: { key }
+    })
+    .then(img => {
+      if (img) {
+        minioClient?.removeObject(defaultBucket, img?.filename)
+        imageRepository.delete(img)
+        .then(res => {
+          console.log(`[${FgCyan}delete image${Reset}] ${res}`)
+        })
+        .catch(err => {
+          console.error(`[${FgRed}delete image error${Reset}] ${err}`)
+        })
+      }
+    })
+    .catch(err => {
+      console.error(err)
+    })
+}
 // declare
 // export function resetPath() {
 //   config()

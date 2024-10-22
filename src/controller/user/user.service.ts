@@ -21,7 +21,10 @@ import { random } from 'lodash'
 import { useMailer } from '../../utils/email'
 import { UserFollowEntity } from '../../entitys/user/userFollowRelation.entity'
 import { md5 } from '../../utils/md5'
-import { useImageSigner } from '../image/image.service'
+import {
+  deleteImage,
+  useImageSigner
+} from '../image/image.service'
 import { ImageEntity } from '../../entitys/image/image.entity'
 import { encode } from 'utf8mb3'
 
@@ -338,62 +341,57 @@ export function updateProfile(
     if (profile.email) updateObj.email = profile.email
     if (profile.description)
       updateObj.description = encode(profile.description)
-    if (profile.avatarUrl)
-      updateObj.avatarUrl = sign(profile.avatarUrl)
-    if (profile.backgroundUrl)
-      updateObj.backgroundUrl = sign(profile.backgroundUrl)
 
-    userRepository.findOne({ where: { id } }).then(user => {
-      if (user === null) {
-        return
-      }
-      ;[user.avatarUrl, user.backgroundUrl].forEach(rel => {
-        const key = rel.split('/image/i/')[1]
-        imageRepository
-          .findOne({
-            where: { key }
+    const internalUpdateUser = () => {
+      userRepository
+        .update(
+          {
+            id
+          },
+          updateObj
+        )
+        .then(result => {
+          resolve({
+            status: StatusCodes.OK,
+            data: result
           })
-          .then(img => {
-            if (img) {
-              minioClient
-                ?.removeObject(defaultBucket, img?.filename!)
-                .then(console.log)
-              imageRepository
-                .delete({
-                  id: img?.id,
-                  uploader: img?.uploader,
-                  key: img?.key
-                })
-                .then(console.log)
-                .catch(console.log)
+        })
+        .catch(err => {
+          reject({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            error: {
+              name: err.name,
+              message: err.message
             }
           })
-          .catch(reject)
-      })
-    })
-
-    userRepository
-      .update(
-        {
-          id
-        },
-        updateObj
-      )
-      .then(result => {
-        resolve({
-          status: StatusCodes.OK,
-          data: result
         })
-      })
-      .catch(err => {
-        reject({
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-          error: {
-            name: err.name,
-            message: err.message
+    }
+    console.log(profile.backgroundUrl)
+    if (profile.avatarUrl || profile.backgroundUrl) {
+      userRepository
+        .findOne({ where: { id } })
+        .then(user => {
+          if (user === null) {
+            return
           }
+          if (profile.avatarUrl) {
+            updateObj.avatarUrl = sign(profile.avatarUrl)
+            const key = user.avatarUrl.split('/image/i/')[1]
+            deleteImage(key)
+          }
+          if (profile.backgroundUrl) {
+            updateObj.backgroundUrl = sign(profile.backgroundUrl)
+            const key = user.backgroundUrl.split('/image/i/')[1]
+            deleteImage(key)
+          }
+          internalUpdateUser()
         })
-      })
+        .catch(err => {
+          console.error(err)
+        })
+    } else {
+      internalUpdateUser()
+    }
   })
 }
 export function updatePassword(
