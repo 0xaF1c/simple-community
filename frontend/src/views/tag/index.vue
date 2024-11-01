@@ -5,7 +5,6 @@
         <n-button quaternary circle @click="$router.back()">
           <n-icon :component="ChevronLeft24Filled"></n-icon>
         </n-button>
-        {{ tagDetail?.title }}
       </template>
       <template #header-extra>
         <n-space align="center">
@@ -17,12 +16,6 @@
     <n-card :bordered="false">
       <template #header>
         <n-space align="center">
-          <n-image
-            :height="100"
-            :width="100"
-            object-fit="cover"
-            :src="tagDetail?.poster"
-          ></n-image>
           <n-el>
             <n-el style="font-size: 2rem">
               {{ tagDetail?.title }}
@@ -36,10 +29,7 @@
     </n-card>
 
     <n-card :bordered="false">
-      <n-empty
-        v-if="isEmtry"
-        :description="$t('emtry.name')"
-      ></n-empty>
+      <n-empty v-if="isEmtry" :description="$t('emtry.name')"></n-empty>
     </n-card>
     <post-card v-for="t in postData" :post="t"></post-card>
   </n-el>
@@ -58,7 +48,7 @@ import {
   NEmpty,
   NButton,
   NIcon,
-  NDivider
+  NDivider,
 } from 'naive-ui'
 import postCard from '../../components/postCard/postCard.vue'
 import { ref, watch } from 'vue'
@@ -75,7 +65,7 @@ export default defineComponent({
     NEmpty,
     NButton,
     NIcon,
-    NDivider
+    NDivider,
   },
   setup() {
     const { error } = useMessage()
@@ -90,8 +80,8 @@ export default defineComponent({
       http
         .get('/api/tag/detail', {
           params: {
-            id: route.query.id
-          }
+            id: route.query.id,
+          },
         })
         .then(res => {
           tagDetail.value = res.data
@@ -104,8 +94,8 @@ export default defineComponent({
       http
         .get('/api/tag/posts', {
           params: {
-            id: route.query.id
-          }
+            id: route.query.id,
+          },
         })
         .then(res => {
           const task: Array<Promise<any>> = []
@@ -114,9 +104,9 @@ export default defineComponent({
             task.push(
               http.get('/api/post/detail', {
                 params: {
-                  id: postId
-                }
-              })
+                  id: postId,
+                },
+              }),
             )
           })
           Promise.all(task)
@@ -149,7 +139,7 @@ export default defineComponent({
       () => route.query,
       () => {
         update()
-      }
+      },
     )
     return {
       postData,
@@ -158,12 +148,12 @@ export default defineComponent({
       tagDetail,
       isEmtry,
       update,
-      ChevronLeft24Filled
+      ChevronLeft24Filled,
     }
   },
   mounted() {
     this.loadingBar.start()
     this.update()
-  }
+  },
 })
 </script>

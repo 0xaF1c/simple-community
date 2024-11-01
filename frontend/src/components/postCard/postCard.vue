@@ -3,7 +3,7 @@
     <template #default>
       <n-el
         :style="{
-          paddingLeft: `${avatarSize + avatarMargin}px`
+          paddingLeft: `${avatarSize + avatarMargin}px`,
         }"
       >
         <n-image-group>
@@ -33,7 +33,7 @@
         :style="{
           height: `${avatarSize}px`,
           verticalAlign: 'top',
-          display: 'flex'
+          display: 'flex',
         }"
       >
         <avatar-link
@@ -45,20 +45,18 @@
             display: 'inline-block',
             height: `${avatarSize}px`,
             verticalAlign: 'top',
-            marginLeft: `${avatarMargin}px`
+            marginLeft: `${avatarMargin}px`,
           }"
         >
           <n-text
-            >{{ post?.publisher.name }}@{{
-              post?.publisher.account
-            }}</n-text
+            >{{ post?.publisher.name }}@{{ post?.publisher.account }}</n-text
           >
           <my-time :date="post?.updateTime"></my-time>
         </n-space>
       </n-el>
       <n-el
         :style="{
-          paddingLeft: `${avatarSize + avatarMargin}px`
+          paddingLeft: `${avatarSize + avatarMargin}px`,
         }"
       >
         <h2>{{ post?.title }}</h2>
@@ -76,10 +74,7 @@
       >
         {{ $t('confirm_delete_post.name') }}
         <template #trigger>
-          <n-button
-            text
-            @click="popConfirmShow = !popConfirmShow"
-          >
+          <n-button text @click="popConfirmShow = !popConfirmShow">
             <n-icon
               :size="15"
               v-show="!popConfirmShow"
@@ -98,7 +93,7 @@
     <template #footer>
       <n-el
         :style="{
-          paddingLeft: `${avatarSize + avatarMargin}px`
+          paddingLeft: `${avatarSize + avatarMargin}px`,
         }"
       >
         <n-el
@@ -119,14 +114,9 @@
               v-show="liked"
               :component="Heart24Filled"
             ></n-icon>
-            <n-el style="margin-left: 7px">{{
-              post?.likeCount
-            }}</n-el>
+            <n-el style="margin-left: 7px">{{ post?.likeCount }}</n-el>
           </n-button>
-          <n-button
-            secondary
-            @click="commentShow = !commentShow"
-          >
+          <n-button secondary @click="commentShow = !commentShow">
             <n-icon
               :size="20"
               v-show="!commentShow"
@@ -154,7 +144,7 @@
           <n-mention
             :placeholder="
               selectedReply !== null
-                ? `${$t('reply.name')} ${selectedReply!.at}`
+                ? `${$t('reply')} ${selectedReply!.at}`
                 : $t('input_comment.name')
             "
             v-model:value="content"
@@ -195,7 +185,7 @@ import {
   useMessage,
   NTooltip,
   NTime,
-  NPopconfirm
+  NPopconfirm,
 } from 'naive-ui'
 import {
   ArrowRight24Filled,
@@ -206,7 +196,7 @@ import {
   Heart24Regular,
   Heart24Filled,
   Delete24Regular,
-  Delete24Filled
+  Delete24Filled,
 } from '@vicons/fluent'
 import tag from '../tag/tag.vue'
 import myComment from '../comment/commentWarpper.vue'
@@ -235,13 +225,13 @@ export default defineComponent({
     NTime,
     NTooltip,
     MyTime,
-    NPopconfirm
+    NPopconfirm,
   },
   props: {
     post: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   setup(props) {
     const { success, error } = useMessage()
@@ -267,16 +257,15 @@ export default defineComponent({
       commentData.value = (
         await http.get('/api/post/comments', {
           params: {
-            id: props.post.id
-          }
+            id: props.post.id,
+          },
         })
       ).data
 
       reply.value = {}
       commentData.value?.comments.forEach((c: any) => {
         if (c.replyTo !== null) {
-          if (reply.value[c.replyTo] === undefined)
-            reply.value[c.replyTo] = []
+          if (reply.value[c.replyTo] === undefined) reply.value[c.replyTo] = []
           reply.value[c.replyTo]?.push(c)
         }
       })
@@ -294,16 +283,16 @@ export default defineComponent({
       http.get('/api/post/like', {
         params: {
           like: liked.value,
-          postId: props.post.id
-        }
+          postId: props.post.id,
+        },
       })
     }
     const init = () => {
       http
         .get('/api/post/isLike', {
           params: {
-            id: props.post.id
-          }
+            id: props.post.id,
+          },
         })
         .then(res => {
           liked.value = res.data
@@ -319,7 +308,7 @@ export default defineComponent({
         .post('/api/post/comment/send', {
           content: content.value,
           postId: props.post.id,
-          replyTo: selectedReply.value?.reply ?? null
+          replyTo: selectedReply.value?.reply ?? null,
         })
         .then(() => {
           content.value = ''
@@ -341,8 +330,8 @@ export default defineComponent({
       http
         .get('/api/post/delete', {
           params: {
-            postId: props.post.id
-          }
+            postId: props.post.id,
+          },
         })
         .then(_res => {
           success(t('delete_success.name'))
@@ -390,7 +379,7 @@ export default defineComponent({
       Heart24Regular,
       Heart24Filled,
       Delete24Regular,
-      Delete24Filled
+      Delete24Filled,
     }
   },
   // methods: {

@@ -98,6 +98,16 @@ export function getPostComments(postId: string) {
         'likeUser',
         'like.userId = likeUser.id'
       )
+      .leftJoinAndSelect(
+        CommentEntity,
+        'replyComment',
+        'replyComment.id = comment.replyTo'
+      )
+      .leftJoinAndSelect(
+        UserEntity,
+        'replyUser',
+        'replyUser.id = replyComment.publisher'
+      )
       .where('PostCommentEntity.postId = :id', { id: postId })
       .getRawMany()
       .then(result => {

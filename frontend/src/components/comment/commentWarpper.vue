@@ -1,9 +1,13 @@
 <template>
-  <n-el v-if="comment.replyTo === null" :style="{
-    borderLeft: `${theme.borderColor} solid 0.5px`,
-    borderTop: `${theme.borderColor} solid 0.5px`,
-    padding: '10px 0 0 20px'
-  }">
+  <n-el
+    v-if="comment.replyTo === null"
+    :style="{
+      padding: '10px 0 0 20px',
+      borderRadius: theme.borderRadius,
+      background: theme.tabColor,
+      marginTop: '5px',
+    }"
+  >
     <comment
       :comment="comment"
       :selected="selectedId === comment.id"
@@ -12,9 +16,8 @@
     />
     <comment
       :style="{
-        borderLeft: `${theme.borderColor} solid 0.5px`,
-        borderTop: `${theme.borderColor} solid 0.5px`,
-        padding: '10px 20px'
+        padding: '10px 20px',
+        marginTop: '5px',
       }"
       :selected="selectedId === c.id"
       v-for="c in reply"
@@ -27,22 +30,19 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import {
-  NEl,
-  useThemeVars
-} from 'naive-ui'
+import { NEl, useThemeVars } from 'naive-ui'
 import comment from './comment.vue'
 export default defineComponent({
   components: { comment, NEl },
   props: {
     comment: {
       required: true,
-      type: Object as any
+      type: Object as any,
     },
     reply: {
       required: true,
-      type: Object as any
-    }
+      type: Object as any,
+    },
   },
   emits: ['onSelect', 'needUpdate'],
   setup(_, { emit }) {
@@ -56,11 +56,10 @@ export default defineComponent({
           selectedId.value = comment.id
           emit('onSelect', {
             at: comment.publisher.name,
-            reply: replyId
+            reply: replyId,
           })
-
         }
-        
+
         if (selectedId.value === null) {
           select()
         } else {
@@ -71,8 +70,8 @@ export default defineComponent({
             select()
           }
         }
-      }
+      },
     }
-  }
+  },
 })
 </script>

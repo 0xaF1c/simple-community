@@ -125,9 +125,7 @@ export default {
   input_comment: {
     name: '留下你的评论 🚀',
   },
-  reply: {
-    name: '回复',
-  },
+  reply: '回复',
   confirm_delete_comment: {
     name: '确认删除这条评论',
   },

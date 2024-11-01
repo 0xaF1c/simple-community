@@ -9,11 +9,11 @@
       size="huge"
       :bordered="true"
       :style="{
-        width: '550px'
+        width: '550px',
       }"
       :segmented="{
         content: 'soft',
-        footer: 'soft'
+        footer: 'soft',
       }"
     >
       <template #header>
@@ -22,26 +22,28 @@
           <n-icon :component="ArrowRepeatAll24Regular"></n-icon>
         </n-button>
       </template>
-      <n-space style="margin-top: 5px;" item-style="margin-top: 12px">
-        <n-tooltip v-for="(tag, i) in data" :style="{
-          width: tag.poster ? '100px' : 'auto'
-        }">
+      <n-space style="margin-top: 5px" item-style="margin-top: 12px">
+        <n-tooltip
+          v-for="(tag, i) in data"
+          :style="{
+            width: tag.poster ? '100px' : 'auto',
+          }"
+        >
           <template #trigger>
-            <n-checkbox-group
-              v-model:value="choosedTagIndex"
-            >
+            <n-checkbox-group v-model:value="choosedTagIndex">
               <n-checkbox :value="i" :label="tag.title"></n-checkbox>
             </n-checkbox-group>
           </template>
           <n-space vertical align="center">
-            <n-avatar :src="tag.poster" :size="100"></n-avatar>
             {{ tag.description }}
           </n-space>
         </n-tooltip>
       </n-space>
       <template #footer>
         <n-space>
-          <n-button @click="confirm" type="primary">{{ $t('confirm.name') }}</n-button>
+          <n-button @click="confirm" type="primary">{{
+            $t('confirm.name')
+          }}</n-button>
           <n-button @click="cancel">{{ $t('cancel.name') }}</n-button>
         </n-space>
       </template>
@@ -60,15 +62,12 @@ import {
   NTooltip,
   NAvatar,
   NEl,
-  NCheckboxGroup
+  NCheckboxGroup,
 } from 'naive-ui'
 import { defineComponent, onMounted, ref } from 'vue'
 import { http } from '../../utils/http'
 import myTag from './tag.vue'
-import {
-  Add24Filled,
-  ArrowRepeatAll24Regular
-} from '@vicons/fluent'
+import { Add24Filled, ArrowRepeatAll24Regular } from '@vicons/fluent'
 
 export default defineComponent({
   components: {
@@ -83,21 +82,19 @@ export default defineComponent({
     NTooltip,
     NAvatar,
     NEl,
-    NCheckboxGroup
+    NCheckboxGroup,
   },
   props: {
     value: {
       type: Array,
-      default: []
-    }
+      default: [],
+    },
   },
-  emits: [
-    'update:value'
-  ],
+  emits: ['update:value'],
   computed: {
     choosedTag() {
-      return this.choosedTagIndex.map((i:any) => this.data[i])
-    }
+      return this.choosedTagIndex.map((i: any) => this.data[i])
+    },
   },
   setup(_props, { emit }) {
     const chooseTagShow = ref(false)
@@ -108,7 +105,10 @@ export default defineComponent({
     }
     const confirm = () => {
       chooseTagShow.value = false
-      emit('update:value', choosedTagIndex.value.map((i:any) => data.value[i]))
+      emit(
+        'update:value',
+        choosedTagIndex.value.map((i: any) => data.value[i]),
+      )
     }
     const cancel = () => {
       chooseTagShow.value = false
@@ -128,9 +128,8 @@ export default defineComponent({
       cancel,
       updateTag,
       Add24Filled,
-      ArrowRepeatAll24Regular
+      ArrowRepeatAll24Regular,
     }
-  }
+  },
 })
-
 </script>

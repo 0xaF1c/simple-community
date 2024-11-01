@@ -5,11 +5,12 @@
         <avatar-link :user-data="comment.publisher"></avatar-link>
         <!-- <n-avatar :src="comment.publisher.avatarUrl" :size="50" object-fit="cover"
           style="display: flex; justify-content: center; align-items: center;" /> -->
-        <n-text
-          >{{ comment.publisher.name }}@{{ comment.publisher.account }}</n-text
-        >
+        <n-text>
+          {{ comment.publisher.name }}@{{ comment.publisher.account }}
+        </n-text>
       </n-space>
     </template>
+    <at-link v-if="comment.replyUser" :userData="comment.replyUser" />
     {{ comment.content }}
     <template #footer>
       <n-space align="end">
@@ -90,6 +91,7 @@ import { http } from '../../utils/http'
 import { useI18n } from 'vue-i18n'
 import avatarLink from '../link/avatarLink.vue'
 import MyTime from '../common/time.vue'
+import AtLink from '../link/atLink.vue'
 
 export default defineComponent({
   props: {
@@ -113,6 +115,7 @@ export default defineComponent({
     NAvatar,
     NPopconfirm,
     avatarLink,
+    AtLink,
     MyTime,
   },
   setup(props, { emit }) {

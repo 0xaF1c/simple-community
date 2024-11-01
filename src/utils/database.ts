@@ -16,7 +16,7 @@ const configFn: IConfigFn = () => {
     database: process.env.DB_DATABASE,
     synchronize: true,
     // print result info to console
-    logging: false,
+    logging: true,
     charset: 'utf8mb4',
     entities: [
       __dirname + '/../**/*.entity.{js,ts}',

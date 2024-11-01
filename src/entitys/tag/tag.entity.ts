@@ -14,9 +14,6 @@ export class TagEntity {
   @Column()
   description: string
 
-  @Column()
-  poster: string
-
   @CreateDateColumn()
   createTime: Date
 

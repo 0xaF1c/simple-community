@@ -1,10 +1,16 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
-import { TagEntity } from "../tag/tag.entity"
-import { PostImagesEntity } from "./postImagesRelation.entity"
-import { UserDTO, UserEntity } from "../user/user.entity"
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from 'typeorm'
+import { TagEntity } from '../tag/tag.entity'
+import { PostImagesEntity } from './postImagesRelation.entity'
+import { UserDTO, UserEntity } from '../user/user.entity'
 // import { plainToClass } from "class-transformer"
-import _ from "lodash"
-import { decode } from "utf8mb3"
+import _ from 'lodash'
+import { decode } from 'utf8mb3'
 
 @Entity('sc_post')
 export class PostEntity {
@@ -110,18 +116,16 @@ interface IPostCommentFindResult {
   likeUser_backgroundUrl: any
   likeUser_createTime: any
   likeUser_updateTime: any
-}
-interface IUser {
-  id: string
-  name: string
-  account: string
-  email: string
-  password: string
-  description: string
-  avatarUrl: string
-  backgroundUrl: string
-  createTime: string
-  updateTime: string
+  replyUser_id: any
+  replyUser_name: any
+  replyUser_account: any
+  replyUser_email: any
+  replyUser_password: any
+  replyUser_description: any
+  replyUser_avatarUrl: any
+  replyUser_backgroundUrl: any
+  replyUser_createTime: any
+  replyUser_updateTime: any
 }
 export class PostDTO {
   id: string
@@ -155,24 +159,27 @@ export class PostDTO {
     _this.publisherId = option.post.publisher
     _this.createTime = option.post.createTime
     _this.updateTime = option.post.updateTime
-    
+
     _this.tags = option.tags.map(tag => ({
       title: tag.title,
       description: tag.description,
       id: tag.id,
-      poster: tag.poster,
+      poster: tag.poster
     }))
     _this.images = option.images.map(image => image.url)
     _this.likes = option.likes.map(user => new UserDTO(user))
     return _this
   }
-  static fromFindResult(options: IPostDetailFindResult[], userId: string | undefined) {
+  static fromFindResult(
+    options: IPostDetailFindResult[],
+    userId: string | undefined
+  ) {
     const _this = new PostDTO()
 
-    if (!options) {      
+    if (!options) {
       return []
     }
-    options.forEach((result) => {      
+    options.forEach(result => {
       _this.content = decode(result.PostEntity_content)
       _this.title = decode(result.PostEntity_title)
       _this.createTime = result.PostEntity_createTime
@@ -184,9 +191,12 @@ export class PostDTO {
       _this.publisher.account = result.pubUser_account
       _this.publisher.email = result.pubUser_email
       _this.publisher.password = result.pubUser_password
-      _this.publisher.description = decode(result.pubUser_description)
+      _this.publisher.description = decode(
+        result.pubUser_description
+      )
       _this.publisher.avatarUrl = result.pubUser_avatarUrl
-      _this.publisher.backgroundUrl = result.pubUser_backgroundUrl
+      _this.publisher.backgroundUrl =
+        result.pubUser_backgroundUrl
       _this.publisher.createTime = result.pubUser_createTime
       _this.publisher.updateTime = result.pubUser_updateTime
 
@@ -196,25 +206,26 @@ export class PostDTO {
         description: result.tag_description,
         poster: result.tag_poster,
         createTime: result.tag_createTime,
-        updateTime: result.tag_updateTime,
+        updateTime: result.tag_updateTime
       })
-      
+
       if (result.user_id) {
-        _this.likes.push(new UserDTO({
-          id: result.user_id,
-          name: result.user_name,
-          account: result.user_account,
-          email: result.user_email,
-          description: result.user_description,
-          avatarUrl: result.user_avatarUrl,
-          backgroundUrl: result.user_backgroundUrl,
-          createTime: result.user_createTime,
-          updateTime: result.user_updateTime,
-        }))
+        _this.likes.push(
+          new UserDTO({
+            id: result.user_id,
+            name: result.user_name,
+            account: result.user_account,
+            email: result.user_email,
+            description: result.user_description,
+            avatarUrl: result.user_avatarUrl,
+            backgroundUrl: result.user_backgroundUrl,
+            createTime: result.user_createTime,
+            updateTime: result.user_updateTime
+          })
+        )
       }
       _this.images.push(result.image_url)
     })
-
 
     _this.images = _.uniqWith(_this.images, _.isEqual)
     _this.images = _this.images.filter(img => img !== null)
@@ -223,12 +234,13 @@ export class PostDTO {
     _this.likes = _this.likes.filter(user => user.id !== null)
     _this.likeCount = _this.likes.length
 
-
-    
     if (userId) {
       _this.liked = false
     } else {
-      _this.liked = _this.likes.filter(user => Number(user.id) === Number(userId)).length > 0
+      _this.liked =
+        _this.likes.filter(
+          user => Number(user.id) === Number(userId)
+        ).length > 0
     }
 
     _this.tags = _.uniqWith(_this.tags, _.isEqual)
@@ -239,46 +251,36 @@ export class PostDTO {
 }
 
 export class PostCommentsDTO {
-  publisher: {
-    id: string
-    name: string
-    account: string
-    email: string
-    password: string
-    description: string
-    avatarUrl: string
-    backgroundUrl: string
-    createTime: string
-    updateTime: string
-  }
+  publisher: UserDTO
   comments: Array<{
     id: string
     content: string
     replyTo: string
+    replyUser: UserDTO | null
     publisherId: string
-    publisher: IUser
+    publisher: UserDTO
     createTime: string
     updateTime: string
     likeCount: number
-    likes: Array<IUser>
+    likes: Array<UserDTO>
   }>
   constructor() {
     this.comments = []
   }
   static fromFindResult(options: IPostCommentFindResult[]) {
     const _this = new PostCommentsDTO()
-    const likes: IUser[] = []
-    const map = new Map<string, Set<IUser>>()
-    options.forEach((r) => {
+    const likes: UserDTO[] = []
+    const map = new Map<string, Set<UserDTO>>()
+
+    options.forEach(r => {
       map.set(r.comment_id, new Set())
-    });
-    options.forEach((result) => {
+    })
+    options.forEach(result => {
       likes.push({
         id: result.likeUser_id,
         name: result.likeUser_name,
         account: result.likeUser_account,
         email: result.likeUser_email,
-        password: result.likeUser_password,
         description: result.likeUser_description,
         avatarUrl: result.likeUser_avatarUrl,
         backgroundUrl: result.likeUser_backgroundUrl,
@@ -289,21 +291,31 @@ export class PostCommentsDTO {
         id: result.comment_id,
         content: decode(result.comment_content),
         replyTo: result.comment_replyTo,
+        replyUser: result.replyUser_id == null ? null : new UserDTO({
+          id: result.replyUser_id,
+          name: result.replyUser_name,
+          account: result.replyUser_account,
+          email: result.replyUser_email,
+          description: result.replyUser_description,
+          avatarUrl: result.replyUser_avatarUrl,
+          backgroundUrl: result.replyUser_backgroundUrl,
+          createTime: result.replyUser_createTime,
+          updateTime: result.replyUser_updateTime
+        }),
         publisherId: result.comment_publisher,
         createTime: result.comment_createTime,
         updateTime: result.comment_updateTime,
-        publisher: {
+        publisher: new UserDTO({
           id: result.user_id,
           name: result.user_name,
           account: result.user_account,
           email: result.user_email,
-          password: result.user_password,
           description: result.user_description,
           avatarUrl: result.user_avatarUrl,
           backgroundUrl: result.user_backgroundUrl,
           createTime: result.user_createTime,
           updateTime: result.user_updateTime
-        },
+        }),
         likeCount: 0,
         likes: []
       })
@@ -312,7 +324,6 @@ export class PostCommentsDTO {
         name: result.likeUser_name,
         account: result.likeUser_account,
         email: result.likeUser_email,
-        password: result.likeUser_password,
         description: result.likeUser_description,
         avatarUrl: result.likeUser_avatarUrl,
         backgroundUrl: result.likeUser_backgroundUrl,
@@ -320,12 +331,16 @@ export class PostCommentsDTO {
         updateTime: result.likeUser_updateTime
       })
     })
-    
-    _this.comments = _.uniqWith(_this.comments, _.isEqual)
-    _this.comments = _this.comments.filter(user => user.id !== null)
 
-    _this.comments.forEach((comment) => {
-      const likesList = [...map.get(comment.id)!].filter(user => user.id !== null)
+    _this.comments = _.uniqWith(_this.comments, _.isEqual)
+    _this.comments = _this.comments.filter(
+      user => user.id !== null
+    )
+
+    _this.comments.forEach(comment => {
+      const likesList = [...map.get(comment.id)!].filter(
+        user => user.id !== null
+      )
       
       comment.likes = likesList
       comment.likeCount = likesList.length

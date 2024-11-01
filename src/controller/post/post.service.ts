@@ -232,8 +232,6 @@ export function getPostDetail(
         })
       })
       .catch(err => {
-        console.log('wdnmd', postId);
-        
         reject({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           error: {
